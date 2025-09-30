@@ -15,10 +15,4 @@ sealed class Screen(val route: String) {
     object EditBookmark : Screen("edit_bookmark/{bookmarkId}") {
         fun createRoute(bookmarkId: Long) = "edit_bookmark/$bookmarkId"
     }
-    object Reading : Screen("reading/{bookmarkId}") {
-        fun createRoute(bookmarkId: Long) = "reading/$bookmarkId"
-    }
-    object ContinuousPlayback : Screen("continuous_playback/{profileId}") {
-        fun createRoute(profileId: Long) = "continuous_playback/$profileId"
-    }
 }

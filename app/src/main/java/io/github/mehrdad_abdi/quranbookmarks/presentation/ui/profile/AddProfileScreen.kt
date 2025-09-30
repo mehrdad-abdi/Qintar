@@ -245,7 +245,10 @@ fun AddProfileScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = ProfileColors[uiState.selectedColorIndex].copy(alpha = 0.08f)
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -264,7 +267,7 @@ fun AddProfileScreen(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(48.dp)
                                 .clip(CircleShape)
                                 .background(ProfileColors[uiState.selectedColorIndex])
                         )
@@ -278,39 +281,28 @@ fun AddProfileScreen(
                             if (uiState.description.isNotBlank()) {
                                 Text(
                                     text = uiState.description,
-                                    style = MaterialTheme.typography.bodySmall,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             val audioText = if (uiState.audioEnabled) {
-                                "Audio: Enabled (Mishary Al-Afasy)"
+                                "Audio: Mishary Al-Afasy"
                             } else {
                                 "Audio: Disabled"
                             }
                             Text(
                                 text = audioText,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (uiState.audioEnabled) {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                } else {
-                                    MaterialTheme.colorScheme.primary
-                                }
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
 
-                            val notificationText = if (uiState.notificationEnabled) {
-                                "Daily Reminder: ${uiState.notificationTime}"
-                            } else {
-                                "Daily Reminder: Disabled"
+                            if (uiState.notificationEnabled) {
+                                Text(
+                                    text = "Daily Reminder: ${uiState.notificationTime}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
-                            Text(
-                                text = notificationText,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (uiState.notificationEnabled) {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                } else {
-                                    MaterialTheme.colorScheme.primary
-                                }
-                            )
                         }
                     }
                 }

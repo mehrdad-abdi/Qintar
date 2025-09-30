@@ -8,6 +8,7 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.BookmarkRepository
+import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.cache.AyahReference
 import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.cache.CacheAyahContentUseCase
 import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.cache.GetAyahsFromBookmarkUseCase
 
@@ -56,13 +57,31 @@ class CacheBookmarkContentWorker @AssistedInject constructor(
             }
 
             // Extract all ayahs from the bookmark
-            val ayahs = getAyahsFromBookmarkUseCase(bookmark)
+            val ayahs = getAyahsFromBookmarkUseCase(bookmark).toMutableList()
             if (ayahs.isEmpty()) {
                 Log.w(TAG, "No ayahs to cache for bookmark $bookmarkId")
                 return Result.success()
             }
 
-            Log.d(TAG, "Caching ${ayahs.size} ayahs for bookmark $bookmarkId")
+            // Check if any ayahs are first verses of surahs 2-114 (except 9) that need bismillah
+            val needsBismillah = ayahs.any { ayahRef ->
+                ayahRef.ayah == 1 && ayahRef.surah in 2..114 && ayahRef.surah != 9
+            }
+
+            if (needsBismillah) {
+                // Add bismillah (Surah 1, Ayah 1 = global ayah number 1) to cache list
+                val bismillahRef = AyahReference(
+                    surah = 1,
+                    ayah = 1,
+                    globalAyahNumber = 1
+                )
+                if (!ayahs.contains(bismillahRef)) {
+                    ayahs.add(bismillahRef)
+                    Log.d(TAG, "Added bismillah to cache list for bookmark $bookmarkId")
+                }
+            }
+
+            Log.d(TAG, "Caching ${ayahs.size} ayahs for bookmark $bookmarkId (bismillah: $needsBismillah)")
 
             // Cache all ayahs (with automatic deduplication)
             val result = cacheAyahContentUseCase.cacheMultiple(

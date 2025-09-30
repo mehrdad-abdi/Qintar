@@ -14,7 +14,7 @@ class GetBookmarkDisplayTextUseCase @Inject constructor(
                 val surahResult = surahRepository.getSurahByNumber(bookmark.startSurah)
                 val surah = surahResult.getOrNull()
                 if (surah != null) {
-                    "${surah.englishName} ${bookmark.startSurah}:${bookmark.startAyah}"
+                    "${surah.name} ${bookmark.startAyah}"
                 } else {
                     "Surah ${bookmark.startSurah}:${bookmark.startAyah}"
                 }
@@ -23,7 +23,7 @@ class GetBookmarkDisplayTextUseCase @Inject constructor(
                 val surahResult = surahRepository.getSurahByNumber(bookmark.startSurah)
                 val surah = surahResult.getOrNull()
                 if (surah != null) {
-                    "${surah.englishName} ${bookmark.startSurah}:${bookmark.startAyah}-${bookmark.endAyah}"
+                    "${surah.name} ${bookmark.startAyah}-${bookmark.endAyah}"
                 } else {
                     "Surah ${bookmark.startSurah}:${bookmark.startAyah}-${bookmark.endAyah}"
                 }
@@ -32,7 +32,7 @@ class GetBookmarkDisplayTextUseCase @Inject constructor(
                 val surahResult = surahRepository.getSurahByNumber(bookmark.startSurah)
                 val surah = surahResult.getOrNull()
                 if (surah != null) {
-                    "${surah.englishName} (${bookmark.startSurah})"
+                    surah.name
                 } else {
                     "Surah ${bookmark.startSurah}"
                 }

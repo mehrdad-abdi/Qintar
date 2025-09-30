@@ -32,6 +32,7 @@ fun CachedContentEntity.toDomain(): CachedContent {
             text = metadataText,
             surahName = metadataSurahName ?: "",
             surahNameEn = metadataSurahNameEn ?: "",
+            surahNumber = surah, // Use the cached surah number
             revelationType = metadataRevelationType ?: "",
             numberOfAyahs = metadataNumberOfAyahs ?: 0,
             hizbQuarter = metadataHizbQuarter ?: 0,

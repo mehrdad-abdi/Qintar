@@ -30,6 +30,7 @@ class QuranRepositoryImpl @Inject constructor(
                     text = verseData.text,
                     surahName = verseData.surah.name,
                     surahNameEn = verseData.surah.englishName,
+                    surahNumber = verseData.surah.number,
                     revelationType = verseData.surah.revelationType,
                     numberOfAyahs = verseData.surah.numberOfAyahs,
                     hizbQuarter = verseData.hizbQuarter,
@@ -59,6 +60,7 @@ class QuranRepositoryImpl @Inject constructor(
                         text = ayahData.text,
                         surahName = surahData.name,
                         surahNameEn = surahData.englishName,
+                        surahNumber = surahData.number,
                         revelationType = surahData.revelationType,
                         numberOfAyahs = surahData.numberOfAyahs,
                         hizbQuarter = ayahData.hizbQuarter,
@@ -95,6 +97,7 @@ class QuranRepositoryImpl @Inject constructor(
                         text = ayahData.text,
                         surahName = surahData.name,
                         surahNameEn = surahData.englishName,
+                        surahNumber = surahData.number,
                         revelationType = surahData.revelationType,
                         numberOfAyahs = surahData.numberOfAyahs,
                         hizbQuarter = ayahData.hizbQuarter,
@@ -151,6 +154,7 @@ class QuranRepositoryImpl @Inject constructor(
                         text = ayahData.text,
                         surahName = surahInfo?.name ?: "Unknown",
                         surahNameEn = surahInfo?.englishName ?: "Unknown",
+                        surahNumber = surahInfo?.number ?: surahNumber,
                         revelationType = surahInfo?.revelationType ?: "Unknown",
                         numberOfAyahs = surahInfo?.numberOfAyahs ?: 0,
                         hizbQuarter = ayahData.hizbQuarter,
@@ -229,10 +233,20 @@ class QuranRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 val pageData = response.body()!!.data
                 val metadataList = pageData.ayahs.map { ayahData ->
+                    // Derive surah number from global ayah number (rough estimate)
+                    val estimatedSurahNumber = when {
+                        ayahData.number <= 7 -> 1
+                        ayahData.number <= 293 -> 2
+                        ayahData.number <= 493 -> 3
+                        ayahData.number <= 669 -> 4
+                        ayahData.number <= 789 -> 5
+                        else -> ((ayahData.number - 789) / 100) + 6 // Rough estimate
+                    }
                     VerseMetadata(
                         text = ayahData.text,
                         surahName = "", // Page doesn't have surah name directly
                         surahNameEn = "", // Page doesn't have surah name directly
+                        surahNumber = estimatedSurahNumber,
                         revelationType = "", // Page doesn't have revelation type
                         numberOfAyahs = 0, // Page doesn't have total ayahs count
                         hizbQuarter = ayahData.hizbQuarter,

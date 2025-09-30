@@ -149,7 +149,10 @@ private fun ProfileCard(
             .fillMaxWidth()
             .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(profile.color).copy(alpha = 0.08f)
+        )
     ) {
         Row(
             modifier = Modifier
@@ -194,6 +197,14 @@ private fun ProfileCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                if (profile.notificationSettings.enabled) {
+                    Text(
+                        text = "Daily Reminder: ${profile.notificationSettings.time}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             // Action buttons

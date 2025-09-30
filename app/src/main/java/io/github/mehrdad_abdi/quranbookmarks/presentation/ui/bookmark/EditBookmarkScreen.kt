@@ -334,14 +334,14 @@ private fun generateEditPreviewText(
             "Page $pageNumber"
         }
         else -> {
-            val surahDisplay = selectedSurah?.let { "${it.number} ${it.englishName}" } ?: "Select Surah"
+            val surahName = selectedSurah?.name ?: "Select Surah"
             val ayah = ayahNumber.ifBlank { "?" }
             val endAyah = endAyahNumber.ifBlank { "?" }
 
             when (type) {
-                BookmarkType.AYAH -> "Surah $surahDisplay:$ayah"
-                BookmarkType.RANGE -> "Surah $surahDisplay:$ayah-$endAyah"
-                BookmarkType.SURAH -> "Surah $surahDisplay"
+                BookmarkType.AYAH -> "$surahName $ayah"
+                BookmarkType.RANGE -> "$surahName $ayah-$endAyah"
+                BookmarkType.SURAH -> surahName
                 BookmarkType.PAGE -> "Page $ayah" // Won't reach here due to outer when
             }
         }

@@ -4,6 +4,7 @@ data class VerseMetadata(
     val text: String,
     val surahName: String,
     val surahNameEn: String,
+    val surahNumber: Int, // Surah number (1-114)
     val revelationType: String,
     val numberOfAyahs: Int,
     val hizbQuarter: Int,
