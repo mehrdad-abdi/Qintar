@@ -96,32 +96,6 @@ fun TodayProgressScreen(
                     )
                 }
 
-                // Streaks Card
-                item {
-                    StreaksCard(
-                        overallStreak = uiState.overallStreak,
-                        topBadgeStreaks = uiState.topBadgeStreaks
-                    )
-                }
-
-                // Last 7 Days Mini Calendar
-                item {
-                    Last7DaysCard(
-                        days = uiState.last7Days,
-                        onViewFullCalendar = onNavigateToCalendar
-                    )
-                }
-
-                // All-Time Stats Card
-                item {
-                    AllTimeStatsCard(
-                        totalAyahs = uiState.totalAyahsAllTime,
-                        bestDayAyahs = uiState.bestDayAyahs,
-                        bestDayDate = uiState.bestDayDate,
-                        onViewStatistics = onNavigateToStatistics
-                    )
-                }
-
                 // Continue Reading Button
                 item {
                     Card(
@@ -153,6 +127,32 @@ fun TodayProgressScreen(
                             )
                         }
                     }
+                }
+
+                // Streaks Card
+                item {
+                    StreaksCard(
+                        overallStreak = uiState.overallStreak,
+                        topBadgeStreaks = uiState.topBadgeStreaks
+                    )
+                }
+
+                // Last 7 Days Mini Calendar
+                item {
+                    Last7DaysCard(
+                        days = uiState.last7Days,
+                        onViewFullCalendar = onNavigateToCalendar
+                    )
+                }
+
+                // All-Time Stats Card
+                item {
+                    AllTimeStatsCard(
+                        totalAyahs = uiState.totalAyahsAllTime,
+                        bestDayAyahs = uiState.bestDayAyahs,
+                        bestDayDate = uiState.bestDayDate,
+                        onViewStatistics = onNavigateToStatistics
+                    )
                 }
 
                 // Error message

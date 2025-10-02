@@ -15,13 +15,25 @@ data class StreakInfo(
 ) {
     /**
      * Get the top N badge level streaks sorted by badge level (highest first).
+     *
+     * Rules:
+     * - Only show badges with streak > 0
+     * - Return top N highest-value badges (by threshold)
+     * - If no badges have streaks > 0, return only GHAIR_GHAFIL with 0 days
      */
     fun getTopStreaks(count: Int): List<Pair<BadgeLevel, Int>> {
-        return badgeLevelStreaks
-            .filter { it.key != BadgeLevel.NONE }
+        val nonZeroStreaks = badgeLevelStreaks
+            .filter { it.key != BadgeLevel.NONE && it.value > 0 }
             .toList()
             .sortedByDescending { it.first.threshold }
             .take(count)
+
+        // If no streaks exist, show GHAIR_GHAFIL with 0 days
+        return if (nonZeroStreaks.isEmpty()) {
+            listOf(BadgeLevel.GHAIR_GHAFIL to 0)
+        } else {
+            nonZeroStreaks
+        }
     }
 }
 
