@@ -233,22 +233,17 @@ class QuranRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 val pageData = response.body()!!.data
                 val metadataList = pageData.ayahs.map { ayahData ->
-                    // Derive surah number from global ayah number (rough estimate)
-                    val estimatedSurahNumber = when {
-                        ayahData.number <= 7 -> 1
-                        ayahData.number <= 293 -> 2
-                        ayahData.number <= 493 -> 3
-                        ayahData.number <= 669 -> 4
-                        ayahData.number <= 789 -> 5
-                        else -> ((ayahData.number - 789) / 100) + 6 // Rough estimate
-                    }
+                    // Use surah info from API if available, otherwise fall back to lookup
+                    val surahInfo = ayahData.surah
+                    val surahNumber = surahInfo?.number ?: getSurahNumberFromGlobalAyah(ayahData.number)
+
                     VerseMetadata(
                         text = ayahData.text,
-                        surahName = "", // Page doesn't have surah name directly
-                        surahNameEn = "", // Page doesn't have surah name directly
-                        surahNumber = estimatedSurahNumber,
-                        revelationType = "", // Page doesn't have revelation type
-                        numberOfAyahs = 0, // Page doesn't have total ayahs count
+                        surahName = surahInfo?.name ?: "",
+                        surahNameEn = surahInfo?.englishName ?: "",
+                        surahNumber = surahNumber,
+                        revelationType = surahInfo?.revelationType ?: "",
+                        numberOfAyahs = surahInfo?.numberOfAyahs ?: 0,
                         hizbQuarter = ayahData.hizbQuarter,
                         rukuNumber = ayahData.ruku,
                         page = ayahData.page,
@@ -264,6 +259,130 @@ class QuranRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    /**
+     * Get surah number from global ayah number (1-6236)
+     * Uses cumulative ayah counts to determine which surah the ayah belongs to
+     */
+    private fun getSurahNumberFromGlobalAyah(globalAyahNumber: Int): Int {
+        return when {
+            globalAyahNumber <= 7 -> 1
+            globalAyahNumber <= 293 -> 2
+            globalAyahNumber <= 493 -> 3
+            globalAyahNumber <= 669 -> 4
+            globalAyahNumber <= 789 -> 5
+            globalAyahNumber <= 954 -> 6
+            globalAyahNumber <= 1160 -> 7
+            globalAyahNumber <= 1235 -> 8
+            globalAyahNumber <= 1364 -> 9
+            globalAyahNumber <= 1473 -> 10
+            globalAyahNumber <= 1596 -> 11
+            globalAyahNumber <= 1707 -> 12
+            globalAyahNumber <= 1750 -> 13
+            globalAyahNumber <= 1802 -> 14
+            globalAyahNumber <= 1901 -> 15
+            globalAyahNumber <= 2029 -> 16
+            globalAyahNumber <= 2140 -> 17
+            globalAyahNumber <= 2250 -> 18
+            globalAyahNumber <= 2348 -> 19
+            globalAyahNumber <= 2483 -> 20
+            globalAyahNumber <= 2595 -> 21
+            globalAyahNumber <= 2673 -> 22
+            globalAyahNumber <= 2791 -> 23
+            globalAyahNumber <= 2855 -> 24
+            globalAyahNumber <= 2932 -> 25
+            globalAyahNumber <= 3159 -> 26
+            globalAyahNumber <= 3252 -> 27
+            globalAyahNumber <= 3340 -> 28
+            globalAyahNumber <= 3409 -> 29
+            globalAyahNumber <= 3469 -> 30
+            globalAyahNumber <= 3503 -> 31
+            globalAyahNumber <= 3533 -> 32
+            globalAyahNumber <= 3606 -> 33
+            globalAyahNumber <= 3660 -> 34
+            globalAyahNumber <= 3705 -> 35
+            globalAyahNumber <= 3788 -> 36
+            globalAyahNumber <= 4070 -> 37
+            globalAyahNumber <= 4154 -> 38
+            globalAyahNumber <= 4229 -> 39
+            globalAyahNumber <= 4314 -> 40
+            globalAyahNumber <= 4368 -> 41
+            globalAyahNumber <= 4421 -> 42
+            globalAyahNumber <= 4510 -> 43
+            globalAyahNumber <= 4569 -> 44
+            globalAyahNumber <= 4606 -> 45
+            globalAyahNumber <= 4641 -> 46
+            globalAyahNumber <= 4679 -> 47
+            globalAyahNumber <= 4708 -> 48
+            globalAyahNumber <= 4726 -> 49
+            globalAyahNumber <= 4771 -> 50
+            globalAyahNumber <= 4831 -> 51
+            globalAyahNumber <= 4880 -> 52
+            globalAyahNumber <= 4942 -> 53
+            globalAyahNumber <= 4997 -> 54
+            globalAyahNumber <= 5075 -> 55
+            globalAyahNumber <= 5171 -> 56
+            globalAyahNumber <= 5200 -> 57
+            globalAyahNumber <= 5222 -> 58
+            globalAyahNumber <= 5246 -> 59
+            globalAyahNumber <= 5259 -> 60
+            globalAyahNumber <= 5273 -> 61
+            globalAyahNumber <= 5284 -> 62
+            globalAyahNumber <= 5295 -> 63
+            globalAyahNumber <= 5313 -> 64
+            globalAyahNumber <= 5325 -> 65
+            globalAyahNumber <= 5337 -> 66
+            globalAyahNumber <= 5367 -> 67
+            globalAyahNumber <= 5419 -> 68
+            globalAyahNumber <= 5471 -> 69
+            globalAyahNumber <= 5515 -> 70
+            globalAyahNumber <= 5543 -> 71
+            globalAyahNumber <= 5571 -> 72
+            globalAyahNumber <= 5591 -> 73
+            globalAyahNumber <= 5647 -> 74
+            globalAyahNumber <= 5687 -> 75
+            globalAyahNumber <= 5718 -> 76
+            globalAyahNumber <= 5768 -> 77
+            globalAyahNumber <= 5808 -> 78
+            globalAyahNumber <= 5854 -> 79
+            globalAyahNumber <= 5896 -> 80
+            globalAyahNumber <= 5925 -> 81
+            globalAyahNumber <= 5944 -> 82
+            globalAyahNumber <= 5980 -> 83
+            globalAyahNumber <= 6005 -> 84
+            globalAyahNumber <= 6027 -> 85
+            globalAyahNumber <= 6044 -> 86
+            globalAyahNumber <= 6063 -> 87
+            globalAyahNumber <= 6089 -> 88
+            globalAyahNumber <= 6119 -> 89
+            globalAyahNumber <= 6139 -> 90
+            globalAyahNumber <= 6154 -> 91
+            globalAyahNumber <= 6175 -> 92
+            globalAyahNumber <= 6186 -> 93
+            globalAyahNumber <= 6194 -> 94
+            globalAyahNumber <= 6202 -> 95
+            globalAyahNumber <= 6221 -> 96
+            globalAyahNumber <= 6226 -> 97
+            globalAyahNumber <= 6234 -> 98
+            globalAyahNumber <= 6242 -> 99
+            globalAyahNumber <= 6253 -> 100
+            globalAyahNumber <= 6264 -> 101
+            globalAyahNumber <= 6272 -> 102
+            globalAyahNumber <= 6275 -> 103
+            globalAyahNumber <= 6284 -> 104
+            globalAyahNumber <= 6289 -> 105
+            globalAyahNumber <= 6293 -> 106
+            globalAyahNumber <= 6300 -> 107
+            globalAyahNumber <= 6303 -> 108
+            globalAyahNumber <= 6309 -> 109
+            globalAyahNumber <= 6312 -> 110
+            globalAyahNumber <= 6317 -> 111
+            globalAyahNumber <= 6321 -> 112
+            globalAyahNumber <= 6326 -> 113
+            globalAyahNumber <= 6236 -> 114
+            else -> 114 // Default to last surah if out of range
         }
     }
 

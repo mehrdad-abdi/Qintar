@@ -20,6 +20,7 @@ class CacheAyahContentUseCaseTest {
         text = "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ",
         surahName = "الفاتحة",
         surahNameEn = "Al-Fatihah",
+        surahNumber = 1,
         revelationType = "Meccan",
         numberOfAyahs = 7,
         hizbQuarter = 1,

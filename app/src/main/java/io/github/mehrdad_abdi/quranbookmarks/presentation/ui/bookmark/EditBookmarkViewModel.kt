@@ -17,11 +17,12 @@ import javax.inject.Inject
 
 data class EditBookmarkUiState(
     val bookmarkId: Long = 0L,
-    val groupId: Long = 0L,
     val selectedSurah: Surah? = null,
     val ayahNumber: String = "",
     val endAyahNumber: String = "",
     val description: String = "",
+    val tags: List<String> = emptyList(),
+    val tagInput: String = "",
     val bookmarkType: BookmarkType = BookmarkType.AYAH,
     val isLoading: Boolean = false,
     val isLoadingBookmark: Boolean = false,
@@ -95,11 +96,11 @@ class EditBookmarkViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(
                         isLoadingBookmark = false,
                         bookmarkId = bookmark.id,
-                        groupId = bookmark.groupId,
                         selectedSurah = selectedSurah,
                         ayahNumber = ayahNumber,
                         endAyahNumber = if (bookmark.type == BookmarkType.RANGE) bookmark.endAyah.toString() else "",
                         description = bookmark.description,
+                        tags = bookmark.tags,
                         bookmarkType = bookmark.type
                     )
                 },
@@ -148,6 +149,26 @@ class EditBookmarkViewModel @Inject constructor(
         )
     }
 
+    fun updateTagInput(input: String) {
+        _uiState.value = _uiState.value.copy(tagInput = input)
+    }
+
+    fun addTag(tag: String) {
+        val trimmedTag = tag.trim()
+        if (trimmedTag.isNotEmpty() && !_uiState.value.tags.contains(trimmedTag)) {
+            _uiState.value = _uiState.value.copy(
+                tags = _uiState.value.tags + trimmedTag,
+                tagInput = ""
+            )
+        }
+    }
+
+    fun removeTag(tag: String) {
+        _uiState.value = _uiState.value.copy(
+            tags = _uiState.value.tags.filter { it != tag }
+        )
+    }
+
     fun updateBookmark(onSuccess: () -> Unit) {
         val currentState = _uiState.value
 
@@ -189,13 +210,13 @@ class EditBookmarkViewModel @Inject constructor(
 
                 val bookmark = Bookmark(
                     id = currentState.bookmarkId,
-                    groupId = currentState.groupId,
                     type = currentState.bookmarkType,
                     startSurah = startSurah,
                     startAyah = startAyah,
                     endSurah = endSurah,
                     endAyah = endAyah,
-                    description = currentState.description.trim()
+                    description = currentState.description.trim(),
+                    tags = currentState.tags
                 )
 
                 updateBookmarkUseCase(bookmark).fold(

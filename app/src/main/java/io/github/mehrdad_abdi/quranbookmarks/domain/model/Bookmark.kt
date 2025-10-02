@@ -2,13 +2,13 @@ package io.github.mehrdad_abdi.quranbookmarks.domain.model
 
 data class Bookmark(
     val id: Long = 0,
-    val groupId: Long,
     val type: BookmarkType,
     val startSurah: Int,
     val startAyah: Int = 1,
     val endSurah: Int = startSurah,
     val endAyah: Int = startAyah,
     val description: String = "",
+    val tags: List<String> = emptyList(),
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 ) {

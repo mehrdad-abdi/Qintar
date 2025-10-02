@@ -21,21 +21,16 @@ class ScheduleBookmarkCacheUseCase @Inject constructor(
 
     suspend operator fun invoke(bookmarkId: Long): Result<Unit> {
         return try {
-            // Get bookmark to check if its group has audio enabled
+            // Get bookmark to verify it exists
             val bookmark = bookmarkRepository.getBookmarkById(bookmarkId)
             if (bookmark == null) {
                 Log.e(TAG, "Bookmark not found: $bookmarkId")
                 return Result.failure(Exception("Bookmark not found"))
             }
 
-            // Get the profile to check reciter settings
-            val profile = bookmarkRepository.getGroupById(bookmark.groupId)
-            if (profile == null) {
-                Log.e(TAG, "Profile not found for bookmark: $bookmarkId")
-                return Result.failure(Exception("Profile not found"))
-            }
-
-            val reciterEdition = profile.reciterEdition
+            // Use default reciter (global app setting)
+            // TODO: Replace with actual settings repository when implemented
+            val reciterEdition = "ar.alafasy"
 
             Log.d(TAG, "Scheduling cache for bookmark $bookmarkId with reciter: $reciterEdition")
 

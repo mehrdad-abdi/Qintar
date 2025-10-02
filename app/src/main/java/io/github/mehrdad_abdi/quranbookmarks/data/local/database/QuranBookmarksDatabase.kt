@@ -3,28 +3,31 @@ package io.github.mehrdad_abdi.quranbookmarks.data.local.database
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import android.content.Context
+import io.github.mehrdad_abdi.quranbookmarks.data.local.converters.StringListConverter
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.BookmarkDao
-import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.BookmarkGroupDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.CachedContentDao
+import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.ReadingActivityDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.entity.BookmarkEntity
-import io.github.mehrdad_abdi.quranbookmarks.data.local.entity.BookmarkGroupEntity
 import io.github.mehrdad_abdi.quranbookmarks.data.local.entity.CachedContentEntity
+import io.github.mehrdad_abdi.quranbookmarks.data.local.entity.ReadingActivityEntity
 
 @Database(
     entities = [
-        BookmarkGroupEntity::class,
         BookmarkEntity::class,
-        CachedContentEntity::class
+        CachedContentEntity::class,
+        ReadingActivityEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
+@TypeConverters(StringListConverter::class)
 abstract class QuranBookmarksDatabase : RoomDatabase() {
 
-    abstract fun bookmarkGroupDao(): BookmarkGroupDao
     abstract fun bookmarkDao(): BookmarkDao
     abstract fun cachedContentDao(): CachedContentDao
+    abstract fun readingActivityDao(): ReadingActivityDao
 
     companion object {
         @Volatile

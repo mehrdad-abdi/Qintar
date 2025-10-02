@@ -24,13 +24,13 @@ class UpdateBookmarkUseCaseTest {
 
     private val sampleBookmark = Bookmark(
         id = 1L,
-        groupId = 1L,
         type = BookmarkType.AYAH,
         startSurah = 2,
         startAyah = 255,
         endSurah = 2,
         endAyah = 255,
-        description = "Ayat al-Kursi"
+        description = "Ayat al-Kursi",
+        tags = listOf("important")
     )
 
     @Before

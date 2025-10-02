@@ -8,10 +8,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmark.AddBookmarkScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmark.EditBookmarkScreen
-import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.profile.AddProfileScreen
-import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.profile.EditProfileScreen
-import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.profile.ProfileDetailScreen
-import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.profile.ProfileListScreen
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmarks.BookmarksScreen
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.calendar.BadgeCalendarScreen
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.reading.BookmarkReadingScreen
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.settings.SettingsScreen
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.statistics.StatisticsScreen
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.today.TodayProgressScreen
 
 @Composable
 fun NavGraph(
@@ -19,70 +21,34 @@ fun NavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.ProfileList.route
+        startDestination = Screen.TodayProgress.route
     ) {
-        composable(route = Screen.ProfileList.route) {
-            ProfileListScreen(
-                onNavigateToAddProfile = {
-                    navController.navigate(Screen.AddProfile.route)
+        // Today's Progress Screen (HOME SCREEN)
+        composable(route = Screen.TodayProgress.route) {
+            TodayProgressScreen(
+                onNavigateToProfiles = {
+                    navController.navigate(Screen.Bookmarks.route)
                 },
-                onNavigateToProfile = { profileId ->
-                    navController.navigate(Screen.ProfileDetail.createRoute(profileId))
+                onNavigateToStatistics = {
+                    navController.navigate(Screen.Statistics.route)
                 },
-                onNavigateToEditProfile = { profileId ->
-                    navController.navigate(Screen.EditProfile.createRoute(profileId))
+                onNavigateToCalendar = {
+                    navController.navigate(Screen.BadgeCalendar.route)
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Settings.route)
                 }
             )
         }
 
-        composable(route = Screen.AddProfile.route) {
-            AddProfileScreen(
+        // Bookmarks Screen (replaces ProfileList)
+        composable(route = Screen.Bookmarks.route) {
+            BookmarksScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
-                onProfileCreated = { profileId ->
-                    navController.popBackStack()
-                    // Navigate back to main screen - the new profile will appear in the list
-                }
-            )
-        }
-
-        composable(
-            route = Screen.EditProfile.route,
-            arguments = listOf(
-                navArgument("profileId") {
-                    type = NavType.LongType
-                }
-            )
-        ) { backStackEntry ->
-            val profileId = backStackEntry.arguments?.getLong("profileId") ?: 0L
-            EditProfileScreen(
-                profileId = profileId,
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onProfileUpdated = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable(
-            route = Screen.ProfileDetail.route,
-            arguments = listOf(
-                navArgument("profileId") {
-                    type = NavType.LongType
-                }
-            )
-        ) { backStackEntry ->
-            val profileId = backStackEntry.arguments?.getLong("profileId") ?: 0L
-            ProfileDetailScreen(
-                profileId = profileId,
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onNavigateToAddBookmark = { profileId ->
-                    navController.navigate(Screen.AddBookmark.createRoute(profileId))
+                onNavigateToAddBookmark = {
+                    navController.navigate(Screen.AddBookmark.route)
                 },
                 onNavigateToEditBookmark = { bookmarkId ->
                     navController.navigate(Screen.EditBookmark.createRoute(bookmarkId))
@@ -90,17 +56,10 @@ fun NavGraph(
             )
         }
 
-        composable(
-            route = Screen.AddBookmark.route,
-            arguments = listOf(
-                navArgument("profileId") {
-                    type = NavType.LongType
-                }
-            )
-        ) { backStackEntry ->
-            val profileId = backStackEntry.arguments?.getLong("profileId") ?: 0L
+        // Add Bookmark Screen
+        composable(route = Screen.AddBookmark.route) {
             AddBookmarkScreen(
-                groupId = profileId,
+                groupId = 0L, // No longer used, but kept for compatibility
                 onNavigateBack = {
                     navController.popBackStack()
                 },
@@ -125,6 +84,51 @@ fun NavGraph(
                     navController.popBackStack()
                 },
                 onBookmarkUpdated = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Bookmark Reading Screen
+        composable(
+            route = Screen.BookmarkReading.route,
+            arguments = listOf(
+                navArgument("bookmarkId") {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+            val bookmarkId = backStackEntry.arguments?.getLong("bookmarkId") ?: 0L
+            BookmarkReadingScreen(
+                bookmarkId = bookmarkId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Statistics Screen
+        composable(route = Screen.Statistics.route) {
+            StatisticsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Badge Calendar Screen
+        composable(route = Screen.BadgeCalendar.route) {
+            BadgeCalendarScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Settings Screen
+        composable(route = Screen.Settings.route) {
+            SettingsScreen(
+                onNavigateBack = {
                     navController.popBackStack()
                 }
             )

@@ -19,6 +19,8 @@ data class AddBookmarkUiState(
     val ayahNumber: String = "",
     val endAyahNumber: String = "",
     val description: String = "",
+    val tags: List<String> = emptyList(),
+    val tagInput: String = "",
     val bookmarkType: BookmarkType = BookmarkType.AYAH,
     val isLoading: Boolean = false,
     val isLoadingSurahs: Boolean = false,
@@ -101,7 +103,27 @@ class AddBookmarkViewModel @Inject constructor(
         )
     }
 
-    fun createBookmark(groupId: Long, onSuccess: () -> Unit) {
+    fun updateTagInput(input: String) {
+        _uiState.value = _uiState.value.copy(tagInput = input)
+    }
+
+    fun addTag(tag: String) {
+        val trimmedTag = tag.trim()
+        if (trimmedTag.isNotEmpty() && !_uiState.value.tags.contains(trimmedTag)) {
+            _uiState.value = _uiState.value.copy(
+                tags = _uiState.value.tags + trimmedTag,
+                tagInput = ""
+            )
+        }
+    }
+
+    fun removeTag(tag: String) {
+        _uiState.value = _uiState.value.copy(
+            tags = _uiState.value.tags.filter { it != tag }
+        )
+    }
+
+    fun createBookmark(onSuccess: () -> Unit) {
         val currentState = _uiState.value
 
         // Validate input
@@ -141,13 +163,13 @@ class AddBookmarkViewModel @Inject constructor(
                 }
 
                 val bookmark = Bookmark(
-                    groupId = groupId,
                     type = currentState.bookmarkType,
                     startSurah = startSurah,
                     startAyah = startAyah,
                     endSurah = endSurah,
                     endAyah = endAyah,
-                    description = currentState.description.trim()
+                    description = currentState.description.trim(),
+                    tags = currentState.tags
                 )
 
                 createBookmarkUseCase(bookmark).fold(

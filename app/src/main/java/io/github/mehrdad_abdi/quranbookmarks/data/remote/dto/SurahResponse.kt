@@ -46,5 +46,26 @@ data class AyahData(
     @SerializedName("hizbQuarter")
     val hizbQuarter: Int,
     @SerializedName("sajda")
-    val sajda: Boolean
+    val sajda: Boolean,
+    @SerializedName("surah")
+    val surah: SurahInfo? = null // Optional because not all API responses include it
+)
+
+/**
+ * Surah information embedded in AyahData (for page/juz queries)
+ * Lighter than SurahDetailData as it doesn't include ayahs list
+ */
+data class SurahInfo(
+    @SerializedName("number")
+    val number: Int,
+    @SerializedName("name")
+    val name: String,
+    @SerializedName("englishName")
+    val englishName: String,
+    @SerializedName("englishNameTranslation")
+    val englishNameTranslation: String,
+    @SerializedName("revelationType")
+    val revelationType: String,
+    @SerializedName("numberOfAyahs")
+    val numberOfAyahs: Int
 )

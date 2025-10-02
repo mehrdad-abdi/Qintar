@@ -7,8 +7,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.BookmarkDao
-import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.BookmarkGroupDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.CachedContentDao
+import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.ReadingActivityDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.database.QuranBookmarksDatabase
 import javax.inject.Singleton
 
@@ -23,11 +23,6 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideBookmarkGroupDao(database: QuranBookmarksDatabase): BookmarkGroupDao {
-        return database.bookmarkGroupDao()
-    }
-
-    @Provides
     fun provideBookmarkDao(database: QuranBookmarksDatabase): BookmarkDao {
         return database.bookmarkDao()
     }
@@ -35,5 +30,10 @@ object DatabaseModule {
     @Provides
     fun provideCachedContentDao(database: QuranBookmarksDatabase): CachedContentDao {
         return database.cachedContentDao()
+    }
+
+    @Provides
+    fun provideReadingActivityDao(database: QuranBookmarksDatabase): ReadingActivityDao {
+        return database.readingActivityDao()
     }
 }

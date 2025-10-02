@@ -9,7 +9,6 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import io.github.mehrdad_abdi.quranbookmarks.MainActivity
 import io.github.mehrdad_abdi.quranbookmarks.R
-import io.github.mehrdad_abdi.quranbookmarks.domain.model.BookmarkGroup
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,15 +46,18 @@ class NotificationService @Inject constructor(
         }
     }
 
-    fun showDailyReminder(profile: BookmarkGroup) {
+    /**
+     * @deprecated Will be reimplemented for global notifications
+     */
+    @Deprecated("Profiles removed - will be reimplemented for global notifications")
+    fun showDailyReminder() {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra("profile_id", profile.id)
         }
 
         val pendingIntent = PendingIntent.getActivity(
             context,
-            profile.id.toInt(),
+            0,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -63,18 +65,16 @@ class NotificationService @Inject constructor(
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Time to read")
-            .setContentText("Time to read your ${profile.name} bookmarks")
+            .setContentText("Time to read your bookmarks")
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 
-        val notificationId = NOTIFICATION_ID_BASE + profile.id.toInt()
-        notificationManager.notify(notificationId, notification)
+        notificationManager.notify(NOTIFICATION_ID_BASE, notification)
     }
 
-    fun cancelNotification(profileId: Long) {
-        val notificationId = NOTIFICATION_ID_BASE + profileId.toInt()
-        notificationManager.cancel(notificationId)
+    fun cancelNotification() {
+        notificationManager.cancel(NOTIFICATION_ID_BASE)
     }
 }

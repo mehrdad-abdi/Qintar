@@ -8,6 +8,11 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.BookmarkRepository
 
+/**
+ * @deprecated Daily reminders will be re-implemented as global app feature
+ * Temporarily disabled during profile removal refactoring
+ */
+@Deprecated("Will be reimplemented as global notification")
 @HiltWorker
 class DailyReminderWorker @AssistedInject constructor(
     @Assisted context: Context,
@@ -17,22 +22,18 @@ class DailyReminderWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
-        const val PROFILE_ID_KEY = "profile_id"
         const val WORK_NAME_PREFIX = "daily_reminder_"
 
-        fun getWorkName(profileId: Long): String = "$WORK_NAME_PREFIX$profileId"
+        fun getWorkName(): String = "${WORK_NAME_PREFIX}global"
     }
 
     override suspend fun doWork(): Result {
         return try {
-            val profileId = inputData.getLong(PROFILE_ID_KEY, -1L)
-            if (profileId == -1L) {
-                return Result.failure()
-            }
-
-            val profile = bookmarkRepository.getGroupById(profileId)
-            if (profile != null && profile.notificationSettings.enabled) {
-                notificationService.showDailyReminder(profile)
+            // TODO: Implement global daily reminder
+            // For now, just show a generic reminder if there are bookmarks
+            val bookmarksCount = bookmarkRepository.getBookmarkCount()
+            if (bookmarksCount > 0) {
+                // notificationService.showDailyReminder() // TODO: Update signature
             }
 
             Result.success()

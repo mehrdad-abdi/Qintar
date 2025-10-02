@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface BookmarkDao {
 
-    @Query("SELECT * FROM bookmarks WHERE groupId = :groupId ORDER BY createdAt ASC")
-    fun getBookmarksByGroupId(groupId: Long): Flow<List<BookmarkEntity>>
+    @Query("SELECT * FROM bookmarks ORDER BY createdAt ASC")
+    fun getAllBookmarks(): Flow<List<BookmarkEntity>>
 
     @Query("SELECT * FROM bookmarks WHERE id = :id")
     suspend fun getBookmarkById(id: Long): BookmarkEntity?
@@ -25,9 +25,9 @@ interface BookmarkDao {
     @Query("DELETE FROM bookmarks WHERE id = :id")
     suspend fun deleteBookmarkById(id: Long)
 
-    @Query("SELECT COUNT(*) FROM bookmarks WHERE groupId = :groupId")
-    suspend fun getBookmarkCountByGroupId(groupId: Long): Int
+    @Query("SELECT * FROM bookmarks WHERE tags LIKE '%' || :tag || '%' ORDER BY createdAt ASC")
+    fun getBookmarksByTag(tag: String): Flow<List<BookmarkEntity>>
 
-    @Query("SELECT * FROM bookmarks ORDER BY updatedAt DESC")
-    fun getAllBookmarks(): Flow<List<BookmarkEntity>>
+    @Query("SELECT COUNT(*) FROM bookmarks")
+    suspend fun getBookmarkCount(): Int
 }

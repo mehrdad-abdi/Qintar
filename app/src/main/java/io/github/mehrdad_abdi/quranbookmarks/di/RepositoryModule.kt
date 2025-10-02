@@ -6,9 +6,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.BookmarkRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.QuranRepositoryImpl
+import io.github.mehrdad_abdi.quranbookmarks.data.repository.ReadingActivityRepositoryImpl
+import io.github.mehrdad_abdi.quranbookmarks.data.repository.SettingsRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.SurahRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.BookmarkRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.QuranRepository
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.ReadingActivityRepository
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SurahRepository
 import javax.inject.Singleton
 
@@ -33,4 +37,16 @@ abstract class RepositoryModule {
     abstract fun bindSurahRepository(
         surahRepositoryImpl: SurahRepositoryImpl
     ): SurahRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindReadingActivityRepository(
+        readingActivityRepositoryImpl: ReadingActivityRepositoryImpl
+    ): ReadingActivityRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(
+        settingsRepositoryImpl: SettingsRepositoryImpl
+    ): SettingsRepository
 }

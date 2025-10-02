@@ -173,7 +173,7 @@ fun AddBookmarkScreen(
 
             // Create Button
             Button(
-                onClick = { viewModel.createBookmark(groupId, onBookmarkCreated) },
+                onClick = { viewModel.createBookmark(onBookmarkCreated) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading
             ) {

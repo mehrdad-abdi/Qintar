@@ -1,39 +1,37 @@
 package io.github.mehrdad_abdi.quranbookmarks.domain.usecase.notification
 
-import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import io.github.mehrdad_abdi.quranbookmarks.data.notification.DailyReminderWorker
-import io.github.mehrdad_abdi.quranbookmarks.domain.model.BookmarkGroup
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.NotificationSettings
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+/**
+ * @deprecated Will be reimplemented for global app notifications
+ */
+@Deprecated("Will be reimplemented for global app notifications")
 class ScheduleDailyNotificationUseCase @Inject constructor(
     private val workManager: WorkManager
 ) {
 
-    operator fun invoke(profile: BookmarkGroup) {
-        if (!profile.notificationSettings.enabled) {
-            cancelNotification(profile.id)
+    operator fun invoke(settings: NotificationSettings) {
+        if (!settings.enabled) {
+            cancelNotification()
             return
         }
 
-        val inputData = Data.Builder()
-            .putLong(DailyReminderWorker.PROFILE_ID_KEY, profile.id)
-            .build()
-
-        val initialDelay = calculateInitialDelay(profile.notificationSettings.time)
+        val initialDelay = calculateInitialDelay(settings.time)
 
         val workRequest = PeriodicWorkRequestBuilder<DailyReminderWorker>(1, TimeUnit.DAYS)
             .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
-            .setInputData(inputData)
             .build()
 
-        val workName = DailyReminderWorker.getWorkName(profile.id)
+        val workName = DailyReminderWorker.getWorkName()
 
         workManager.enqueueUniquePeriodicWork(
             workName,
@@ -42,8 +40,8 @@ class ScheduleDailyNotificationUseCase @Inject constructor(
         )
     }
 
-    fun cancelNotification(profileId: Long) {
-        val workName = DailyReminderWorker.getWorkName(profileId)
+    fun cancelNotification() {
+        val workName = DailyReminderWorker.getWorkName()
         workManager.cancelUniqueWork(workName)
     }
 
