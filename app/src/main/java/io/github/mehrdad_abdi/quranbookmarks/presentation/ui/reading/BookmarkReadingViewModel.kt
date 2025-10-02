@@ -33,7 +33,8 @@ data class BookmarkReadingUiState(
     val showReciterSelection: Boolean = false,
     val playbackSpeed: PlaybackSpeed = PlaybackSpeed.SPEED_1,
     val pendingVerseAfterBismillah: Int? = null, // Tracks which verse to play after bismillah completes
-    val isPlayingBismillah: Boolean = false // Indicates bismillah is currently playing
+    val isPlayingBismillah: Boolean = false, // Indicates bismillah is currently playing
+    val readAyahIds: Set<String> = emptySet() // Set of ayah IDs read today
 )
 
 @HiltViewModel
@@ -43,7 +44,9 @@ class BookmarkReadingViewModel @Inject constructor(
     private val getBookmarkContentUseCase: GetBookmarkContentUseCase,
     private val quranRepository: QuranRepository,
     private val settingsRepository: SettingsRepository,
-    private val audioService: AudioService
+    private val audioService: AudioService,
+    private val getTodayStatsUseCase: io.github.mehrdad_abdi.quranbookmarks.domain.usecase.reading.GetTodayStatsUseCase,
+    private val toggleAyahTrackingUseCase: io.github.mehrdad_abdi.quranbookmarks.domain.usecase.reading.ToggleAyahTrackingUseCase
 ) : ViewModel() {
 
     companion object {
@@ -56,8 +59,9 @@ class BookmarkReadingViewModel @Inject constructor(
 
     val uiState: StateFlow<BookmarkReadingUiState> = combine(
         _uiState,
-        audioService.playbackState
-    ) { uiState, audioState ->
+        audioService.playbackState,
+        getTodayStatsUseCase()
+    ) { uiState, audioState, todayActivity ->
         // Handle auto-play next ayah when current one completes
         // Only trigger if we have a new completed URL and audio is NOT playing
         if (audioState.completedUrl != null &&
@@ -70,7 +74,8 @@ class BookmarkReadingViewModel @Inject constructor(
         uiState.copy(
             isPlayingAudio = audioState.isPlaying,
             currentPlayingIndex = if (audioState.isPlaying) uiState.currentPlayingIndex else null,
-            playbackSpeed = PlaybackSpeed.fromValue(audioState.playbackSpeed)
+            playbackSpeed = PlaybackSpeed.fromValue(audioState.playbackSpeed),
+            readAyahIds = todayActivity.trackedAyahIds
         )
     }.stateIn(
         scope = viewModelScope,
@@ -418,6 +423,12 @@ class BookmarkReadingViewModel @Inject constructor(
                 if (currentPlayingIndex != null) {
                     val verseItems = currentState.listItems.filterIsInstance<ReadingListItem.VerseItem>()
 
+                    // Find the current verse and mark it as read
+                    val currentVerseItem = verseItems.find { it.globalIndex == currentPlayingIndex }
+                    if (currentVerseItem != null) {
+                        markAyahAsRead(currentVerseItem)
+                    }
+
                     // Find the next verse by globalIndex
                     val currentVersePosition = verseItems.indexOfFirst { it.globalIndex == currentPlayingIndex }
                     if (currentVersePosition >= 0 && currentVersePosition < verseItems.size - 1) {
@@ -462,6 +473,49 @@ class BookmarkReadingViewModel @Inject constructor(
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
         audioService.clearError()
+    }
+
+    /**
+     * Toggle read status for a specific ayah
+     */
+    fun toggleAyahReadStatus(verseItem: ReadingListItem.VerseItem) {
+        viewModelScope.launch {
+            val ayahId = getAyahId(verseItem)
+            try {
+                toggleAyahTrackingUseCase(ayahId = ayahId)
+                Log.d(TAG, "Toggled read status for ayah: $ayahId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error toggling ayah read status", e)
+            }
+        }
+    }
+
+    /**
+     * Mark ayah as read (called when audio completes)
+     */
+    private fun markAyahAsRead(verseItem: ReadingListItem.VerseItem) {
+        viewModelScope.launch {
+            val ayahId = getAyahId(verseItem)
+            val currentState = _uiState.value
+
+            // Only mark if not already read today
+            if (ayahId !in currentState.readAyahIds) {
+                try {
+                    toggleAyahTrackingUseCase(ayahId = ayahId)
+                    Log.d(TAG, "Marked ayah as read: $ayahId")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error marking ayah as read", e)
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate unique ayah ID for tracking
+     * Format: "bookmarkId:surah:ayah"
+     */
+    private fun getAyahId(verseItem: ReadingListItem.VerseItem): String {
+        return "${verseItem.bookmark.id}:${verseItem.verse.surahNumber}:${verseItem.verse.ayahInSurah}"
     }
 
     override fun onCleared() {

@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -234,11 +235,16 @@ fun BookmarkReadingScreen(
                                         )
                                     }
                                     is ReadingListItem.VerseItem -> {
+                                        val ayahId = "${item.bookmark.id}:${item.verse.surahNumber}:${item.verse.ayahInSurah}"
+                                        val isReadToday = ayahId in uiState.readAyahIds
+
                                         VerseCard(
                                             verseItem = item,
                                             isPlaying = uiState.currentPlayingIndex == item.globalIndex,
                                             primaryColor = primaryColor,
-                                            onPlayClick = { viewModel.playAudioAtIndex(item.globalIndex) }
+                                            onPlayClick = { viewModel.playAudioAtIndex(item.globalIndex) },
+                                            isReadToday = isReadToday,
+                                            onToggleReadStatus = { viewModel.toggleAyahReadStatus(item) }
                                         )
                                     }
                                 }
@@ -310,7 +316,9 @@ private fun VerseCard(
     isPlaying: Boolean,
     primaryColor: Color,
     onPlayClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isReadToday: Boolean = false,
+    onToggleReadStatus: () -> Unit = {}
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -323,52 +331,77 @@ private fun VerseCard(
             }
         )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.Top
+                .padding(12.dp)
         ) {
-            // Play button
-            IconButton(
-                onClick = onPlayClick,
-                modifier = Modifier.size(32.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
             ) {
-                Icon(
-                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (isPlaying) "Pause" else "Play",
-                    tint = primaryColor
-                )
+                // Play button
+                IconButton(
+                    onClick = onPlayClick,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = if (isPlaying) "Pause" else "Play",
+                        tint = primaryColor
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Verse text
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = verseItem.verse.text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Verse number badge
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(primaryColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = verseItem.displayNumber,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            // Read status indicator at bottom left
+            Spacer(modifier = Modifier.height(4.dp))
 
-            // Verse text
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = verseItem.verse.text,
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Verse number badge
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(primaryColor),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = verseItem.displayNumber,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                IconButton(
+                    onClick = onToggleReadStatus,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = if (isReadToday) "Mark as unread" else "Mark as read",
+                        tint = if (isReadToday) Color(0xFF4CAF50) else Color(0xFFBDBDBD),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }

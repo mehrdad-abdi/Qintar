@@ -31,17 +31,17 @@ fun QuranBookmarksTheme(
         primary = primaryColor,
         secondary = secondaryColor,
         tertiary = tertiaryColor,
-        background = DarkGreen,
-        surface = DarkGreen.copy(alpha = 0.9f),
+        background = Color(0xFF121212),
+        surface = Color(0xFF1E1E1E),
         onPrimary = Color.White,
         onSecondary = Color.White,
         onTertiary = Color.White,
-        onBackground = WarmWhite,
-        onSurface = WarmWhite,
+        onBackground = Color(0xFFE0E0E0),
+        onSurface = Color(0xFFE0E0E0),
         primaryContainer = primaryColor.copy(alpha = 0.2f),
         onPrimaryContainer = primaryColor,
-        surfaceVariant = LightGreen,
-        onSurfaceVariant = CreamBackground
+        surfaceVariant = Color(0xFF2C2C2C),
+        onSurfaceVariant = Color(0xFFC0C0C0)
     )
 
     val lightColorScheme = lightColorScheme(

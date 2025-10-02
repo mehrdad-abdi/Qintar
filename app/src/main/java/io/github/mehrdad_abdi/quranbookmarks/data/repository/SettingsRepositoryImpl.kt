@@ -25,11 +25,14 @@ class SettingsRepositoryImpl @Inject constructor(
 
     private val _settingsFlow = MutableStateFlow(loadSettings())
 
+    // Keep a strong reference to prevent garbage collection
+    private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
+        _settingsFlow.value = loadSettings()
+    }
+
     init {
         // Listen to preference changes
-        prefs.registerOnSharedPreferenceChangeListener { _, _ ->
-            _settingsFlow.value = loadSettings()
-        }
+        prefs.registerOnSharedPreferenceChangeListener(prefsListener)
     }
 
     override fun getSettings(): Flow<AppSettings> {
