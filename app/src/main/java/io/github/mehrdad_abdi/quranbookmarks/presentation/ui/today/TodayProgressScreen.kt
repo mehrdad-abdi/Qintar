@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +35,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun TodayProgressScreen(
     onNavigateToProfiles: () -> Unit,
+    onNavigateToRandomReading: () -> Unit,
     onNavigateToStatistics: () -> Unit,
     onNavigateToCalendar: () -> Unit,
     onNavigateToSettings: () -> Unit,
@@ -122,6 +124,39 @@ fun TodayProgressScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Continue Reading",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // Random Reading Button
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Button(
+                            onClick = onNavigateToRandomReading,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Shuffle,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Random Reading",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )

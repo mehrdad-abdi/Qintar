@@ -10,6 +10,7 @@ sealed class Screen(val route: String) {
     object BookmarkReading : Screen("bookmark_reading/{bookmarkId}") {
         fun createRoute(bookmarkId: Long) = "bookmark_reading/$bookmarkId"
     }
+    object RandomReading : Screen("random_reading")
     object Statistics : Screen("statistics")
     object BadgeCalendar : Screen("badge_calendar")
     object Settings : Screen("settings")

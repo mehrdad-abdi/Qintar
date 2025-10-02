@@ -10,6 +10,7 @@ import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmark.AddBookmar
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmark.EditBookmarkScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmarks.BookmarksScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.calendar.BadgeCalendarScreen
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.random.RandomModeSelectionScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.reading.BookmarkReadingScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.settings.ReciterSelectionScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.settings.SettingsScreen
@@ -29,6 +30,9 @@ fun NavGraph(
             TodayProgressScreen(
                 onNavigateToProfiles = {
                     navController.navigate(Screen.Bookmarks.route)
+                },
+                onNavigateToRandomReading = {
+                    navController.navigate(Screen.RandomReading.route)
                 },
                 onNavigateToStatistics = {
                     navController.navigate(Screen.Statistics.route)
@@ -104,6 +108,18 @@ fun NavGraph(
                 bookmarkId = bookmarkId,
                 onNavigateBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        // Random Reading Mode Selection Screen
+        composable(route = Screen.RandomReading.route) {
+            RandomModeSelectionScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToReading = { bookmarkId ->
+                    navController.navigate(Screen.BookmarkReading.createRoute(bookmarkId))
                 }
             )
         }

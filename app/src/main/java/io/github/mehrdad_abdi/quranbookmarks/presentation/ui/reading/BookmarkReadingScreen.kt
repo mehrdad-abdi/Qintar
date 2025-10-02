@@ -100,14 +100,16 @@ fun BookmarkReadingScreen(
                             )
                         }
 
-                        // Reciter selection button
-                        IconButton(
-                            onClick = { viewModel.toggleReciterSelection() }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.RecordVoiceOver,
-                                contentDescription = "Select Reciter"
-                            )
+                        // Reciter selection button (hide for temporary bookmarks)
+                        if (uiState.bookmark?.id != -1L) {
+                            IconButton(
+                                onClick = { viewModel.toggleReciterSelection() }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.RecordVoiceOver,
+                                    contentDescription = "Select Reciter"
+                                )
+                            }
                         }
 
                         // Playback speed button
