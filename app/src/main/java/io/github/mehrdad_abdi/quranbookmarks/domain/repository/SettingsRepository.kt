@@ -10,4 +10,5 @@ interface SettingsRepository {
     suspend fun updateNotificationTime(time: String)
     suspend fun updateTheme(theme: io.github.mehrdad_abdi.quranbookmarks.domain.model.AppTheme)
     suspend fun updatePrimaryColor(colorHex: String)
+    suspend fun updatePlaybackSpeed(speed: Float)
 }

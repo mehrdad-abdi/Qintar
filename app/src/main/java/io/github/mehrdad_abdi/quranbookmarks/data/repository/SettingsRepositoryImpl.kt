@@ -62,6 +62,10 @@ class SettingsRepositoryImpl @Inject constructor(
         prefs.edit().putString(KEY_PRIMARY_COLOR, colorHex).apply()
     }
 
+    override suspend fun updatePlaybackSpeed(speed: Float) {
+        prefs.edit().putFloat(KEY_PLAYBACK_SPEED, speed).apply()
+    }
+
     private fun loadSettings(): AppSettings {
         val reciter = prefs.getString(KEY_RECITER, DEFAULT_RECITER) ?: DEFAULT_RECITER
         val bitrate = prefs.getString(KEY_BITRATE, DEFAULT_BITRATE) ?: DEFAULT_BITRATE
@@ -69,6 +73,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val notificationTime = prefs.getString(KEY_NOTIFICATION_TIME, DEFAULT_TIME) ?: DEFAULT_TIME
         val themeName = prefs.getString(KEY_THEME, AppTheme.SYSTEM.name) ?: AppTheme.SYSTEM.name
         val primaryColor = prefs.getString(KEY_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR) ?: DEFAULT_PRIMARY_COLOR
+        val playbackSpeed = prefs.getFloat(KEY_PLAYBACK_SPEED, DEFAULT_PLAYBACK_SPEED)
         val theme = try {
             AppTheme.valueOf(themeName)
         } catch (e: IllegalArgumentException) {
@@ -83,7 +88,8 @@ class SettingsRepositoryImpl @Inject constructor(
                 time = notificationTime
             ),
             theme = theme,
-            primaryColorHex = primaryColor
+            primaryColorHex = primaryColor,
+            playbackSpeed = playbackSpeed
         )
     }
 
@@ -94,10 +100,12 @@ class SettingsRepositoryImpl @Inject constructor(
         private const val KEY_NOTIFICATION_TIME = "notification_time"
         private const val KEY_THEME = "theme"
         private const val KEY_PRIMARY_COLOR = "primary_color"
+        private const val KEY_PLAYBACK_SPEED = "playback_speed"
 
         private const val DEFAULT_RECITER = "ar.alafasy"
         private const val DEFAULT_BITRATE = "64"
         private const val DEFAULT_TIME = "07:00"
         private const val DEFAULT_PRIMARY_COLOR = "#C5A05C" // Gold
+        private const val DEFAULT_PLAYBACK_SPEED = 1.0f
     }
 }

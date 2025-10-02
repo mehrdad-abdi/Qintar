@@ -34,7 +34,9 @@ data class BookmarksUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val currentPlayingAyah: Int? = null,
-    val isPlayingAll: Boolean = false
+    val isPlayingAll: Boolean = false,
+    val readAyahIds: Set<String> = emptySet(),
+    val playbackSpeed: io.github.mehrdad_abdi.quranbookmarks.domain.service.PlaybackSpeed = io.github.mehrdad_abdi.quranbookmarks.domain.service.PlaybackSpeed.SPEED_1
 )
 
 @HiltViewModel
@@ -45,7 +47,9 @@ class BookmarksViewModel @Inject constructor(
     private val getAyahsFromBookmarkUseCase: GetAyahsFromBookmarkUseCase,
     private val quranRepository: QuranRepository,
     private val settingsRepository: SettingsRepository,
-    private val audioService: AudioService
+    private val audioService: AudioService,
+    private val getTodayStatsUseCase: io.github.mehrdad_abdi.quranbookmarks.domain.usecase.reading.GetTodayStatsUseCase,
+    private val toggleAyahTrackingUseCase: io.github.mehrdad_abdi.quranbookmarks.domain.usecase.reading.ToggleAyahTrackingUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BookmarksUiState())
@@ -55,20 +59,14 @@ class BookmarksViewModel @Inject constructor(
 
     val uiState: StateFlow<BookmarksUiState> = combine(
         _uiState,
-        audioService.playbackState
-    ) { uiState, audioState ->
-        // Handle auto-play next when playing all
-        if (uiState.isPlayingAll &&
-            audioState.completedUrl != null &&
-            audioState.completedUrl != lastCompletedUrl &&
-            !audioState.isPlaying) {
-            lastCompletedUrl = audioState.completedUrl
-            handlePlayAllNext()
-        }
-
+        audioService.playbackState,
+        getTodayStatsUseCase()
+    ) { uiState, audioState, todayActivity ->
         uiState.copy(
             currentPlayingAyah = if (audioState.isPlaying) uiState.currentPlayingAyah else null,
-            isPlayingAll = if (!audioState.isPlaying) false else uiState.isPlayingAll
+            isPlayingAll = if (!audioState.isPlaying) false else uiState.isPlayingAll,
+            readAyahIds = todayActivity.trackedAyahIds,
+            playbackSpeed = io.github.mehrdad_abdi.quranbookmarks.domain.service.PlaybackSpeed.fromValue(audioState.playbackSpeed)
         )
     }.stateIn(
         scope = viewModelScope,
@@ -79,6 +77,41 @@ class BookmarksViewModel @Inject constructor(
     init {
         loadBookmarks()
         loadTags()
+        observeAudioCompletion()
+        loadPlaybackSpeed()
+    }
+
+    private fun loadPlaybackSpeed() {
+        viewModelScope.launch {
+            settingsRepository.getSettings().collect { settings ->
+                val speed = io.github.mehrdad_abdi.quranbookmarks.domain.service.PlaybackSpeed.fromValue(settings.playbackSpeed)
+                audioService.setPlaybackSpeed(speed)
+            }
+        }
+    }
+
+    private fun observeAudioCompletion() {
+        viewModelScope.launch {
+            audioService.playbackState.collect { audioState ->
+                // When audio completes
+                if (audioState.completedUrl != null &&
+                    audioState.completedUrl != lastCompletedUrl &&
+                    !audioState.isPlaying) {
+                    lastCompletedUrl = audioState.completedUrl
+
+                    // Mark the ayah as read
+                    val currentAyahNumber = _uiState.value.currentPlayingAyah
+                    if (currentAyahNumber != null) {
+                        markAyahAsRead(currentAyahNumber)
+                    }
+
+                    // Handle play-all next
+                    if (_uiState.value.isPlayingAll) {
+                        handlePlayAllNext()
+                    }
+                }
+            }
+        }
     }
 
     private fun loadBookmarks() {
@@ -201,6 +234,10 @@ class BookmarksViewModel @Inject constructor(
     }
 
     fun isAyahPlaying(globalAyahNumber: Int): Boolean {
+        return _uiState.value.currentPlayingAyah == globalAyahNumber && audioService.playbackState.value.isPlaying
+    }
+
+    fun isAyahSelected(globalAyahNumber: Int): Boolean {
         return _uiState.value.currentPlayingAyah == globalAyahNumber
     }
 
@@ -251,6 +288,65 @@ class BookmarksViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun toggleAyahReadStatus(bookmark: Bookmark, verse: VerseMetadata) {
+        viewModelScope.launch {
+            val ayahId = getAyahId(bookmark, verse)
+            try {
+                toggleAyahTrackingUseCase(ayahId = ayahId)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(error = "Failed to toggle read status: ${e.message}")
+            }
+        }
+    }
+
+    private fun markAyahAsRead(globalAyahNumber: Int) {
+        viewModelScope.launch {
+            // Find the bookmark and verse for this globalAyahNumber
+            val bookmarkWithAyah = _uiState.value.bookmarksWithAyahs.firstOrNull { bookmarkWithAyahs ->
+                bookmarkWithAyahs.ayahs.any { it.globalAyahNumber == globalAyahNumber }
+            }
+
+            if (bookmarkWithAyah != null) {
+                val verse = bookmarkWithAyah.ayahs.find { it.globalAyahNumber == globalAyahNumber }
+                if (verse != null) {
+                    val ayahId = getAyahId(bookmarkWithAyah.bookmark, verse)
+
+                    // Get fresh stats to avoid race condition
+                    val todayStats = getTodayStatsUseCase.getTodaySnapshot()
+
+                    // Only mark if not already read today
+                    if (!todayStats.isAyahTracked(ayahId)) {
+                        try {
+                            toggleAyahTrackingUseCase(ayahId = ayahId)
+                        } catch (e: Exception) {
+                            // Silent failure for automatic tracking
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getAyahId(bookmark: Bookmark, verse: VerseMetadata): String {
+        return "${bookmark.id}:${verse.surahNumber}:${verse.ayahInSurah}"
+    }
+
+    fun setPlaybackSpeed(speed: io.github.mehrdad_abdi.quranbookmarks.domain.service.PlaybackSpeed) {
+        audioService.setPlaybackSpeed(speed)
+        // Persist the setting
+        viewModelScope.launch {
+            settingsRepository.updatePlaybackSpeed(speed.value)
+        }
+    }
+
+    fun pauseAyah() {
+        audioService.pause()
+    }
+
+    fun resumeAyah() {
+        audioService.resume()
     }
 
     override fun onCleared() {

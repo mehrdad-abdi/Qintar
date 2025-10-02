@@ -5,7 +5,8 @@ data class AppSettings(
     val reciterBitrate: String = "64", // Audio bitrate for selected reciter
     val notificationSettings: NotificationSettings = NotificationSettings(),
     val theme: AppTheme = AppTheme.SYSTEM,
-    val primaryColorHex: String = "#C5A05C" // Default Gold color
+    val primaryColorHex: String = "#C5A05C", // Default Gold color
+    val playbackSpeed: Float = 1.0f // Playback speed (0.5x to 2x)
 )
 
 enum class AppTheme {
