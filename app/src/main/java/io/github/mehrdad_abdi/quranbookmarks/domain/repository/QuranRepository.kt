@@ -5,6 +5,11 @@ import io.github.mehrdad_abdi.quranbookmarks.domain.model.VerseMetadata
 import io.github.mehrdad_abdi.quranbookmarks.data.remote.dto.ReciterData
 import kotlinx.coroutines.flow.Flow
 
+data class AyahAudioData(
+    val text: String,
+    val audio: String?
+)
+
 interface QuranRepository {
 
     // API operations
@@ -13,6 +18,7 @@ interface QuranRepository {
     suspend fun getAyahRangeMetadata(surahNumber: Int, startAyah: Int, endAyah: Int): Result<List<VerseMetadata>>
     suspend fun getPageMetadata(pageNumber: Int): Result<List<VerseMetadata>>
     suspend fun getAvailableReciters(): Result<List<ReciterData>>
+    suspend fun getAyahWithAudio(ayahReference: String, reciterEdition: String): Result<AyahAudioData>
 
     // Content URLs
     fun getImageUrl(surah: Int, ayah: Int, highRes: Boolean = false): String

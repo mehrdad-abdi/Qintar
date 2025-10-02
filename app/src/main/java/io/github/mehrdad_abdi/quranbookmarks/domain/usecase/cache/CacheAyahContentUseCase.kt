@@ -4,6 +4,8 @@ import android.util.Log
 import io.github.mehrdad_abdi.quranbookmarks.data.cache.FileDownloadManager
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.CachedContent
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.QuranRepository
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 /**
@@ -16,12 +18,12 @@ import javax.inject.Inject
  */
 class CacheAyahContentUseCase @Inject constructor(
     private val quranRepository: QuranRepository,
+    private val settingsRepository: SettingsRepository,
     private val fileDownloadManager: FileDownloadManager
 ) {
     companion object {
         private const val TAG = "CacheAyahContentUseCase"
         private const val DEFAULT_RECITER = "ar.alafasy"
-        private const val DEFAULT_BITRATE = "64"
     }
 
     suspend operator fun invoke(
@@ -54,6 +56,9 @@ class CacheAyahContentUseCase @Inject constructor(
 
             val metadata = metadataResult.getOrThrow()
 
+            // Get settings for bitrate
+            val settings = settingsRepository.getSettings().first()
+
             // Generate URLs for downloading
             val imageUrl = quranRepository.getImageUrl(
                 ayahReference.surah,
@@ -65,14 +70,14 @@ class CacheAyahContentUseCase @Inject constructor(
                 quranRepository.getAudioUrl(
                     reciterEdition,
                     ayahReference.globalAyahNumber,
-                    DEFAULT_BITRATE
+                    settings.reciterBitrate
                 )
             } else {
-                // Use default reciter if none specified
+                // Use default reciter and bitrate from settings
                 quranRepository.getAudioUrl(
-                    DEFAULT_RECITER,
+                    settings.reciterEdition,
                     ayahReference.globalAyahNumber,
-                    DEFAULT_BITRATE
+                    settings.reciterBitrate
                 )
             }
 

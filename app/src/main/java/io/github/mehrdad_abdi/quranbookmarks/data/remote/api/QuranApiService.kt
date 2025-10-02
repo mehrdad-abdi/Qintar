@@ -29,6 +29,12 @@ interface QuranApiService {
     @GET("v1/edition/format/audio")
     suspend fun getAudioEditions(): Response<ReciterResponse>
 
+    @GET("v1/ayah/{ayahReference}/{edition}")
+    suspend fun getAyahWithEdition(
+        @Path("ayahReference") ayahReference: String,
+        @Path("edition") edition: String
+    ): Response<VerseResponse>
+
     companion object {
         const val BASE_URL = "https://api.alquran.cloud/"
 

@@ -11,6 +11,7 @@ import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmark.EditBookma
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmarks.BookmarksScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.calendar.BadgeCalendarScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.reading.BookmarkReadingScreen
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.settings.ReciterSelectionScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.settings.SettingsScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.statistics.StatisticsScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.today.TodayProgressScreen
@@ -128,6 +129,18 @@ fun NavGraph(
         // Settings Screen
         composable(route = Screen.Settings.route) {
             SettingsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToReciterSelection = {
+                    navController.navigate(Screen.ReciterSelection.route)
+                }
+            )
+        }
+
+        // Reciter Selection Screen
+        composable(route = Screen.ReciterSelection.route) {
+            ReciterSelectionScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }

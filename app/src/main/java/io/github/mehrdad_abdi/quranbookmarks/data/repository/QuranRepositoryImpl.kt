@@ -399,6 +399,23 @@ class QuranRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getAyahWithAudio(ayahReference: String, reciterEdition: String): Result<io.github.mehrdad_abdi.quranbookmarks.domain.repository.AyahAudioData> {
+        return try {
+            val response = apiService.getAyahWithEdition(ayahReference, reciterEdition)
+            if (response.isSuccessful && response.body() != null) {
+                val ayahData = response.body()!!.data
+                Result.success(io.github.mehrdad_abdi.quranbookmarks.domain.repository.AyahAudioData(
+                    text = ayahData.text,
+                    audio = ayahData.audio
+                ))
+            } else {
+                Result.failure(Exception("Failed to fetch ayah audio: ${response.message()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override fun getImageUrl(surah: Int, ayah: Int, highRes: Boolean): String {
         return QuranApiService.Companion.ImageUrls.getImageUrl(surah, ayah, highRes)
     }

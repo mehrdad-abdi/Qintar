@@ -8,6 +8,7 @@ import io.github.mehrdad_abdi.quranbookmarks.data.remote.dto.ReciterData
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.Bookmark
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.VerseMetadata
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.QuranRepository
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.service.AudioService
 import io.github.mehrdad_abdi.quranbookmarks.domain.service.PlaybackSpeed
 import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.bookmark.GetBookmarkByIdUseCase
@@ -41,6 +42,7 @@ class BookmarkReadingViewModel @Inject constructor(
     private val getBookmarkDisplayTextUseCase: GetBookmarkDisplayTextUseCase,
     private val getBookmarkContentUseCase: GetBookmarkContentUseCase,
     private val quranRepository: QuranRepository,
+    private val settingsRepository: SettingsRepository,
     private val audioService: AudioService
 ) : ViewModel() {
 
@@ -300,7 +302,7 @@ class BookmarkReadingViewModel @Inject constructor(
         }
     }
 
-    private fun getAudioUrl(verseItem: ReadingListItem.VerseItem): String? {
+    private suspend fun getAudioUrl(verseItem: ReadingListItem.VerseItem): String? {
         val state = _uiState.value
         val reciter = state.selectedReciter
         val verse = verseItem.verse
@@ -312,9 +314,10 @@ class BookmarkReadingViewModel @Inject constructor(
                 return verse.cachedAudioPath
             }
 
-            // Fall back to streaming URL
-            val audioUrl = quranRepository.getAudioUrl(reciter.identifier, verse.globalAyahNumber, "128")
-            Log.d(TAG, "Using streaming audio URL for ayah ${verse.globalAyahNumber}")
+            // Fall back to streaming URL using settings bitrate
+            val settings = settingsRepository.getSettings().stateIn(viewModelScope).value
+            val audioUrl = quranRepository.getAudioUrl(reciter.identifier, verse.globalAyahNumber, settings.reciterBitrate)
+            Log.d(TAG, "Using streaming audio URL for ayah ${verse.globalAyahNumber} with bitrate ${settings.reciterBitrate}")
             audioUrl
         } else {
             Log.e(TAG, "No reciter selected")
@@ -359,9 +362,10 @@ class BookmarkReadingViewModel @Inject constructor(
                 return cachedContent.audioPath
             }
 
-            // Fall back to streaming URL for global ayah number 1
-            val audioUrl = quranRepository.getAudioUrl(reciter.identifier, 1, "128")
-            Log.d(TAG, "Using streaming bismillah audio URL")
+            // Fall back to streaming URL for global ayah number 1 using settings bitrate
+            val settings = settingsRepository.getSettings().stateIn(viewModelScope).value
+            val audioUrl = quranRepository.getAudioUrl(reciter.identifier, 1, settings.reciterBitrate)
+            Log.d(TAG, "Using streaming bismillah audio URL with bitrate ${settings.reciterBitrate}")
             audioUrl
         } else {
             Log.e(TAG, "No reciter selected for bismillah")

@@ -11,6 +11,7 @@ import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.bookmark.GetAllBookm
 import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.bookmark.GetAllTagsUseCase
 import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.cache.GetAyahsFromBookmarkUseCase
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.QuranRepository
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,6 +44,7 @@ class BookmarksViewModel @Inject constructor(
     private val deleteBookmarkUseCase: DeleteBookmarkUseCase,
     private val getAyahsFromBookmarkUseCase: GetAyahsFromBookmarkUseCase,
     private val quranRepository: QuranRepository,
+    private val settingsRepository: SettingsRepository,
     private val audioService: AudioService
 ) : ViewModel() {
 
@@ -180,13 +182,14 @@ class BookmarksViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val cachedContent = quranRepository.getCachedContent(verse.surahNumber, verse.ayahInSurah)
+                val settings = settingsRepository.getSettings().stateIn(viewModelScope).value
 
                 val audioUrl = if (cachedContent?.audioPath != null) {
                     // Use cached audio file
                     "file://${cachedContent.audioPath}"
                 } else {
-                    // Fall back to streaming
-                    quranRepository.getAudioUrl("ar.alafasy", verse.globalAyahNumber, "64")
+                    // Fall back to streaming using settings reciter and bitrate
+                    quranRepository.getAudioUrl(settings.reciterEdition, verse.globalAyahNumber, settings.reciterBitrate)
                 }
 
                 _uiState.value = _uiState.value.copy(currentPlayingAyah = verse.globalAyahNumber)
@@ -233,11 +236,12 @@ class BookmarksViewModel @Inject constructor(
             viewModelScope.launch {
                 try {
                     val cachedContent = quranRepository.getCachedContent(verse.surahNumber, verse.ayahInSurah)
+                    val settings = settingsRepository.getSettings().stateIn(viewModelScope).value
 
                     val audioUrl = if (cachedContent?.audioPath != null) {
                         "file://${cachedContent.audioPath}"
                     } else {
-                        quranRepository.getAudioUrl("ar.alafasy", verse.globalAyahNumber, "64")
+                        quranRepository.getAudioUrl(settings.reciterEdition, verse.globalAyahNumber, settings.reciterBitrate)
                     }
 
                     _uiState.value = _uiState.value.copy(currentPlayingAyah = verse.globalAyahNumber)

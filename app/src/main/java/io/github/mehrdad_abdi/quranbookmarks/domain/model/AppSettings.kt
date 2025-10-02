@@ -2,6 +2,7 @@ package io.github.mehrdad_abdi.quranbookmarks.domain.model
 
 data class AppSettings(
     val reciterEdition: String = "ar.alafasy",
+    val reciterBitrate: String = "64", // Audio bitrate for selected reciter
     val notificationSettings: NotificationSettings = NotificationSettings(),
     val theme: AppTheme = AppTheme.SYSTEM,
     val primaryColorHex: String = "#C5A05C" // Default Gold color

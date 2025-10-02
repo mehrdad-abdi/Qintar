@@ -13,4 +13,5 @@ sealed class Screen(val route: String) {
     object Statistics : Screen("statistics")
     object BadgeCalendar : Screen("badge_calendar")
     object Settings : Screen("settings")
+    object ReciterSelection : Screen("reciter_selection")
 }

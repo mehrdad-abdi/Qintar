@@ -1,9 +1,12 @@
 package io.github.mehrdad_abdi.quranbookmarks.domain.usecase.cache
 
 import io.github.mehrdad_abdi.quranbookmarks.data.cache.FileDownloadManager
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.AppSettings
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.CachedContent
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.VerseMetadata
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.QuranRepository
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -13,6 +16,7 @@ import org.mockito.kotlin.*
 class CacheAyahContentUseCaseTest {
 
     private lateinit var quranRepository: QuranRepository
+    private lateinit var settingsRepository: SettingsRepository
     private lateinit var fileDownloadManager: FileDownloadManager
     private lateinit var useCase: CacheAyahContentUseCase
 
@@ -35,8 +39,15 @@ class CacheAyahContentUseCaseTest {
     @Before
     fun setup() {
         quranRepository = mock()
+        settingsRepository = mock()
         fileDownloadManager = mock()
-        useCase = CacheAyahContentUseCase(quranRepository, fileDownloadManager)
+
+        // Mock default settings - return flow each time it's called
+        whenever(settingsRepository.getSettings()).thenAnswer {
+            flowOf(AppSettings(reciterEdition = "ar.alafasy", reciterBitrate = "64"))
+        }
+
+        useCase = CacheAyahContentUseCase(quranRepository, settingsRepository, fileDownloadManager)
     }
 
     @Test

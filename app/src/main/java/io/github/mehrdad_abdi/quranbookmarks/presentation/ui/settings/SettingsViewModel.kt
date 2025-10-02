@@ -11,6 +11,7 @@ import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepositor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -65,7 +66,9 @@ class SettingsViewModel @Inject constructor(
     fun updateReciter(reciterEdition: String) {
         viewModelScope.launch {
             try {
-                settingsRepository.updateReciter(reciterEdition)
+                // Keep current bitrate when updating reciter
+                val currentSettings = settingsRepository.getSettings().first()
+                settingsRepository.updateReciter(reciterEdition, currentSettings.reciterBitrate)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     error = "Failed to update reciter: ${e.message}"

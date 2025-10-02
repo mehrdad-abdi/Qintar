@@ -31,7 +31,9 @@ data class VerseData(
     @SerializedName("hizbQuarter")
     val hizbQuarter: Int,
     @SerializedName("sajda")
-    val sajda: Boolean
+    val sajda: Boolean,
+    @SerializedName("audio")
+    val audio: String? = null
 )
 
 data class SurahData(

@@ -36,8 +36,11 @@ class SettingsRepositoryImpl @Inject constructor(
         return _settingsFlow.asStateFlow()
     }
 
-    override suspend fun updateReciter(reciterEdition: String) {
-        prefs.edit().putString(KEY_RECITER, reciterEdition).apply()
+    override suspend fun updateReciter(reciterEdition: String, bitrate: String) {
+        prefs.edit()
+            .putString(KEY_RECITER, reciterEdition)
+            .putString(KEY_BITRATE, bitrate)
+            .apply()
     }
 
     override suspend fun updateNotificationEnabled(enabled: Boolean) {
@@ -58,6 +61,7 @@ class SettingsRepositoryImpl @Inject constructor(
 
     private fun loadSettings(): AppSettings {
         val reciter = prefs.getString(KEY_RECITER, DEFAULT_RECITER) ?: DEFAULT_RECITER
+        val bitrate = prefs.getString(KEY_BITRATE, DEFAULT_BITRATE) ?: DEFAULT_BITRATE
         val notificationEnabled = prefs.getBoolean(KEY_NOTIFICATION_ENABLED, false)
         val notificationTime = prefs.getString(KEY_NOTIFICATION_TIME, DEFAULT_TIME) ?: DEFAULT_TIME
         val themeName = prefs.getString(KEY_THEME, AppTheme.SYSTEM.name) ?: AppTheme.SYSTEM.name
@@ -70,6 +74,7 @@ class SettingsRepositoryImpl @Inject constructor(
 
         return AppSettings(
             reciterEdition = reciter,
+            reciterBitrate = bitrate,
             notificationSettings = NotificationSettings(
                 enabled = notificationEnabled,
                 time = notificationTime
@@ -81,12 +86,14 @@ class SettingsRepositoryImpl @Inject constructor(
 
     companion object {
         private const val KEY_RECITER = "reciter_edition"
+        private const val KEY_BITRATE = "reciter_bitrate"
         private const val KEY_NOTIFICATION_ENABLED = "notification_enabled"
         private const val KEY_NOTIFICATION_TIME = "notification_time"
         private const val KEY_THEME = "theme"
         private const val KEY_PRIMARY_COLOR = "primary_color"
 
         private const val DEFAULT_RECITER = "ar.alafasy"
+        private const val DEFAULT_BITRATE = "64"
         private const val DEFAULT_TIME = "07:00"
         private const val DEFAULT_PRIMARY_COLOR = "#C5A05C" // Gold
     }

@@ -26,12 +26,12 @@ import androidx.compose.foundation.layout.heightIn
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToReciterSelection: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showThemeDialog by remember { mutableStateOf(false) }
-    var showReciterDialog by remember { mutableStateOf(false) }
     var showColorDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -60,7 +60,7 @@ fun SettingsScreen(
                 title = "Reciter",
                 subtitle = uiState.availableReciters.find { it.identifier == uiState.settings.reciterEdition }?.name
                     ?: uiState.settings.reciterEdition,
-                onClick = { showReciterDialog = true }
+                onClick = onNavigateToReciterSelection
             )
 
             Divider(modifier = Modifier.padding(horizontal = 16.dp))
@@ -156,49 +156,6 @@ fun SettingsScreen(
         )
     }
 
-    // Reciter Selection Dialog
-    if (showReciterDialog) {
-        AlertDialog(
-            onDismissRequest = { showReciterDialog = false },
-            title = { Text("Select Reciter") },
-            text = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 400.dp)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    uiState.availableReciters.forEach { reciter ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    viewModel.updateReciter(reciter.identifier)
-                                    showReciterDialog = false
-                                }
-                                .padding(vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = uiState.settings.reciterEdition == reciter.identifier,
-                                onClick = {
-                                    viewModel.updateReciter(reciter.identifier)
-                                    showReciterDialog = false
-                                }
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text(text = reciter.name)
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showReciterDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
 
     // Color Selection Dialog
     if (showColorDialog) {
