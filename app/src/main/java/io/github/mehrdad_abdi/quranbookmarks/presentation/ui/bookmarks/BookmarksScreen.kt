@@ -417,12 +417,26 @@ private fun VerseCard(
 
                 // Verse text
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = verse.text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (verse.sajda) {
+                            Text(
+                                text = "۩",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = primaryColor,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                        }
+                        Text(
+                            text = verse.text,
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))

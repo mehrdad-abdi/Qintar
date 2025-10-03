@@ -7,6 +7,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.mehrdad_abdi.quranbookmarks.data.remote.api.QuranApiService
+import io.github.mehrdad_abdi.quranbookmarks.data.remote.dto.SajdaData
+import io.github.mehrdad_abdi.quranbookmarks.data.remote.dto.SajdaDeserializer
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -23,6 +25,7 @@ object NetworkModule {
     fun provideGson(): Gson {
         return GsonBuilder()
             .setLenient()
+            .registerTypeAdapter(SajdaData::class.java, SajdaDeserializer())
             .create()
     }
 

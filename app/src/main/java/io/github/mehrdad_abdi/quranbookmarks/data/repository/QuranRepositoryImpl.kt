@@ -37,7 +37,7 @@ class QuranRepositoryImpl @Inject constructor(
                     rukuNumber = verseData.ruku,
                     page = verseData.page,
                     manzil = verseData.manzil,
-                    sajda = verseData.sajda,
+                    sajda = verseData.hasSajda(),
                     globalAyahNumber = verseData.number,
                     ayahInSurah = verseData.numberInSurah
                 )
@@ -67,7 +67,7 @@ class QuranRepositoryImpl @Inject constructor(
                         rukuNumber = ayahData.ruku,
                         page = ayahData.page,
                         manzil = ayahData.manzil,
-                        sajda = ayahData.sajda,
+                        sajda = ayahData.hasSajda(),
                         globalAyahNumber = ayahData.number,
                         ayahInSurah = ayahData.numberInSurah
                     )
@@ -104,7 +104,7 @@ class QuranRepositoryImpl @Inject constructor(
                         rukuNumber = ayahData.ruku,
                         page = ayahData.page,
                         manzil = ayahData.manzil,
-                        sajda = ayahData.sajda,
+                        sajda = ayahData.hasSajda(),
                         globalAyahNumber = ayahData.number,
                         ayahInSurah = ayahData.numberInSurah
                     )
@@ -161,7 +161,7 @@ class QuranRepositoryImpl @Inject constructor(
                         rukuNumber = ayahData.ruku,
                         page = ayahData.page,
                         manzil = ayahData.manzil,
-                        sajda = ayahData.sajda,
+                        sajda = ayahData.hasSajda(),
                         globalAyahNumber = ayahData.number,
                         ayahInSurah = ayahData.numberInSurah
                     )
@@ -248,7 +248,7 @@ class QuranRepositoryImpl @Inject constructor(
                         rukuNumber = ayahData.ruku,
                         page = ayahData.page,
                         manzil = ayahData.manzil,
-                        sajda = ayahData.sajda,
+                        sajda = ayahData.hasSajda(),
                         globalAyahNumber = ayahData.number,
                         ayahInSurah = ayahData.numberInSurah
                     )

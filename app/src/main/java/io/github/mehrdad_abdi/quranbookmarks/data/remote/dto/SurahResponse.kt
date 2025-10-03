@@ -46,10 +46,12 @@ data class AyahData(
     @SerializedName("hizbQuarter")
     val hizbQuarter: Int,
     @SerializedName("sajda")
-    val sajda: Boolean,
+    val sajda: SajdaData? = null,
     @SerializedName("surah")
     val surah: SurahInfo? = null // Optional because not all API responses include it
-)
+) {
+    fun hasSajda(): Boolean = sajda != null
+}
 
 /**
  * Surah information embedded in AyahData (for page/juz queries)
