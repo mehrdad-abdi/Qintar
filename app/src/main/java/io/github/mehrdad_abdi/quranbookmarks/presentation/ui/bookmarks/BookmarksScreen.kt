@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Pause
@@ -203,7 +204,6 @@ fun BookmarksScreen(
                             item(key = "bookmark_${bookmarkWithAyahs.bookmark.id}") {
                                 BookmarkCard(
                                     bookmark = bookmarkWithAyahs.bookmark,
-                                    firstAyahText = bookmarkWithAyahs.ayahs.firstOrNull()?.text,
                                     onEdit = { onNavigateToEditBookmark(bookmarkWithAyahs.bookmark.id) },
                                     onDelete = { viewModel.deleteBookmark(bookmarkWithAyahs.bookmark.id) },
                                     primaryColor = primaryColor
@@ -274,7 +274,6 @@ fun BookmarksScreen(
 @Composable
 private fun BookmarkCard(
     bookmark: Bookmark,
-    firstAyahText: String?,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     primaryColor: Color
@@ -288,59 +287,44 @@ private fun BookmarkCard(
             containerColor = primaryColor.copy(alpha = 0.15f)
         )
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Bookmark info
-                Column(modifier = Modifier.weight(1f)) {
+            // Bookmark info
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = bookmark.getDisplayText(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                // Metadata line (description or tags summary)
+                val metadata = if (bookmark.description.isNotBlank()) {
+                    bookmark.description
+                } else if (bookmark.tags.isNotEmpty()) {
+                    bookmark.tags.joinToString(", ")
+                } else {
+                    ""
+                }
+
+                if (metadata.isNotBlank()) {
                     Text(
-                        text = bookmark.getDisplayText(),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        text = metadata,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-
-                    // Metadata line (description or tags summary)
-                    val metadata = if (bookmark.description.isNotBlank()) {
-                        bookmark.description
-                    } else if (bookmark.tags.isNotEmpty()) {
-                        bookmark.tags.joinToString(", ")
-                    } else {
-                        ""
-                    }
-
-                    if (metadata.isNotBlank()) {
-                        Text(
-                            text = metadata,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                // Actions
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                IconButton(onClick = { showDeleteDialog = true }) {
-                    Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
                 }
             }
 
-            // Arabic text preview
-            if (firstAyahText != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = firstAyahText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = 2,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                )
+            // Actions
+            IconButton(onClick = onEdit) {
+                Icon(Icons.Default.Edit, "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            IconButton(onClick = { showDeleteDialog = true }) {
+                Icon(Icons.Default.Clear, "Delete", tint = MaterialTheme.colorScheme.error)
             }
         }
     }

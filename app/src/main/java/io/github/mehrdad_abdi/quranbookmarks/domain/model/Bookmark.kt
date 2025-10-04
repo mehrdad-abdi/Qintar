@@ -14,9 +14,9 @@ data class Bookmark(
 ) {
     fun getDisplayText(): String {
         return when (type) {
-            BookmarkType.AYAH -> "Surah $startSurah:$startAyah"
-            BookmarkType.RANGE -> "Surah $startSurah:$startAyah-$endAyah"
-            BookmarkType.SURAH -> "Surah $startSurah"
+            BookmarkType.AYAH -> "${SurahNames.getName(startSurah)} $startAyah"
+            BookmarkType.RANGE -> "${SurahNames.getName(startSurah)} $startAyah-$endAyah"
+            BookmarkType.SURAH -> SurahNames.getName(startSurah)
             BookmarkType.PAGE -> "Page $startAyah"
         }
     }

@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -160,15 +159,6 @@ fun AddBookmarkScreen(
                 maxLines = 5
             )
 
-            // Preview Card
-            BookmarkPreviewCard(
-                bookmarkType = uiState.bookmarkType,
-                selectedSurah = uiState.selectedSurah,
-                ayahNumber = uiState.ayahNumber,
-                endAyahNumber = uiState.endAyahNumber,
-                description = uiState.description
-            )
-
             Spacer(modifier = Modifier.weight(1f))
 
             // Create Button
@@ -246,48 +236,6 @@ private fun BookmarkTypeSelector(
     }
 }
 
-@Composable
-private fun BookmarkPreviewCard(
-    bookmarkType: BookmarkType,
-    selectedSurah: io.github.mehrdad_abdi.quranbookmarks.domain.model.Surah?,
-    ayahNumber: String,
-    endAyahNumber: String,
-    description: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "Preview",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Text(
-                text = generatePreviewText(bookmarkType, selectedSurah, ayahNumber, endAyahNumber),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            if (description.isNotBlank()) {
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
 private fun getBookmarkTypeDisplayName(type: BookmarkType): String {
     return when (type) {
         BookmarkType.AYAH -> "Single Ayah"
@@ -303,31 +251,5 @@ private fun getBookmarkTypeDescription(type: BookmarkType): String {
         BookmarkType.RANGE -> "Bookmark multiple consecutive verses"
         BookmarkType.SURAH -> "Bookmark an entire chapter"
         BookmarkType.PAGE -> "Bookmark by page number"
-    }
-}
-
-private fun generatePreviewText(
-    type: BookmarkType,
-    selectedSurah: io.github.mehrdad_abdi.quranbookmarks.domain.model.Surah?,
-    ayahNumber: String,
-    endAyahNumber: String
-): String {
-    return when (type) {
-        BookmarkType.PAGE -> {
-            val pageNumber = ayahNumber.ifBlank { "?" }
-            "Page $pageNumber"
-        }
-        else -> {
-            val surahName = selectedSurah?.name ?: "Select Surah"
-            val ayah = ayahNumber.ifBlank { "?" }
-            val endAyah = endAyahNumber.ifBlank { "?" }
-
-            when (type) {
-                BookmarkType.AYAH -> "$surahName $ayah"
-                BookmarkType.RANGE -> "$surahName $ayah-$endAyah"
-                BookmarkType.SURAH -> surahName
-                BookmarkType.PAGE -> "Page $ayah" // Won't reach here due to outer when
-            }
-        }
     }
 }
