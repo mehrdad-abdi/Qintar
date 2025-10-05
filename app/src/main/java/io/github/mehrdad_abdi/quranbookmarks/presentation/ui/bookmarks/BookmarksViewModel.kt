@@ -22,6 +22,7 @@ import javax.inject.Inject
 
 data class BookmarkWithAyahs(
     val bookmark: Bookmark,
+    val displayText: String,
     val ayahs: List<VerseMetadata> = emptyList(),
     val isLoadingAyahs: Boolean = false
 )
@@ -44,7 +45,8 @@ class BookmarksViewModel @Inject constructor(
     private val getAllBookmarksUseCase: GetAllBookmarksUseCase,
     private val getAllTagsUseCase: GetAllTagsUseCase,
     private val deleteBookmarkUseCase: DeleteBookmarkUseCase,
-    private val getAyahsFromBookmarkUseCase: GetAyahsFromBookmarkUseCase,
+    private val getBookmarkContentUseCase: io.github.mehrdad_abdi.quranbookmarks.domain.usecase.reading.GetBookmarkContentUseCase,
+    private val getBookmarkDisplayTextUseCase: io.github.mehrdad_abdi.quranbookmarks.domain.usecase.bookmark.GetBookmarkDisplayTextUseCase,
     private val quranRepository: QuranRepository,
     private val settingsRepository: SettingsRepository,
     private val audioService: AudioService,
@@ -108,9 +110,58 @@ class BookmarksViewModel @Inject constructor(
                     // Handle play-all next
                     if (_uiState.value.isPlayingAll) {
                         handlePlayAllNext()
+                    } else {
+                        // Auto-play next ayah in single-play mode
+                        handleAutoPlayNext()
                     }
                 }
             }
+        }
+    }
+
+    private fun handleAutoPlayNext() {
+        viewModelScope.launch {
+            val currentAyahNumber = _uiState.value.currentPlayingAyah ?: return@launch
+
+            // Flatten all ayahs from bookmarks
+            val allAyahs = _uiState.value.bookmarksWithAyahs.flatMap { it.ayahs }
+
+            // Find current ayah and play next
+            val currentIndex = allAyahs.indexOfFirst { it.globalAyahNumber == currentAyahNumber }
+            if (currentIndex >= 0 && currentIndex < allAyahs.size - 1) {
+                val nextVerse = allAyahs[currentIndex + 1]
+
+                // Clear completion and add small delay
+                audioService.clearCompletion()
+                kotlinx.coroutines.delay(100)
+
+                // Play next verse
+                playAyahDirect(nextVerse)
+            } else {
+                // End of playlist
+                audioService.clearCompletion()
+                audioService.stop()
+                lastCompletedUrl = null
+                _uiState.value = _uiState.value.copy(currentPlayingAyah = null)
+            }
+        }
+    }
+
+    private suspend fun playAyahDirect(verse: VerseMetadata) {
+        try {
+            val cachedContent = quranRepository.getCachedContent(verse.surahNumber, verse.ayahInSurah)
+            val settings = settingsRepository.getSettings().stateIn(viewModelScope).value
+
+            val audioUrl = if (cachedContent?.audioPath != null) {
+                "file://${cachedContent.audioPath}"
+            } else {
+                quranRepository.getAudioUrl(settings.reciterEdition, verse.globalAyahNumber, settings.reciterBitrate)
+            }
+
+            _uiState.value = _uiState.value.copy(currentPlayingAyah = verse.globalAyahNumber)
+            audioService.playAudio(audioUrl)
+        } catch (e: Exception) {
+            _uiState.value = _uiState.value.copy(error = "Failed to play audio: ${e.message}")
         }
     }
 
@@ -135,25 +186,24 @@ class BookmarksViewModel @Inject constructor(
     private suspend fun loadAllAyahsForBookmarks(bookmarks: List<Bookmark>): List<BookmarkWithAyahs> {
         return bookmarks.map { bookmark ->
             try {
-                val ayahReferences = getAyahsFromBookmarkUseCase(bookmark)
-
-                // Load all ayahs from cache or API
-                val ayahs = ayahReferences.mapNotNull { ayahRef ->
-                    // Try to get from cache first
-                    val cachedContent = quranRepository.getCachedContent(ayahRef.surah, ayahRef.ayah)
-
-                    if (cachedContent != null) {
-                        // Use cached metadata
-                        cachedContent.metadata
-                    } else {
-                        // Fall back to API if not cached
-                        quranRepository.getVerseMetadata(ayahRef.globalAyahNumber).getOrNull()
-                    }
+                // Get display text using use case
+                val displayText = try {
+                    getBookmarkDisplayTextUseCase(bookmark)
+                } catch (e: Exception) {
+                    bookmark.getDisplayText()
                 }
 
-                BookmarkWithAyahs(bookmark, ayahs, false)
+                // Use GetBookmarkContentUseCase which handles all bookmark types correctly
+                val contentResult = getBookmarkContentUseCase(bookmark)
+                val ayahs = if (contentResult.isSuccess) {
+                    contentResult.getOrThrow()
+                } else {
+                    emptyList()
+                }
+
+                BookmarkWithAyahs(bookmark, displayText, ayahs, false)
             } catch (e: Exception) {
-                BookmarkWithAyahs(bookmark, emptyList(), false)
+                BookmarkWithAyahs(bookmark, bookmark.getDisplayText(), emptyList(), false)
             }
         }
     }
@@ -214,6 +264,18 @@ class BookmarksViewModel @Inject constructor(
     fun playAyah(verse: VerseMetadata) {
         viewModelScope.launch {
             try {
+                // Check if this verse is already selected
+                if (_uiState.value.currentPlayingAyah == verse.globalAyahNumber) {
+                    // Same verse - toggle play/pause
+                    if (audioService.playbackState.value.isPlaying) {
+                        audioService.pause()
+                    } else {
+                        audioService.resume()
+                    }
+                    return@launch
+                }
+
+                // Different verse - play it
                 val cachedContent = quranRepository.getCachedContent(verse.surahNumber, verse.ayahInSurah)
                 val settings = settingsRepository.getSettings().stateIn(viewModelScope).value
 

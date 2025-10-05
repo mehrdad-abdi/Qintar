@@ -136,7 +136,7 @@ fun TodayProgressScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
                         shape = RoundedCornerShape(16.dp)
                     ) {
@@ -146,7 +146,7 @@ fun TodayProgressScreen(
                                 .fillMaxWidth()
                                 .padding(16.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary
+                                containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
                             Icon(
@@ -222,6 +222,9 @@ private fun TodayStatsCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -306,6 +309,9 @@ private fun StreaksCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -389,6 +395,9 @@ private fun Last7DaysCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -487,6 +496,9 @@ private fun AllTimeStatsCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(

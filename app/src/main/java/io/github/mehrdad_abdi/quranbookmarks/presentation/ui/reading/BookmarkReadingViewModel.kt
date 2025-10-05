@@ -144,14 +144,12 @@ class BookmarkReadingViewModel @Inject constructor(
                 // Calculate metadata
                 val metadata = calculateBookmarkMetadata(verses)
 
-                // Add bookmark header (doesn't consume globalIndex, just stores the start position)
+                // Add bookmark header
                 listItems.add(
                     ReadingListItem.BookmarkHeader(
                         bookmark = bookmark,
                         displayText = displayText,
-                        verseCount = verses.size,
-                        metadata = metadata,
-                        globalStartIndex = 0
+                        metadata = metadata
                     )
                 )
 
@@ -161,8 +159,6 @@ class BookmarkReadingViewModel @Inject constructor(
                     listItems.add(
                         ReadingListItem.VerseItem(
                             verse = verse,
-                            bookmark = bookmark,
-                            displayNumber = verse.ayahInSurah.toString(),
                             globalIndex = globalIndex
                         )
                     )
@@ -480,7 +476,8 @@ class BookmarkReadingViewModel @Inject constructor(
      */
     fun toggleAyahReadStatus(verseItem: ReadingListItem.VerseItem) {
         viewModelScope.launch {
-            val ayahId = getAyahId(verseItem)
+            val bookmark = _uiState.value.bookmark ?: return@launch
+            val ayahId = getAyahId(bookmark, verseItem.verse)
             try {
                 toggleAyahTrackingUseCase(ayahId = ayahId)
                 Log.d(TAG, "Toggled read status for ayah: $ayahId")
@@ -495,7 +492,8 @@ class BookmarkReadingViewModel @Inject constructor(
      */
     private fun markAyahAsRead(verseItem: ReadingListItem.VerseItem) {
         viewModelScope.launch {
-            val ayahId = getAyahId(verseItem)
+            val bookmark = _uiState.value.bookmark ?: return@launch
+            val ayahId = getAyahId(bookmark, verseItem.verse)
             val currentState = _uiState.value
 
             // Only mark if not already read today
@@ -514,8 +512,8 @@ class BookmarkReadingViewModel @Inject constructor(
      * Generate unique ayah ID for tracking
      * Format: "bookmarkId:surah:ayah"
      */
-    private fun getAyahId(verseItem: ReadingListItem.VerseItem): String {
-        return "${verseItem.bookmark.id}:${verseItem.verse.surahNumber}:${verseItem.verse.ayahInSurah}"
+    private fun getAyahId(bookmark: Bookmark, verse: VerseMetadata): String {
+        return "${bookmark.id}:${verse.surahNumber}:${verse.ayahInSurah}"
     }
 
     override fun onCleared() {

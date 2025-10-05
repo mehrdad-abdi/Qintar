@@ -1,36 +1,23 @@
 package io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmarks
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import io.github.mehrdad_abdi.quranbookmarks.domain.model.Bookmark
-import io.github.mehrdad_abdi.quranbookmarks.domain.model.VerseMetadata
-import io.github.mehrdad_abdi.quranbookmarks.domain.service.PlaybackSpeed
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.BookmarkHeaderCard
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.PlaybackSpeedButton
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.VerseCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,44 +50,10 @@ fun BookmarksScreen(
                         }
 
                         // Playback speed button
-                        Box {
-                            IconButton(
-                                onClick = {
-                                    val nextSpeed = when (uiState.playbackSpeed) {
-                                        PlaybackSpeed.SPEED_0_5 -> PlaybackSpeed.SPEED_0_75
-                                        PlaybackSpeed.SPEED_0_75 -> PlaybackSpeed.SPEED_1
-                                        PlaybackSpeed.SPEED_1 -> PlaybackSpeed.SPEED_1_25
-                                        PlaybackSpeed.SPEED_1_25 -> PlaybackSpeed.SPEED_1_5
-                                        PlaybackSpeed.SPEED_1_5 -> PlaybackSpeed.SPEED_2
-                                        PlaybackSpeed.SPEED_2 -> PlaybackSpeed.SPEED_0_5
-                                    }
-                                    viewModel.setPlaybackSpeed(nextSpeed)
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Speed,
-                                    contentDescription = "Playback Speed: ${uiState.playbackSpeed.displayText}"
-                                )
-                            }
-                            // Speed badge
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .offset(x = (-4).dp, y = (-4).dp)
-                                    .background(
-                                        color = MaterialTheme.colorScheme.primary,
-                                        shape = RoundedCornerShape(4.dp)
-                                    )
-                                    .padding(horizontal = 3.dp, vertical = 1.dp)
-                            ) {
-                                Text(
-                                    text = uiState.playbackSpeed.displayText,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontSize = 9.sp,
-                                    color = Color.White
-                                )
-                            }
-                        }
+                        PlaybackSpeedButton(
+                            currentSpeed = uiState.playbackSpeed,
+                            onSpeedChange = { viewModel.setPlaybackSpeed(it) }
+                        )
                     }
                 }
             )
@@ -202,11 +155,23 @@ fun BookmarksScreen(
                         uiState.bookmarksWithAyahs.forEach { bookmarkWithAyahs ->
                             // Bookmark card header
                             item(key = "bookmark_${bookmarkWithAyahs.bookmark.id}") {
-                                BookmarkCard(
-                                    bookmark = bookmarkWithAyahs.bookmark,
-                                    onEdit = { onNavigateToEditBookmark(bookmarkWithAyahs.bookmark.id) },
-                                    onDelete = { viewModel.deleteBookmark(bookmarkWithAyahs.bookmark.id) },
-                                    primaryColor = primaryColor
+                                val bookmark = bookmarkWithAyahs.bookmark
+                                val metadata = if (bookmark.description.isNotBlank()) {
+                                    bookmark.description
+                                } else if (bookmark.tags.isNotEmpty()) {
+                                    bookmark.tags.joinToString(", ")
+                                } else {
+                                    ""
+                                }
+
+                                BookmarkHeaderCard(
+                                    bookmark = bookmark,
+                                    displayText = bookmarkWithAyahs.displayText,
+                                    metadata = metadata,
+                                    primaryColor = primaryColor,
+                                    isEditable = true,
+                                    onEdit = { onNavigateToEditBookmark(bookmark.id) },
+                                    onDelete = { viewModel.deleteBookmark(bookmark.id) }
                                 )
                             }
 
@@ -232,24 +197,11 @@ fun BookmarksScreen(
 
                                     VerseCard(
                                         verse = ayah,
-                                        bookmark = bookmarkWithAyahs.bookmark,
-                                        displayNumber = "${ayah.ayahInSurah}",
+                                        displayNumber = ayah.ayahInSurah.toString(),
                                         isPlaying = viewModel.isAyahPlaying(ayah.globalAyahNumber),
                                         isSelected = viewModel.isAyahSelected(ayah.globalAyahNumber),
                                         primaryColor = primaryColor,
-                                        onPlayClick = {
-                                            if (viewModel.isAyahSelected(ayah.globalAyahNumber)) {
-                                                // Same ayah - toggle play/pause
-                                                if (viewModel.isAyahPlaying(ayah.globalAyahNumber)) {
-                                                    viewModel.pauseAyah()
-                                                } else {
-                                                    viewModel.resumeAyah()
-                                                }
-                                            } else {
-                                                // Different ayah - play it
-                                                viewModel.playAyah(ayah)
-                                            }
-                                        },
+                                        onPlayClick = { viewModel.playAyah(ayah) },
                                         isReadToday = isReadToday,
                                         onToggleReadStatus = { viewModel.toggleAyahReadStatus(bookmarkWithAyahs.bookmark, ayah) }
                                     )
@@ -267,201 +219,6 @@ fun BookmarksScreen(
         LaunchedEffect(error) {
             // Show error
             viewModel.clearError()
-        }
-    }
-}
-
-@Composable
-private fun BookmarkCard(
-    bookmark: Bookmark,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-    primaryColor: Color
-) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = primaryColor.copy(alpha = 0.15f)
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Bookmark info
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = bookmark.getDisplayText(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                // Metadata line (description or tags summary)
-                val metadata = if (bookmark.description.isNotBlank()) {
-                    bookmark.description
-                } else if (bookmark.tags.isNotEmpty()) {
-                    bookmark.tags.joinToString(", ")
-                } else {
-                    ""
-                }
-
-                if (metadata.isNotBlank()) {
-                    Text(
-                        text = metadata,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            // Actions
-            IconButton(onClick = onEdit) {
-                Icon(Icons.Default.Edit, "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            IconButton(onClick = { showDeleteDialog = true }) {
-                Icon(Icons.Default.Clear, "Delete", tint = MaterialTheme.colorScheme.error)
-            }
-        }
-    }
-
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Bookmark") },
-            text = { Text("Are you sure you want to delete this bookmark?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDelete()
-                        showDeleteDialog = false
-                    }
-                ) {
-                    Text("Delete")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-}
-
-@Composable
-private fun VerseCard(
-    verse: VerseMetadata,
-    bookmark: Bookmark,
-    displayNumber: String,
-    isPlaying: Boolean,
-    isSelected: Boolean = false,
-    primaryColor: Color,
-    onPlayClick: () -> Unit,
-    isReadToday: Boolean = false,
-    onToggleReadStatus: () -> Unit = {}
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) {
-                primaryColor.copy(alpha = 0.2f)
-            } else {
-                MaterialTheme.colorScheme.surface
-            }
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top
-            ) {
-                // Play button
-                IconButton(
-                    onClick = onPlayClick,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isPlaying) "Pause" else "Play",
-                        tint = primaryColor
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // Verse text
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (verse.sajda) {
-                            Text(
-                                text = "۩",
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = primaryColor,
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                        }
-                        Text(
-                            text = verse.text,
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.End,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // Verse number badge
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(primaryColor),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = displayNumber,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
-            }
-
-            // Read status indicator at bottom left
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = onToggleReadStatus,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = if (isReadToday) "Mark as unread" else "Mark as read",
-                        tint = if (isReadToday) Color(0xFF4CAF50) else Color(0xFFBDBDBD),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
         }
     }
 }

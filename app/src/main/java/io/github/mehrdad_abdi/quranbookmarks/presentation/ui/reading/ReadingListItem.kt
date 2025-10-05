@@ -16,22 +16,19 @@ sealed class ReadingListItem {
     data class BookmarkHeader(
         val bookmark: Bookmark,
         val displayText: String,
-        val verseCount: Int,
-        val metadata: String, // e.g., "7 verses • Page 1 • Juz 1"
-        val globalStartIndex: Int // Starting index in flat playback list
+        val metadata: String // e.g., "7 verses • Page 1 • Juz 1"
     ) : ReadingListItem() {
         override val id: String = "header_${bookmark.id}"
     }
 
     /**
-     * Represents a single verse within a bookmark
+     * Represents a single verse
+     * Contains the verse data and its global index for playback tracking
      */
     data class VerseItem(
         val verse: VerseMetadata,
-        val bookmark: Bookmark,
-        val displayNumber: String, // Ayah number to display (e.g., "255")
-        val globalIndex: Int // Index in flat playback list
+        val globalIndex: Int // Index in flat playback list (same as globalAyahNumber)
     ) : ReadingListItem() {
-        override val id: String = "verse_${globalIndex}"
+        override val id: String = "verse_${verse.globalAyahNumber}"
     }
 }
