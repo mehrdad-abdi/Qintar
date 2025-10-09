@@ -1,13 +1,17 @@
 package io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -21,11 +25,17 @@ fun BookmarkHeaderCard(
     metadata: String,
     primaryColor: Color,
     isEditable: Boolean = false,
+    isExpanded: Boolean = true,
     onEdit: () -> Unit = {},
     onDelete: () -> Unit = {},
+    onToggleExpansion: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val rotationAngle by animateFloatAsState(
+        targetValue = if (isExpanded) 0f else -90f,
+        label = "chevron_rotation"
+    )
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -37,12 +47,19 @@ fun BookmarkHeaderCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable(onClick = onToggleExpansion)
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (isEditable) {
-                Spacer(modifier = Modifier.width(12.dp))
-            }
+            // Chevron icon
+            Icon(
+                imageVector = Icons.Default.ExpandMore,
+                contentDescription = if (isExpanded) "Collapse" else "Expand",
+                modifier = Modifier.rotate(rotationAngle),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(

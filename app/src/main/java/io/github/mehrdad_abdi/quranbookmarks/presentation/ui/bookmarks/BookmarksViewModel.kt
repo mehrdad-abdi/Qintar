@@ -24,7 +24,8 @@ data class BookmarkWithAyahs(
     val bookmark: Bookmark,
     val displayText: String,
     val ayahs: List<VerseMetadata> = emptyList(),
-    val isLoadingAyahs: Boolean = false
+    val isLoadingAyahs: Boolean = false,
+    val isExpanded: Boolean = false
 )
 
 data class BookmarksUiState(
@@ -54,10 +55,16 @@ class BookmarksViewModel @Inject constructor(
     private val toggleAyahTrackingUseCase: io.github.mehrdad_abdi.quranbookmarks.domain.usecase.reading.ToggleAyahTrackingUseCase
 ) : ViewModel() {
 
+    companion object {
+        private const val TAG = "BookmarksVM"
+    }
+
     private val _uiState = MutableStateFlow(BookmarksUiState())
     private var lastCompletedUrl: String? = null
     private var allAyahsList: List<VerseMetadata> = emptyList()
     private var currentPlayAllIndex: Int = 0
+    private var pendingVerseAfterBismillah: VerseMetadata? = null
+    private var isPlayingBismillah: Boolean = false
 
     val uiState: StateFlow<BookmarksUiState> = combine(
         _uiState,
@@ -101,6 +108,19 @@ class BookmarksViewModel @Inject constructor(
                     !audioState.isPlaying) {
                     lastCompletedUrl = audioState.completedUrl
 
+                    // Check if bismillah just completed
+                    if (isPlayingBismillah && pendingVerseAfterBismillah != null) {
+                        android.util.Log.d(TAG, "Bismillah completed, playing pending verse")
+                        audioService.clearCompletion()
+                        kotlinx.coroutines.delay(100)
+
+                        val verse = pendingVerseAfterBismillah!!
+                        isPlayingBismillah = false
+                        pendingVerseAfterBismillah = null
+                        playAyahDirectWithoutBismillah(verse)
+                        return@collect
+                    }
+
                     // Mark the ayah as read
                     val currentAyahNumber = _uiState.value.currentPlayingAyah
                     if (currentAyahNumber != null) {
@@ -110,44 +130,39 @@ class BookmarksViewModel @Inject constructor(
                     // Handle play-all next
                     if (_uiState.value.isPlayingAll) {
                         handlePlayAllNext()
-                    } else {
-                        // Auto-play next ayah in single-play mode
-                        handleAutoPlayNext()
                     }
                 }
             }
         }
     }
 
-    private fun handleAutoPlayNext() {
-        viewModelScope.launch {
-            val currentAyahNumber = _uiState.value.currentPlayingAyah ?: return@launch
+    private suspend fun playAyahDirect(verse: VerseMetadata) {
+        android.util.Log.d(TAG, "=== PLAYING AUDIO DEBUG ===")
+        android.util.Log.d(TAG, "Verse: Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
 
-            // Flatten all ayahs from bookmarks
-            val allAyahs = _uiState.value.bookmarksWithAyahs.flatMap { it.ayahs }
+        // Check if bismillah should be played first
+        if (shouldPlayBismillah(verse)) {
+            android.util.Log.d(TAG, "✓ BISMILLAH REQUIRED for Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
+            val bismillahUrl = getBismillahAudioUrl()
 
-            // Find current ayah and play next
-            val currentIndex = allAyahs.indexOfFirst { it.globalAyahNumber == currentAyahNumber }
-            if (currentIndex >= 0 && currentIndex < allAyahs.size - 1) {
-                val nextVerse = allAyahs[currentIndex + 1]
-
-                // Clear completion and add small delay
-                audioService.clearCompletion()
-                kotlinx.coroutines.delay(100)
-
-                // Play next verse
-                playAyahDirect(nextVerse)
+            if (bismillahUrl != null) {
+                android.util.Log.d(TAG, "▶ PLAYING BISMILLAH: $bismillahUrl")
+                isPlayingBismillah = true
+                pendingVerseAfterBismillah = verse
+                _uiState.value = _uiState.value.copy(currentPlayingAyah = verse.globalAyahNumber)
+                audioService.playAudio(bismillahUrl)
+                return
             } else {
-                // End of playlist
-                audioService.clearCompletion()
-                audioService.stop()
-                lastCompletedUrl = null
-                _uiState.value = _uiState.value.copy(currentPlayingAyah = null)
+                android.util.Log.e(TAG, "✗ BISMILLAH URL IS NULL - playing verse directly")
             }
+        } else {
+            android.util.Log.d(TAG, "✗ No bismillah needed for Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
         }
+
+        playAyahDirectWithoutBismillah(verse)
     }
 
-    private suspend fun playAyahDirect(verse: VerseMetadata) {
+    private suspend fun playAyahDirectWithoutBismillah(verse: VerseMetadata) {
         try {
             val cachedContent = quranRepository.getCachedContent(verse.surahNumber, verse.ayahInSurah)
             val settings = settingsRepository.getSettings().stateIn(viewModelScope).value
@@ -158,10 +173,57 @@ class BookmarksViewModel @Inject constructor(
                 quranRepository.getAudioUrl(settings.reciterEdition, verse.globalAyahNumber, settings.reciterBitrate)
             }
 
+            android.util.Log.d(TAG, "▶ PLAYING VERSE: $audioUrl")
             _uiState.value = _uiState.value.copy(currentPlayingAyah = verse.globalAyahNumber)
             audioService.playAudio(audioUrl)
         } catch (e: Exception) {
             _uiState.value = _uiState.value.copy(error = "Failed to play audio: ${e.message}")
+        }
+    }
+
+    /**
+     * Check if bismillah should be played before this verse
+     * Bismillah plays for first verses (ayahInSurah == 1) of surahs 2-114, excluding surah 9 (At-Tawbah)
+     */
+    private fun shouldPlayBismillah(verse: VerseMetadata): Boolean {
+        android.util.Log.d(TAG, "Checking bismillah: Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
+        android.util.Log.d(TAG, "  - ayahInSurah == 1? ${verse.ayahInSurah == 1}")
+        android.util.Log.d(TAG, "  - surahNumber in 2..114? ${verse.surahNumber in 2..114}")
+        android.util.Log.d(TAG, "  - surahNumber != 9? ${verse.surahNumber != 9}")
+
+        val shouldPlay = verse.ayahInSurah == 1 &&
+                        verse.surahNumber in 2..114 &&
+                        verse.surahNumber != 9
+
+        android.util.Log.d(TAG, "  - RESULT: shouldPlay = $shouldPlay")
+        return shouldPlay
+    }
+
+    /**
+     * Get audio URL for bismillah (global ayah number 1 - Al-Fatiha 1:1)
+     */
+    private suspend fun getBismillahAudioUrl(): String? {
+        android.util.Log.d(TAG, "getBismillahAudioUrl called")
+
+        try {
+            // Check if bismillah is cached (surah 1, ayah 1)
+            val cachedContent = quranRepository.getCachedContent(1, 1)
+            android.util.Log.d(TAG, "  - Cached content for 1:1: ${cachedContent != null}")
+            android.util.Log.d(TAG, "  - Cached audio path: ${cachedContent?.audioPath}")
+
+            if (cachedContent?.audioPath != null) {
+                android.util.Log.d(TAG, "  → Using cached bismillah audio: ${cachedContent.audioPath}")
+                return "file://${cachedContent.audioPath}"
+            }
+
+            // Fall back to streaming URL for global ayah number 1
+            val settings = settingsRepository.getSettings().stateIn(viewModelScope).value
+            val audioUrl = quranRepository.getAudioUrl(settings.reciterEdition, 1, settings.reciterBitrate)
+            android.util.Log.d(TAG, "  → Using streaming bismillah URL: $audioUrl (bitrate: ${settings.reciterBitrate})")
+            return audioUrl
+        } catch (e: Exception) {
+            android.util.Log.e(TAG, "  ✗ Error getting bismillah URL", e)
+            return null
         }
     }
 
@@ -325,6 +387,9 @@ class BookmarksViewModel @Inject constructor(
             playAyahAtIndex(currentPlayAllIndex)
         } else {
             // Finished playing all
+            audioService.clearCompletion()
+            audioService.stop()
+            lastCompletedUrl = null
             _uiState.value = _uiState.value.copy(isPlayingAll = false, currentPlayingAyah = null)
         }
     }
@@ -333,21 +398,12 @@ class BookmarksViewModel @Inject constructor(
         if (index < allAyahsList.size) {
             val verse = allAyahsList[index]
             viewModelScope.launch {
-                try {
-                    val cachedContent = quranRepository.getCachedContent(verse.surahNumber, verse.ayahInSurah)
-                    val settings = settingsRepository.getSettings().stateIn(viewModelScope).value
+                // Clear completion and add small delay before playing next
+                audioService.clearCompletion()
+                kotlinx.coroutines.delay(100)
 
-                    val audioUrl = if (cachedContent?.audioPath != null) {
-                        "file://${cachedContent.audioPath}"
-                    } else {
-                        quranRepository.getAudioUrl(settings.reciterEdition, verse.globalAyahNumber, settings.reciterBitrate)
-                    }
-
-                    _uiState.value = _uiState.value.copy(currentPlayingAyah = verse.globalAyahNumber)
-                    audioService.playAudio(audioUrl)
-                } catch (e: Exception) {
-                    _uiState.value = _uiState.value.copy(error = "Failed to play audio: ${e.message}")
-                }
+                // Use playAyahDirect to properly handle bismillah
+                playAyahDirect(verse)
             }
         }
     }
@@ -409,6 +465,60 @@ class BookmarksViewModel @Inject constructor(
 
     fun resumeAyah() {
         audioService.resume()
+    }
+
+    fun toggleBookmarkExpansion(bookmarkId: Long) {
+        val currentBookmarks = _uiState.value.bookmarksWithAyahs
+        val updatedBookmarks = currentBookmarks.map { bookmarkWithAyahs ->
+            if (bookmarkWithAyahs.bookmark.id == bookmarkId) {
+                bookmarkWithAyahs.copy(isExpanded = !bookmarkWithAyahs.isExpanded)
+            } else {
+                bookmarkWithAyahs
+            }
+        }
+        _uiState.value = _uiState.value.copy(bookmarksWithAyahs = updatedBookmarks)
+    }
+
+    /**
+     * Expand a bookmark if it's currently collapsed
+     * Returns true if the bookmark was expanded, false if it was already expanded
+     */
+    fun expandBookmarkIfNeeded(bookmarkId: Long): Boolean {
+        val currentBookmarks = _uiState.value.bookmarksWithAyahs
+        val bookmark = currentBookmarks.find { it.bookmark.id == bookmarkId }
+
+        if (bookmark != null && !bookmark.isExpanded) {
+            val updatedBookmarks = currentBookmarks.map { bookmarkWithAyahs ->
+                if (bookmarkWithAyahs.bookmark.id == bookmarkId) {
+                    bookmarkWithAyahs.copy(isExpanded = true)
+                } else {
+                    bookmarkWithAyahs
+                }
+            }
+            _uiState.value = _uiState.value.copy(bookmarksWithAyahs = updatedBookmarks)
+            return true
+        }
+
+        return false
+    }
+
+    /**
+     * Smart toggle: Expand all if any are collapsed, collapse all if all are expanded
+     */
+    fun expandOrCollapseAll() {
+        val currentBookmarks = _uiState.value.bookmarksWithAyahs
+
+        // Check if all bookmarks are currently expanded
+        val allExpanded = currentBookmarks.all { it.isExpanded }
+
+        // If all expanded, collapse all. Otherwise, expand all.
+        val newExpandedState = !allExpanded
+
+        val updatedBookmarks = currentBookmarks.map { bookmarkWithAyahs ->
+            bookmarkWithAyahs.copy(isExpanded = newExpandedState)
+        }
+
+        _uiState.value = _uiState.value.copy(bookmarksWithAyahs = updatedBookmarks)
     }
 
     override fun onCleared() {

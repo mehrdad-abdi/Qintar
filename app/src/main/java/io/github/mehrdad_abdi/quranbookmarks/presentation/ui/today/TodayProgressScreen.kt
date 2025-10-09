@@ -241,7 +241,7 @@ private fun TodayStatsCard(
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "آیات امروز",
+                text = "Ayahs Today",
                 fontSize = 20.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -57,6 +57,10 @@ class BookmarkReadingViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(BookmarkReadingUiState())
     private var lastCompletedUrl: String? = null
 
+    init {
+        loadPlaybackSpeed()
+    }
+
     val uiState: StateFlow<BookmarkReadingUiState> = combine(
         _uiState,
         audioService.playbackState,
@@ -104,15 +108,16 @@ class BookmarkReadingViewModel @Inject constructor(
                 // Load verses for this bookmark and build list items
                 val listItems = buildListItems(bookmark)
 
+                // Load reciters with default reciter BEFORE updating state
+                // This ensures selectedReciter is available for immediate playback
+                loadReciters(DEFAULT_RECITER)
+
                 _uiState.value = _uiState.value.copy(
                     bookmark = bookmark,
                     listItems = listItems,
                     isLoading = false,
                     error = null
                 )
-
-                // Load reciters with default reciter
-                loadReciters(DEFAULT_RECITER)
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading bookmark", e)
                 _uiState.value = _uiState.value.copy(
@@ -199,25 +204,23 @@ class BookmarkReadingViewModel @Inject constructor(
         return "$verseText • $pageText • $juzText"
     }
 
-    private fun loadReciters(defaultReciterId: String) {
-        viewModelScope.launch {
-            try {
-                val recitersResult = quranRepository.getAvailableReciters()
-                if (recitersResult.isSuccess) {
-                    val reciters = recitersResult.getOrThrow()
-                    val defaultReciter = reciters.find { it.identifier == defaultReciterId }
-                        ?: reciters.find { it.identifier == "ar.alafasy" }
-                        ?: reciters.firstOrNull()
+    private suspend fun loadReciters(defaultReciterId: String) {
+        try {
+            val recitersResult = quranRepository.getAvailableReciters()
+            if (recitersResult.isSuccess) {
+                val reciters = recitersResult.getOrThrow()
+                val defaultReciter = reciters.find { it.identifier == defaultReciterId }
+                    ?: reciters.find { it.identifier == "ar.alafasy" }
+                    ?: reciters.firstOrNull()
 
-                    _uiState.value = _uiState.value.copy(
-                        reciters = reciters,
-                        selectedReciter = defaultReciter
-                    )
-                    Log.d(TAG, "Loaded reciters, selected: ${defaultReciter?.name}")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading reciters", e)
+                _uiState.value = _uiState.value.copy(
+                    reciters = reciters,
+                    selectedReciter = defaultReciter
+                )
+                Log.d(TAG, "Loaded reciters, selected: ${defaultReciter?.name}")
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading reciters", e)
         }
     }
 
@@ -262,12 +265,19 @@ class BookmarkReadingViewModel @Inject constructor(
                 return@launch
             }
 
+            val verse = verseItem.verse
+            Log.d(TAG, "=== PLAYING AUDIO DEBUG ===")
+            Log.d(TAG, "Verse: Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}, GlobalIndex $globalIndex")
+            Log.d(TAG, "Selected Reciter: ${currentState.selectedReciter?.identifier}")
+
             // Check if bismillah should be played first
             if (shouldPlayBismillah(verseItem)) {
-                Log.d(TAG, "Playing bismillah before verse at globalIndex $globalIndex")
+                Log.d(TAG, "✓ BISMILLAH REQUIRED for Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
                 val bismillahUrl = getBismillahAudioUrl()
 
+                Log.d(TAG, "Bismillah URL: $bismillahUrl")
                 if (bismillahUrl != null) {
+                    Log.d(TAG, "▶ PLAYING BISMILLAH: $bismillahUrl")
                     // Set pending verse and play bismillah
                     _uiState.value = currentState.copy(
                         currentPlayingIndex = globalIndex,
@@ -277,8 +287,10 @@ class BookmarkReadingViewModel @Inject constructor(
                     audioService.playAudio(bismillahUrl)
                     return@launch
                 } else {
-                    Log.e(TAG, "Unable to get bismillah audio URL, playing verse directly")
+                    Log.e(TAG, "✗ BISMILLAH URL IS NULL - playing verse directly")
                 }
+            } else {
+                Log.d(TAG, "✗ No bismillah needed for Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
             }
 
             // Play the verse directly (either no bismillah needed or bismillah URL failed)
@@ -328,6 +340,10 @@ class BookmarkReadingViewModel @Inject constructor(
 
     fun setPlaybackSpeed(speed: PlaybackSpeed) {
         audioService.setPlaybackSpeed(speed)
+        // Persist the setting
+        viewModelScope.launch {
+            settingsRepository.updatePlaybackSpeed(speed.value)
+        }
         Log.d(TAG, "Playback speed changed to ${speed.displayText}")
     }
 
@@ -337,13 +353,16 @@ class BookmarkReadingViewModel @Inject constructor(
      */
     private fun shouldPlayBismillah(verseItem: ReadingListItem.VerseItem): Boolean {
         val verse = verseItem.verse
+        Log.d(TAG, "Checking bismillah: Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
+        Log.d(TAG, "  - ayahInSurah == 1? ${verse.ayahInSurah == 1}")
+        Log.d(TAG, "  - surahNumber in 2..114? ${verse.surahNumber in 2..114}")
+        Log.d(TAG, "  - surahNumber != 9? ${verse.surahNumber != 9}")
+
         val shouldPlay = verse.ayahInSurah == 1 &&
                         verse.surahNumber in 2..114 &&
                         verse.surahNumber != 9
 
-        if (shouldPlay) {
-            Log.d(TAG, "Bismillah needed for surah ${verse.surahNumber}, ayah ${verse.ayahInSurah}")
-        }
+        Log.d(TAG, "  - RESULT: shouldPlay = $shouldPlay")
         return shouldPlay
     }
 
@@ -355,21 +374,27 @@ class BookmarkReadingViewModel @Inject constructor(
         val state = _uiState.value
         val reciter = state.selectedReciter
 
+        Log.d(TAG, "getBismillahAudioUrl called")
+        Log.d(TAG, "  - selectedReciter: ${reciter?.identifier}")
+
         return if (reciter != null) {
             // Check if bismillah is cached (surah 1, ayah 1)
             val cachedContent = quranRepository.getCachedContent(1, 1)
+            Log.d(TAG, "  - Cached content for 1:1: ${cachedContent != null}")
+            Log.d(TAG, "  - Cached audio path: ${cachedContent?.audioPath}")
+
             if (cachedContent?.audioPath != null) {
-                Log.d(TAG, "Using cached bismillah audio: ${cachedContent.audioPath}")
+                Log.d(TAG, "  → Using cached bismillah audio: ${cachedContent.audioPath}")
                 return cachedContent.audioPath
             }
 
             // Fall back to streaming URL for global ayah number 1 using settings bitrate
             val settings = settingsRepository.getSettings().stateIn(viewModelScope).value
             val audioUrl = quranRepository.getAudioUrl(reciter.identifier, 1, settings.reciterBitrate)
-            Log.d(TAG, "Using streaming bismillah audio URL with bitrate ${settings.reciterBitrate}")
+            Log.d(TAG, "  → Using streaming bismillah URL: $audioUrl (bitrate: ${settings.reciterBitrate})")
             audioUrl
         } else {
-            Log.e(TAG, "No reciter selected for bismillah")
+            Log.e(TAG, "  ✗ No reciter selected for bismillah!")
             null
         }
     }
@@ -469,6 +494,15 @@ class BookmarkReadingViewModel @Inject constructor(
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
         audioService.clearError()
+    }
+
+    private fun loadPlaybackSpeed() {
+        viewModelScope.launch {
+            settingsRepository.getSettings().collect { settings ->
+                val speed = PlaybackSpeed.fromValue(settings.playbackSpeed)
+                audioService.setPlaybackSpeed(speed)
+            }
+        }
     }
 
     /**

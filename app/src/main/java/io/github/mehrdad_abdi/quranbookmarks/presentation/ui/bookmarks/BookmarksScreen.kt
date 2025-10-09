@@ -9,6 +9,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.UnfoldLess
+import androidx.compose.material.icons.filled.UnfoldMore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,6 +41,17 @@ fun BookmarksScreen(
                     }
                 },
                 actions = {
+                    // Expand/Collapse All button
+                    if (uiState.bookmarksWithAyahs.isNotEmpty()) {
+                        val allExpanded = uiState.bookmarksWithAyahs.all { it.isExpanded }
+                        IconButton(onClick = { viewModel.expandOrCollapseAll() }) {
+                            Icon(
+                                imageVector = if (allExpanded) Icons.Default.UnfoldLess else Icons.Default.UnfoldMore,
+                                contentDescription = if (allExpanded) "Collapse All" else "Expand All"
+                            )
+                        }
+                    }
+
                     // Play All button
                     if (uiState.bookmarksWithAyahs.isNotEmpty() &&
                         uiState.bookmarksWithAyahs.any { it.ayahs.isNotEmpty() }) {
@@ -121,21 +134,40 @@ fun BookmarksScreen(
                     LaunchedEffect(uiState.currentPlayingAyah) {
                         val playingAyah = uiState.currentPlayingAyah
                         if (playingAyah != null) {
-                            // Find the index of the playing ayah in the flat list
+                            // Find the bookmark containing this ayah and expand if needed
+                            var targetBookmarkId: Long?
                             var itemIndex = 0
                             var found = false
 
                             for (bookmarkWithAyahs in uiState.bookmarksWithAyahs) {
+                                // Check if this bookmark contains the playing ayah
+                                val containsAyah = bookmarkWithAyahs.ayahs.any { it.globalAyahNumber == playingAyah }
+                                if (containsAyah) {
+                                    targetBookmarkId = bookmarkWithAyahs.bookmark.id
+
+                                    // Expand the bookmark if it's collapsed
+                                    if (!bookmarkWithAyahs.isExpanded) {
+                                        viewModel.expandBookmarkIfNeeded(targetBookmarkId)
+                                        // Wait a bit for the UI to update after expansion
+                                        kotlinx.coroutines.delay(100)
+                                    }
+                                }
+                            }
+
+                            // Now calculate the index after potential expansion
+                            for (bookmarkWithAyahs in uiState.bookmarksWithAyahs) {
                                 // Skip bookmark header
                                 itemIndex++
 
-                                // Check ayahs
-                                for (ayah in bookmarkWithAyahs.ayahs) {
-                                    if (ayah.globalAyahNumber == playingAyah) {
-                                        found = true
-                                        break
+                                // Only count ayahs if the bookmark is expanded
+                                if (bookmarkWithAyahs.isExpanded) {
+                                    for (ayah in bookmarkWithAyahs.ayahs) {
+                                        if (ayah.globalAyahNumber == playingAyah) {
+                                            found = true
+                                            break
+                                        }
+                                        itemIndex++
                                     }
-                                    itemIndex++
                                 }
 
                                 if (found) break
@@ -170,41 +202,45 @@ fun BookmarksScreen(
                                     metadata = metadata,
                                     primaryColor = primaryColor,
                                     isEditable = true,
+                                    isExpanded = bookmarkWithAyahs.isExpanded,
                                     onEdit = { onNavigateToEditBookmark(bookmark.id) },
-                                    onDelete = { viewModel.deleteBookmark(bookmark.id) }
+                                    onDelete = { viewModel.deleteBookmark(bookmark.id) },
+                                    onToggleExpansion = { viewModel.toggleBookmarkExpansion(bookmark.id) }
                                 )
                             }
 
-                            // Ayahs for this bookmark
-                            if (bookmarkWithAyahs.isLoadingAyahs) {
-                                item(key = "loading_${bookmarkWithAyahs.bookmark.id}") {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 8.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator()
+                            // Ayahs for this bookmark (only show if expanded)
+                            if (bookmarkWithAyahs.isExpanded) {
+                                if (bookmarkWithAyahs.isLoadingAyahs) {
+                                    item(key = "loading_${bookmarkWithAyahs.bookmark.id}") {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 8.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator()
+                                        }
                                     }
-                                }
-                            } else {
-                                items(
-                                    items = bookmarkWithAyahs.ayahs,
-                                    key = { ayah -> "ayah_${bookmarkWithAyahs.bookmark.id}_${ayah.surahNumber}_${ayah.ayahInSurah}" }
-                                ) { ayah ->
-                                    val ayahId = "${bookmarkWithAyahs.bookmark.id}:${ayah.surahNumber}:${ayah.ayahInSurah}"
-                                    val isReadToday = ayahId in uiState.readAyahIds
+                                } else {
+                                    items(
+                                        items = bookmarkWithAyahs.ayahs,
+                                        key = { ayah -> "ayah_${bookmarkWithAyahs.bookmark.id}_${ayah.surahNumber}_${ayah.ayahInSurah}" }
+                                    ) { ayah ->
+                                        val ayahId = "${bookmarkWithAyahs.bookmark.id}:${ayah.surahNumber}:${ayah.ayahInSurah}"
+                                        val isReadToday = ayahId in uiState.readAyahIds
 
-                                    VerseCard(
-                                        verse = ayah,
-                                        displayNumber = ayah.ayahInSurah.toString(),
-                                        isPlaying = viewModel.isAyahPlaying(ayah.globalAyahNumber),
-                                        isSelected = viewModel.isAyahSelected(ayah.globalAyahNumber),
-                                        primaryColor = primaryColor,
-                                        onPlayClick = { viewModel.playAyah(ayah) },
-                                        isReadToday = isReadToday,
-                                        onToggleReadStatus = { viewModel.toggleAyahReadStatus(bookmarkWithAyahs.bookmark, ayah) }
-                                    )
+                                        VerseCard(
+                                            verse = ayah,
+                                            displayNumber = ayah.ayahInSurah.toString(),
+                                            isPlaying = viewModel.isAyahPlaying(ayah.globalAyahNumber),
+                                            isSelected = viewModel.isAyahSelected(ayah.globalAyahNumber),
+                                            primaryColor = primaryColor,
+                                            onPlayClick = { viewModel.playAyah(ayah) },
+                                            isReadToday = isReadToday,
+                                            onToggleReadStatus = { viewModel.toggleAyahReadStatus(bookmarkWithAyahs.bookmark, ayah) }
+                                        )
+                                    }
                                 }
                             }
                         }
