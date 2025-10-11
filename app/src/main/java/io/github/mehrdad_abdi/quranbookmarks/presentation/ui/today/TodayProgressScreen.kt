@@ -1,6 +1,7 @@
 package io.github.mehrdad_abdi.quranbookmarks.presentation.ui.today
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -39,6 +40,7 @@ fun TodayProgressScreen(
     onNavigateToStatistics: () -> Unit,
     onNavigateToCalendar: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToHadith: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TodayProgressViewModel = hiltViewModel()
 ) {
@@ -94,7 +96,8 @@ fun TodayProgressScreen(
                         currentBadge = uiState.currentBadge,
                         nextBadge = uiState.nextBadge,
                         ayahsToNext = uiState.ayahsToNextBadge,
-                        progress = uiState.progressToNextBadge
+                        progress = uiState.progressToNextBadge,
+                        onClick = onNavigateToHadith
                     )
                 }
 
@@ -217,10 +220,13 @@ private fun TodayStatsCard(
     currentBadge: BadgeLevel,
     nextBadge: BadgeLevel?,
     ayahsToNext: Int?,
-    progress: Float
+    progress: Float,
+    onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer

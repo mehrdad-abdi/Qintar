@@ -15,4 +15,5 @@ sealed class Screen(val route: String) {
     object BadgeCalendar : Screen("badge_calendar")
     object Settings : Screen("settings")
     object ReciterSelection : Screen("reciter_selection")
+    object Hadith : Screen("hadith")
 }

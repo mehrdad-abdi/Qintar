@@ -160,7 +160,8 @@ class BookmarkReadingViewModel @Inject constructor(
                     listItems.add(
                         ReadingListItem.VerseItem(
                             verse = verse,
-                            globalIndex = globalIndex
+                            globalIndex = globalIndex,
+                            bookmarkId = bookmark.id
                         )
                     )
                     globalIndex++

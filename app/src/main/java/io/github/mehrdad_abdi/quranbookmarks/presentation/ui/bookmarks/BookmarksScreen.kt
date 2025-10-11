@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pause
@@ -37,7 +38,7 @@ fun BookmarksScreen(
                 title = { Text("Bookmarks") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                     }
                 },
                 actions = {
@@ -142,7 +143,9 @@ fun BookmarksScreen(
                             for (bookmarkWithAyahs in uiState.bookmarksWithAyahs) {
                                 // Check if this bookmark contains the playing ayah
                                 // IMPORTANT: Only expand if this is the CURRENTLY PLAYING bookmark
-                                val containsAyah = bookmarkWithAyahs.ayahs.any { it.globalAyahNumber == playingAyah }
+                                val containsAyah = bookmarkWithAyahs.ayahs.any {
+                                    it.surahNumber == playingAyah.surah && it.ayahInSurah == playingAyah.ayah
+                                }
                                 val isCurrentlyPlayingBookmark = viewModel.isBookmarkCurrentlyPlaying(bookmarkWithAyahs.bookmark.id)
 
                                 if (containsAyah && isCurrentlyPlayingBookmark) {
@@ -166,7 +169,8 @@ fun BookmarksScreen(
                                 // Only count ayahs if the bookmark is expanded
                                 if (bookmarkWithAyahs.isExpanded) {
                                     for (ayah in bookmarkWithAyahs.ayahs) {
-                                        if (ayah.globalAyahNumber == playingAyah) {
+                                        if (ayah.surahNumber == playingAyah.surah && ayah.ayahInSurah == playingAyah.ayah &&
+                                            bookmarkWithAyahs.bookmark.id == playingAyah.bookmarkId) {
                                             found = true
                                             break
                                         }
@@ -237,10 +241,10 @@ fun BookmarksScreen(
                                         VerseCard(
                                             verse = ayah,
                                             displayNumber = ayah.ayahInSurah.toString(),
-                                            isPlaying = viewModel.isAyahPlaying(bookmarkWithAyahs.bookmark.id, ayah.globalAyahNumber),
-                                            isSelected = viewModel.isAyahSelected(bookmarkWithAyahs.bookmark.id, ayah.globalAyahNumber),
+                                            isPlaying = viewModel.isAyahPlaying(bookmarkWithAyahs.bookmark.id, ayah.surahNumber, ayah.ayahInSurah),
+                                            isSelected = viewModel.isAyahSelected(bookmarkWithAyahs.bookmark.id, ayah.surahNumber, ayah.ayahInSurah),
                                             primaryColor = primaryColor,
-                                            onPlayClick = { viewModel.playAyah(ayah) },
+                                            onPlayClick = { viewModel.playAyah(bookmarkWithAyahs.bookmark.id, ayah) },
                                             isReadToday = isReadToday,
                                             onToggleReadStatus = { viewModel.toggleAyahReadStatus(bookmarkWithAyahs.bookmark, ayah) }
                                         )

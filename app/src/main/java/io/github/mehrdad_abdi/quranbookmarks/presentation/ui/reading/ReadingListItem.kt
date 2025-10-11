@@ -27,8 +27,9 @@ sealed class ReadingListItem {
      */
     data class VerseItem(
         val verse: VerseMetadata,
-        val globalIndex: Int // Index in flat playback list (same as globalAyahNumber)
+        val globalIndex: Int, // Index in flat playback list for sequential playback
+        val bookmarkId: Long // Bookmark context for unique identification
     ) : ReadingListItem() {
-        override val id: String = "verse_${verse.globalAyahNumber}"
+        override val id: String = "verse_${bookmarkId}_${verse.surahNumber}_${verse.ayahInSurah}"
     }
 }

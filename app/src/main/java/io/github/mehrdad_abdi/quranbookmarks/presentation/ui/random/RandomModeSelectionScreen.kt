@@ -143,7 +143,7 @@ fun RandomModeSelectionScreen(
                                 .fillMaxWidth()
                                 .padding(16.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary
+                                containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
                             Icon(
