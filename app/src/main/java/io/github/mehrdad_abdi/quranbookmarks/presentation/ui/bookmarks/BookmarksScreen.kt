@@ -141,8 +141,11 @@ fun BookmarksScreen(
 
                             for (bookmarkWithAyahs in uiState.bookmarksWithAyahs) {
                                 // Check if this bookmark contains the playing ayah
+                                // IMPORTANT: Only expand if this is the CURRENTLY PLAYING bookmark
                                 val containsAyah = bookmarkWithAyahs.ayahs.any { it.globalAyahNumber == playingAyah }
-                                if (containsAyah) {
+                                val isCurrentlyPlayingBookmark = viewModel.isBookmarkCurrentlyPlaying(bookmarkWithAyahs.bookmark.id)
+
+                                if (containsAyah && isCurrentlyPlayingBookmark) {
                                     targetBookmarkId = bookmarkWithAyahs.bookmark.id
 
                                     // Expand the bookmark if it's collapsed
@@ -151,6 +154,7 @@ fun BookmarksScreen(
                                         // Wait a bit for the UI to update after expansion
                                         kotlinx.coroutines.delay(100)
                                     }
+                                    break // Found the correct bookmark, stop searching
                                 }
                             }
 
@@ -233,8 +237,8 @@ fun BookmarksScreen(
                                         VerseCard(
                                             verse = ayah,
                                             displayNumber = ayah.ayahInSurah.toString(),
-                                            isPlaying = viewModel.isAyahPlaying(ayah.globalAyahNumber),
-                                            isSelected = viewModel.isAyahSelected(ayah.globalAyahNumber),
+                                            isPlaying = viewModel.isAyahPlaying(bookmarkWithAyahs.bookmark.id, ayah.globalAyahNumber),
+                                            isSelected = viewModel.isAyahSelected(bookmarkWithAyahs.bookmark.id, ayah.globalAyahNumber),
                                             primaryColor = primaryColor,
                                             onPlayClick = { viewModel.playAyah(ayah) },
                                             isReadToday = isReadToday,

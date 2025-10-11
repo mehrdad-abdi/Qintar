@@ -28,6 +28,15 @@ data class BookmarkWithAyahs(
     val isExpanded: Boolean = false
 )
 
+/**
+ * Wrapper class to uniquely identify an ayah with its bookmark context
+ * This prevents confusion when the same ayah appears in multiple bookmarks
+ */
+data class AyahWithBookmark(
+    val bookmarkId: Long,
+    val verse: VerseMetadata
+)
+
 data class BookmarksUiState(
     val bookmarks: List<Bookmark> = emptyList(),
     val bookmarksWithAyahs: List<BookmarkWithAyahs> = emptyList(),
@@ -61,10 +70,11 @@ class BookmarksViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(BookmarksUiState())
     private var lastCompletedUrl: String? = null
-    private var allAyahsList: List<VerseMetadata> = emptyList()
+    private var allAyahsList: List<AyahWithBookmark> = emptyList()
     private var currentPlayAllIndex: Int = 0
     private var pendingVerseAfterBismillah: VerseMetadata? = null
     private var isPlayingBismillah: Boolean = false
+    private var currentPlayingBookmarkId: Long? = null
 
     val uiState: StateFlow<BookmarksUiState> = combine(
         _uiState,
@@ -87,16 +97,6 @@ class BookmarksViewModel @Inject constructor(
         loadBookmarks()
         loadTags()
         observeAudioCompletion()
-        loadPlaybackSpeed()
-    }
-
-    private fun loadPlaybackSpeed() {
-        viewModelScope.launch {
-            settingsRepository.getSettings().collect { settings ->
-                val speed = io.github.mehrdad_abdi.quranbookmarks.domain.service.PlaybackSpeed.fromValue(settings.playbackSpeed)
-                audioService.setPlaybackSpeed(speed)
-            }
-        }
     }
 
     private fun observeAudioCompletion() {
@@ -357,22 +357,34 @@ class BookmarksViewModel @Inject constructor(
         }
     }
 
-    fun isAyahPlaying(globalAyahNumber: Int): Boolean {
-        return _uiState.value.currentPlayingAyah == globalAyahNumber && audioService.playbackState.value.isPlaying
+    fun isAyahPlaying(bookmarkId: Long, globalAyahNumber: Int): Boolean {
+        return _uiState.value.currentPlayingAyah == globalAyahNumber &&
+               currentPlayingBookmarkId == bookmarkId &&
+               audioService.playbackState.value.isPlaying
     }
 
-    fun isAyahSelected(globalAyahNumber: Int): Boolean {
-        return _uiState.value.currentPlayingAyah == globalAyahNumber
+    fun isAyahSelected(bookmarkId: Long, globalAyahNumber: Int): Boolean {
+        return _uiState.value.currentPlayingAyah == globalAyahNumber &&
+               currentPlayingBookmarkId == bookmarkId
+    }
+
+    fun isBookmarkCurrentlyPlaying(bookmarkId: Long): Boolean {
+        return currentPlayingBookmarkId == bookmarkId
     }
 
     fun togglePlayAll() {
         if (_uiState.value.isPlayingAll) {
             // Stop playing
             audioService.pause()
+            currentPlayingBookmarkId = null
             _uiState.value = _uiState.value.copy(isPlayingAll = false, currentPlayingAyah = null)
         } else {
-            // Start playing all
-            allAyahsList = _uiState.value.bookmarksWithAyahs.flatMap { it.ayahs }
+            // Start playing all - wrap each ayah with its bookmark ID to maintain context
+            allAyahsList = _uiState.value.bookmarksWithAyahs.flatMap { bookmarkWithAyahs ->
+                bookmarkWithAyahs.ayahs.map { verse ->
+                    AyahWithBookmark(bookmarkWithAyahs.bookmark.id, verse)
+                }
+            }
             if (allAyahsList.isNotEmpty()) {
                 currentPlayAllIndex = 0
                 _uiState.value = _uiState.value.copy(isPlayingAll = true)
@@ -396,14 +408,15 @@ class BookmarksViewModel @Inject constructor(
 
     private fun playAyahAtIndex(index: Int) {
         if (index < allAyahsList.size) {
-            val verse = allAyahsList[index]
+            val ayahWithBookmark = allAyahsList[index]
+            currentPlayingBookmarkId = ayahWithBookmark.bookmarkId
             viewModelScope.launch {
                 // Clear completion and add small delay before playing next
                 audioService.clearCompletion()
                 kotlinx.coroutines.delay(100)
 
                 // Use playAyahDirect to properly handle bismillah
-                playAyahDirect(verse)
+                playAyahDirect(ayahWithBookmark.verse)
             }
         }
     }
@@ -453,10 +466,6 @@ class BookmarksViewModel @Inject constructor(
 
     fun setPlaybackSpeed(speed: io.github.mehrdad_abdi.quranbookmarks.domain.service.PlaybackSpeed) {
         audioService.setPlaybackSpeed(speed)
-        // Persist the setting
-        viewModelScope.launch {
-            settingsRepository.updatePlaybackSpeed(speed.value)
-        }
     }
 
     fun pauseAyah() {

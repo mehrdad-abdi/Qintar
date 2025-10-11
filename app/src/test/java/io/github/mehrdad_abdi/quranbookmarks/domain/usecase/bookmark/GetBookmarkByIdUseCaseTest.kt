@@ -3,6 +3,7 @@ package io.github.mehrdad_abdi.quranbookmarks.domain.usecase.bookmark
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.Bookmark
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.BookmarkType
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.BookmarkRepository
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.TemporaryBookmarkRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -15,6 +16,9 @@ class GetBookmarkByIdUseCaseTest {
 
     @Mock
     private lateinit var repository: BookmarkRepository
+
+    @Mock
+    private lateinit var temporaryBookmarkRepository: TemporaryBookmarkRepository
 
     private lateinit var getBookmarkByIdUseCase: GetBookmarkByIdUseCase
 
@@ -32,7 +36,7 @@ class GetBookmarkByIdUseCaseTest {
     @Before
     fun setup() {
         MockitoAnnotations.openMocks(this)
-        getBookmarkByIdUseCase = GetBookmarkByIdUseCase(repository)
+        getBookmarkByIdUseCase = GetBookmarkByIdUseCase(repository, temporaryBookmarkRepository)
     }
 
     @Test

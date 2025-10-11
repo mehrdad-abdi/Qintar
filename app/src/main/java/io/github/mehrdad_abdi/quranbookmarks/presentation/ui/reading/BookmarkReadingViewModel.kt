@@ -57,10 +57,6 @@ class BookmarkReadingViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(BookmarkReadingUiState())
     private var lastCompletedUrl: String? = null
 
-    init {
-        loadPlaybackSpeed()
-    }
-
     val uiState: StateFlow<BookmarkReadingUiState> = combine(
         _uiState,
         audioService.playbackState,
@@ -340,10 +336,6 @@ class BookmarkReadingViewModel @Inject constructor(
 
     fun setPlaybackSpeed(speed: PlaybackSpeed) {
         audioService.setPlaybackSpeed(speed)
-        // Persist the setting
-        viewModelScope.launch {
-            settingsRepository.updatePlaybackSpeed(speed.value)
-        }
         Log.d(TAG, "Playback speed changed to ${speed.displayText}")
     }
 
@@ -494,15 +486,6 @@ class BookmarkReadingViewModel @Inject constructor(
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
         audioService.clearError()
-    }
-
-    private fun loadPlaybackSpeed() {
-        viewModelScope.launch {
-            settingsRepository.getSettings().collect { settings ->
-                val speed = PlaybackSpeed.fromValue(settings.playbackSpeed)
-                audioService.setPlaybackSpeed(speed)
-            }
-        }
     }
 
     /**

@@ -55,7 +55,7 @@ class CacheAyahContentUseCaseTest {
         // Given
         val ayahRef = AyahReference(surah = 1, ayah = 1, globalAyahNumber = 1)
         whenever(quranRepository.getCachedContentById("1:1")).thenReturn(null)
-        whenever(quranRepository.getVerseMetadata(1)).thenReturn(Result.success(testMetadata))
+        whenever(quranRepository.getVerseMetadata(1, 1)).thenReturn(Result.success(testMetadata))
         whenever(fileDownloadManager.downloadImageFile(any(), any(), any())).thenAnswer { "/cache/image_1_1.png" }
         whenever(fileDownloadManager.downloadAudioFile(any(), any(), any())).thenAnswer { "/cache/audio_1_1.mp3" }
 
@@ -65,7 +65,7 @@ class CacheAyahContentUseCaseTest {
         // Then
         assertTrue(result.isSuccess)
         verify(quranRepository).saveCachedContent(any())
-        verify(quranRepository).getVerseMetadata(1)
+        verify(quranRepository).getVerseMetadata(1, 1)
     }
 
     @Test
@@ -87,7 +87,7 @@ class CacheAyahContentUseCaseTest {
         assertTrue(result.isSuccess)
         assertEquals(existingCache, result.getOrNull())
         verify(quranRepository, never()).saveCachedContent(any())
-        verify(quranRepository, never()).getVerseMetadata(any())
+        verify(quranRepository, never()).getVerseMetadata(any(), any())
     }
 
     @Test
@@ -101,14 +101,14 @@ class CacheAyahContentUseCaseTest {
             metadata = testMetadata
         )
         whenever(quranRepository.getCachedContentById("1:1")).thenReturn(existingCache)
-        whenever(quranRepository.getVerseMetadata(1)).thenReturn(Result.success(testMetadata))
+        whenever(quranRepository.getVerseMetadata(1, 1)).thenReturn(Result.success(testMetadata))
 
         // When
         val result = useCase(ayahRef, reciterEdition = null, forceRefresh = true)
 
         // Then
         assertTrue(result.isSuccess)
-        verify(quranRepository).getVerseMetadata(1)
+        verify(quranRepository).getVerseMetadata(1, 1)
         verify(quranRepository).saveCachedContent(any())
     }
 
@@ -117,7 +117,7 @@ class CacheAyahContentUseCaseTest {
         // Given
         val ayahRef = AyahReference(surah = 1, ayah = 1, globalAyahNumber = 1)
         whenever(quranRepository.getCachedContentById("1:1")).thenReturn(null)
-        whenever(quranRepository.getVerseMetadata(1)).thenReturn(
+        whenever(quranRepository.getVerseMetadata(1, 1)).thenReturn(
             Result.failure(Exception("Network error"))
         )
 
@@ -140,7 +140,7 @@ class CacheAyahContentUseCaseTest {
         )
 
         whenever(quranRepository.getCachedContentById(any())).thenReturn(null)
-        whenever(quranRepository.getVerseMetadata(any())).thenReturn(Result.success(testMetadata))
+        whenever(quranRepository.getVerseMetadata(any(), any())).thenReturn(Result.success(testMetadata))
 
         // When
         val result = useCase.cacheMultiple(ayahs)
@@ -160,8 +160,8 @@ class CacheAyahContentUseCaseTest {
         )
 
         whenever(quranRepository.getCachedContentById(any())).thenReturn(null)
-        whenever(quranRepository.getVerseMetadata(1)).thenReturn(Result.success(testMetadata))
-        whenever(quranRepository.getVerseMetadata(2)).thenReturn(
+        whenever(quranRepository.getVerseMetadata(1, 1)).thenReturn(Result.success(testMetadata))
+        whenever(quranRepository.getVerseMetadata(1, 2)).thenReturn(
             Result.failure(Exception("Network error"))
         )
 
@@ -179,7 +179,7 @@ class CacheAyahContentUseCaseTest {
         // Given
         val ayahRef = AyahReference(surah = 1, ayah = 1, globalAyahNumber = 1)
         whenever(quranRepository.getCachedContentById("1:1")).thenReturn(null)
-        whenever(quranRepository.getVerseMetadata(1)).thenReturn(Result.success(testMetadata))
+        whenever(quranRepository.getVerseMetadata(1, 1)).thenReturn(Result.success(testMetadata))
 
         // When
         val result = useCase(ayahRef, reciterEdition = "ar.abdulbasit", forceRefresh = false)
@@ -194,7 +194,7 @@ class CacheAyahContentUseCaseTest {
         // Given
         val ayahRef = AyahReference(surah = 1, ayah = 1, globalAyahNumber = 1)
         whenever(quranRepository.getCachedContentById("1:1")).thenReturn(null)
-        whenever(quranRepository.getVerseMetadata(1)).thenReturn(Result.success(testMetadata))
+        whenever(quranRepository.getVerseMetadata(1, 1)).thenReturn(Result.success(testMetadata))
 
         // When
         val result = useCase(ayahRef, reciterEdition = "none", forceRefresh = false)
@@ -209,7 +209,7 @@ class CacheAyahContentUseCaseTest {
         // Given
         val ayahRef = AyahReference(surah = 2, ayah = 255, globalAyahNumber = 262)
         whenever(quranRepository.getCachedContentById("2:255")).thenReturn(null)
-        whenever(quranRepository.getVerseMetadata(262)).thenReturn(Result.success(testMetadata))
+        whenever(quranRepository.getVerseMetadata(2, 255)).thenReturn(Result.success(testMetadata))
 
         // When
         val result = useCase(ayahRef)

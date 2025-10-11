@@ -8,9 +8,13 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,14 +46,32 @@ enum class PlaybackSpeed(val value: Float, val displayText: String) {
 
 @Singleton
 class AudioService @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val settingsRepository: SettingsRepository
 ) {
     private var mediaPlayer: MediaPlayer? = null
     private var audioManager: AudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     private var audioFocusRequest: AudioFocusRequest? = null
+    private val serviceScope = CoroutineScope(SupervisorJob())
 
     private val _playbackState = MutableStateFlow(AudioPlaybackState())
     val playbackState: StateFlow<AudioPlaybackState> = _playbackState.asStateFlow()
+
+    init {
+        // Load initial playback speed from settings
+        loadInitialPlaybackSpeed()
+    }
+
+    private fun loadInitialPlaybackSpeed() {
+        serviceScope.launch {
+            settingsRepository.getSettings().collect { settings ->
+                val speed = PlaybackSpeed.fromValue(settings.playbackSpeed)
+                // Only update state, don't apply to MediaPlayer yet (it will be applied when audio plays)
+                _playbackState.value = _playbackState.value.copy(playbackSpeed = speed.value)
+                Log.d("AudioService", "Loaded initial playback speed: ${speed.displayText}")
+            }
+        }
+    }
 
     private val audioFocusListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
         when (focusChange) {
@@ -240,20 +262,29 @@ class AudioService @Inject constructor(
 
     fun setPlaybackSpeed(speed: PlaybackSpeed) {
         try {
+            // Update state immediately
+            _playbackState.value = _playbackState.value.copy(playbackSpeed = speed.value)
+
+            // Apply to MediaPlayer if available and supported
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 mediaPlayer?.let { player ->
                     val params = player.playbackParams
                     params.speed = speed.value
                     player.playbackParams = params
-
-                    _playbackState.value = _playbackState.value.copy(playbackSpeed = speed.value)
                     Log.d("AudioService", "Playback speed set to ${speed.displayText}")
                 }
             } else {
                 Log.w("AudioService", "Playback speed control not supported on this Android version")
-                _playbackState.value = _playbackState.value.copy(
-                    error = "Speed control requires Android 6.0 or higher"
-                )
+            }
+
+            // Persist to settings
+            serviceScope.launch {
+                try {
+                    settingsRepository.updatePlaybackSpeed(speed.value)
+                    Log.d("AudioService", "Persisted playback speed: ${speed.displayText}")
+                } catch (e: Exception) {
+                    Log.e("AudioService", "Failed to persist playback speed", e)
+                }
             }
         } catch (e: Exception) {
             Log.e("AudioService", "Failed to set playback speed", e)

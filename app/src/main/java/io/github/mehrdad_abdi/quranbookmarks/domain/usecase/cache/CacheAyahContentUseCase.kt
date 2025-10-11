@@ -45,8 +45,8 @@ class CacheAyahContentUseCase @Inject constructor(
 
             Log.d(TAG, "Caching content for ${ayahReference.surah}:${ayahReference.ayah}")
 
-            // Fetch verse metadata from API
-            val metadataResult = quranRepository.getVerseMetadata(ayahReference.globalAyahNumber)
+            // Fetch verse metadata from API using surah:ayah format
+            val metadataResult = quranRepository.getVerseMetadata(ayahReference.surah, ayahReference.ayah)
             if (metadataResult.isFailure) {
                 return Result.failure(
                     metadataResult.exceptionOrNull()

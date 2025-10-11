@@ -13,7 +13,7 @@ data class AyahAudioData(
 interface QuranRepository {
 
     // API operations
-    suspend fun getVerseMetadata(ayahNumber: Int): Result<VerseMetadata>
+    suspend fun getVerseMetadata(surahNumber: Int, ayahNumber: Int): Result<VerseMetadata>
     suspend fun getSurahMetadata(surahNumber: Int): Result<List<VerseMetadata>>
     suspend fun getAyahRangeMetadata(surahNumber: Int, startAyah: Int, endAyah: Int): Result<List<VerseMetadata>>
     suspend fun getPageMetadata(pageNumber: Int): Result<List<VerseMetadata>>

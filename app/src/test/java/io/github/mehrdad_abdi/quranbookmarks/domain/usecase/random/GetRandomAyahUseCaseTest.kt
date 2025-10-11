@@ -44,7 +44,7 @@ class GetRandomAyahUseCaseTest {
     @Test
     fun `invoke returns success with verse metadata`() = runTest {
         // Given
-        `when`(quranRepository.getVerseMetadata(any())).thenReturn(Result.success(testVerse))
+        `when`(quranRepository.getVerseMetadata(any(), any())).thenReturn(Result.success(testVerse))
 
         // When
         val result = getRandomAyahUseCase()
@@ -58,7 +58,7 @@ class GetRandomAyahUseCaseTest {
     fun `invoke returns failure when repository fails`() = runTest {
         // Given
         val error = Exception("Network error")
-        `when`(quranRepository.getVerseMetadata(any())).thenReturn(Result.failure(error))
+        `when`(quranRepository.getVerseMetadata(any(), any())).thenReturn(Result.failure(error))
 
         // When
         val result = getRandomAyahUseCase()
@@ -68,20 +68,23 @@ class GetRandomAyahUseCaseTest {
     }
 
     @Test
-    fun `invoke generates ayah number in valid range`() = runTest {
+    fun `invoke generates ayah in valid range`() = runTest {
         // Given
-        var capturedAyahNumber = 0
-        `when`(quranRepository.getVerseMetadata(any())).thenAnswer { invocation ->
-            capturedAyahNumber = invocation.getArgument(0)
-            Result.success(testVerse.copy(globalAyahNumber = capturedAyahNumber))
+        var capturedSurah = 0
+        var capturedAyah = 0
+        `when`(quranRepository.getVerseMetadata(any(), any())).thenAnswer { invocation ->
+            capturedSurah = invocation.getArgument(0)
+            capturedAyah = invocation.getArgument(1)
+            Result.success(testVerse.copy(surahNumber = capturedSurah, ayahInSurah = capturedAyah))
         }
 
         // When
         repeat(100) {
             getRandomAyahUseCase()
 
-            // Then
-            assertTrue("Ayah number $capturedAyahNumber is out of range", capturedAyahNumber in 1..6236)
+            // Then - Check that surah and ayah are in valid ranges
+            assertTrue("Surah number $capturedSurah is out of range", capturedSurah in 1..114)
+            assertTrue("Ayah number $capturedAyah is out of range", capturedAyah >= 1)
         }
     }
 }
