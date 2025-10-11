@@ -15,6 +15,7 @@ import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.random.RandomModeSe
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.reading.BookmarkReadingScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.settings.ReciterSelectionScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.settings.SettingsScreen
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.settings.backup.BackupScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.statistics.StatisticsScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.today.TodayProgressScreen
 
@@ -154,6 +155,9 @@ fun NavGraph(
                 },
                 onNavigateToReciterSelection = {
                     navController.navigate(Screen.ReciterSelection.route)
+                },
+                onNavigateToBackup = {
+                    navController.navigate(Screen.Backup.route)
                 }
             )
         }
@@ -161,6 +165,15 @@ fun NavGraph(
         // Reciter Selection Screen
         composable(route = Screen.ReciterSelection.route) {
             ReciterSelectionScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Backup & Restore Screen
+        composable(route = Screen.Backup.route) {
+            BackupScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }

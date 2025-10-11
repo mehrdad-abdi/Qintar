@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.heightIn
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToReciterSelection: () -> Unit,
+    onNavigateToBackup: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -105,6 +106,17 @@ fun SettingsScreen(
                 subtitle = ThemeColor.entries.find { it.hex == uiState.settings.primaryColorHex }?.displayName
                     ?: "Custom",
                 onClick = { showColorDialog = true }
+            )
+
+            Divider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            // Data Management Section
+            SettingsSectionHeader("Data")
+
+            SettingsItem(
+                title = "Backup & Restore",
+                subtitle = "Export or import your data",
+                onClick = onNavigateToBackup
             )
 
             Spacer(modifier = Modifier.height(16.dp))
