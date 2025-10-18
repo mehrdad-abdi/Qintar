@@ -18,7 +18,7 @@
     <string name="screen_today_title">پیشرفت امروز</string>
     <string name="ayahs_today">آیات امروز</string>
     <string name="current_badge">نشان فعلی:</string>
-    <string name="button_continue_reading">ادامه خواندن</string>
+    <string name="button_continue_reading">خواندن نشانه‌ها</string>
     <string name="button_random_reading">خواندن تصادفی</string>
     <string name="badge_max_achieved">🎉 بالاترین نشان به دست آمد!</string>
     <string name="badge_progress_format">%1$d آیه دیگر تا رسیدن به %2$s</string>

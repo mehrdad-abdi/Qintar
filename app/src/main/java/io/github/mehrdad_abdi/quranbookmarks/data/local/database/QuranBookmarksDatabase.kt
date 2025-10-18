@@ -8,18 +8,21 @@ import android.content.Context
 import io.github.mehrdad_abdi.quranbookmarks.data.local.converters.StringListConverter
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.BookmarkDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.CachedContentDao
+import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.KhatmProgressDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.ReadingActivityDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.entity.BookmarkEntity
 import io.github.mehrdad_abdi.quranbookmarks.data.local.entity.CachedContentEntity
+import io.github.mehrdad_abdi.quranbookmarks.data.local.entity.KhatmProgressEntity
 import io.github.mehrdad_abdi.quranbookmarks.data.local.entity.ReadingActivityEntity
 
 @Database(
     entities = [
         BookmarkEntity::class,
         CachedContentEntity::class,
-        ReadingActivityEntity::class
+        ReadingActivityEntity::class,
+        KhatmProgressEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(StringListConverter::class)
@@ -28,6 +31,7 @@ abstract class QuranBookmarksDatabase : RoomDatabase() {
     abstract fun bookmarkDao(): BookmarkDao
     abstract fun cachedContentDao(): CachedContentDao
     abstract fun readingActivityDao(): ReadingActivityDao
+    abstract fun khatmProgressDao(): KhatmProgressDao
 
     companion object {
         @Volatile

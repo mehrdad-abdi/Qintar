@@ -11,6 +11,7 @@ import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmark.EditBookma
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmarks.BookmarksScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.calendar.BadgeCalendarScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.hadith.HadithScreen
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.khatm.KhatmReadingScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.random.RandomModeSelectionScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.reading.BookmarkReadingScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.settings.ReciterSelectionScreen
@@ -18,6 +19,9 @@ import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.settings.SettingsSc
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.settings.backup.BackupScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.statistics.StatisticsScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.today.TodayProgressScreen
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.SurahNames
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.Surah
+import androidx.compose.runtime.remember
 
 @Composable
 fun NavGraph(
@@ -47,6 +51,9 @@ fun NavGraph(
                 },
                 onNavigateToHadith = {
                     navController.navigate(Screen.Hadith.route)
+                },
+                onNavigateToKhatmReading = {
+                    navController.navigate(Screen.KhatmReading.route)
                 }
             )
         }
@@ -125,6 +132,30 @@ fun NavGraph(
                 },
                 onNavigateToReading = { bookmarkId ->
                     navController.navigate(Screen.BookmarkReading.createRoute(bookmarkId))
+                }
+            )
+        }
+
+        // Khatm Reading Screen
+        composable(route = Screen.KhatmReading.route) {
+            // Create surah list from SurahNames
+            val surahs = remember {
+                (1..114).map { number ->
+                    Surah(
+                        number = number,
+                        name = SurahNames.getName(number),
+                        englishName = SurahNames.getName(number),
+                        englishNameTranslation = SurahNames.getName(number),
+                        numberOfAyahs = SurahNames.getAyahCount(number),
+                        revelationType = "" // Not needed for jump dialog
+                    )
+                }
+            }
+
+            KhatmReadingScreen(
+                surahs = surahs,
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

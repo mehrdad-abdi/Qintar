@@ -6,12 +6,14 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.BackupRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.BookmarkRepositoryImpl
+import io.github.mehrdad_abdi.quranbookmarks.data.repository.KhatmProgressRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.QuranRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.ReadingActivityRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.SettingsRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.SurahRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.BackupRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.BookmarkRepository
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.KhatmProgressRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.QuranRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.ReadingActivityRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
@@ -57,4 +59,10 @@ abstract class RepositoryModule {
     abstract fun bindBackupRepository(
         backupRepositoryImpl: BackupRepositoryImpl
     ): BackupRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindKhatmProgressRepository(
+        khatmProgressRepositoryImpl: KhatmProgressRepositoryImpl
+    ): KhatmProgressRepository
 }

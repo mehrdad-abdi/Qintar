@@ -18,7 +18,7 @@
     <string name="screen_today_title">Today\'s Progress</string>
     <string name="ayahs_today">Ayahs Today</string>
     <string name="current_badge">Current Badge:</string>
-    <string name="button_continue_reading">Continue Reading</string>
+    <string name="button_continue_reading">Bookmarks Reading</string>
     <string name="button_random_reading">Random Reading</string>
     <string name="badge_max_achieved">🎉 Maximum badge achieved!</string>
     <string name="badge_progress_format">%1$d more ayahs to reach %2$s</string>
@@ -237,4 +237,18 @@
     <string name="badge_faez">Faez</string>
     <string name="badge_mujtahid">Mujtahid</string>
     <string name="badge_sahib_qantar">Qintar</string>
+
+    <!-- Khatm Reading Screen -->
+    <string name="screen_khatm_title">Khatm Reading</string>
+    <string name="button_khatm_reading">Khatm Reading</string>
+    <string name="page_indicator">Page %1$d / 604</string>
+    <string name="jump_to">Jump To</string>
+    <string name="tab_page">Page</string>
+    <string name="tab_juz">Juz</string>
+    <string name="tab_surah">Surah</string>
+    <string name="enter_page_number">Enter page number (1-604)</string>
+    <string name="select_juz">Select Juz (1-30)</string>
+    <string name="invalid_page">Invalid page number</string>
+    <string name="play_all_page">Play All</string>
+    <string name="juz_format">Juz %d</string>
 </resources>

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import android.util.Log
+import androidx.compose.material.icons.filled.Bookmarks
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.mehrdad_abdi.quranbookmarks.R
@@ -48,6 +49,7 @@ fun TodayProgressScreen(
     onNavigateToCalendar: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToHadith: () -> Unit,
+    onNavigateToKhatmReading: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TodayProgressViewModel = hiltViewModel()
 ) {
@@ -114,6 +116,39 @@ fun TodayProgressScreen(
                         onClick = onNavigateToHadith
                     )
                 }
+                // Khatm Reading Button
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Button(
+                            onClick = onNavigateToKhatmReading,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MenuBook,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.button_khatm_reading),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
 
                 // Continue Reading Button
                 item {
@@ -134,7 +169,7 @@ fun TodayProgressScreen(
                             )
                         ) {
                             Icon(
-                                imageVector = Icons.Default.MenuBook,
+                                imageVector = Icons.Default.Bookmarks,
                                 contentDescription = null,
                                 modifier = Modifier.size(24.dp)
                             )

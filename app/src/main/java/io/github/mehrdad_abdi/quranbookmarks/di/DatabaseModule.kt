@@ -8,6 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.BookmarkDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.CachedContentDao
+import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.KhatmProgressDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.ReadingActivityDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.database.QuranBookmarksDatabase
 import javax.inject.Singleton
@@ -35,5 +36,10 @@ object DatabaseModule {
     @Provides
     fun provideReadingActivityDao(database: QuranBookmarksDatabase): ReadingActivityDao {
         return database.readingActivityDao()
+    }
+
+    @Provides
+    fun provideKhatmProgressDao(database: QuranBookmarksDatabase): KhatmProgressDao {
+        return database.khatmProgressDao()
     }
 }
