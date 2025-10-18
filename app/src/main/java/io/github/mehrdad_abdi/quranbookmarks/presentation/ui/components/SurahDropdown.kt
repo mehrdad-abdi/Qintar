@@ -14,9 +14,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import io.github.mehrdad_abdi.quranbookmarks.R
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.Surah
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +52,7 @@ fun SurahDropdown(
                     IconButton(onClick = { showDialog = true }) {
                         Icon(
                             imageVector = if (showDialog) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                            contentDescription = "Open surah selection"
+                            contentDescription = stringResource(R.string.open_surah_selection)
                         )
                     }
                 }
@@ -109,7 +111,7 @@ private fun SurahSelectionDialog(
             ) {
                 // Dialog title
                 Text(
-                    text = "Select Surah",
+                    text = stringResource(R.string.select_surah),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -120,11 +122,11 @@ private fun SurahSelectionDialog(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("Search surahs...") },
+                    placeholder = { Text(stringResource(R.string.search_surahs)) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
+                            contentDescription = stringResource(R.string.search)
                         )
                     },
                     trailingIcon = {
@@ -132,7 +134,7 @@ private fun SurahSelectionDialog(
                             IconButton(onClick = { searchQuery = "" }) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
-                                    contentDescription = "Clear search"
+                                    contentDescription = stringResource(R.string.clear_search)
                                 )
                             }
                         }
@@ -145,7 +147,7 @@ private fun SurahSelectionDialog(
 
                 // Results count
                 Text(
-                    text = "${filteredSurahs.size} surah${if (filteredSurahs.size != 1) "s" else ""} found",
+                    text = stringResource(R.string.surahs_found, filteredSurahs.size),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -176,7 +178,7 @@ private fun SurahSelectionDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                 }
             }
@@ -213,7 +215,7 @@ private fun SurahListItem(
                 )
 
                 Text(
-                    text = "${surah.numberOfAyahs} ayahs",
+                    text = stringResource(R.string.ayahs_in_surah, surah.numberOfAyahs),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

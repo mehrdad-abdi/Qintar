@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.mehrdad_abdi.quranbookmarks.data.remote.dto.ReciterData
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.AppLanguage
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.AppSettings
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.AppTheme
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.QuranRepository
@@ -120,6 +121,18 @@ class SettingsViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     error = "Failed to update color: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun updateLanguage(language: AppLanguage) {
+        viewModelScope.launch {
+            try {
+                settingsRepository.updateLanguage(language)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = "Failed to update language: ${e.message}"
                 )
             }
         }

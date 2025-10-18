@@ -5,35 +5,48 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.RtlIcons
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import io.github.mehrdad_abdi.quranbookmarks.R
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.AppLanguage
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
+import javax.inject.Inject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HadithScreen(
     onNavigateBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: HadithViewModel = hiltViewModel()
 ) {
+    val settings by viewModel.settingsRepository.getSettings().collectAsState(initial = io.github.mehrdad_abdi.quranbookmarks.domain.model.AppSettings())
+    val currentLanguage = settings.language
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Hadith about Quran Reading",
+                        text = stringResource(R.string.screen_hadith_title),
                         fontWeight = FontWeight.Bold
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            imageVector = RtlIcons.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 }
@@ -48,7 +61,7 @@ fun HadithScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Arabic Text
+            // Always show Arabic Text
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -63,13 +76,13 @@ fun HadithScreen(
                         .padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = "Arabic",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Divider()
+//                    Text(
+//                        text = stringResource(R.string.hadith_arabic_title),
+//                        fontSize = 18.sp,
+//                        fontWeight = FontWeight.Bold,
+//                        color = MaterialTheme.colorScheme.primary
+//                    )
+//                    Divider()
                     Text(
                         text = """قال رسول الله (ص):
 من قَرَأَ عَشْرَ آیاتٍ فی لَیْلَةٍ لَمْ یُکْتَبْ مِنَ الْغافِلینَ،
@@ -82,16 +95,20 @@ fun HadithScreen(
                         fontSize = 20.sp,
                         lineHeight = 36.sp,
                         textAlign = TextAlign.Right,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            textDirection = TextDirection.Rtl // Explicitly sets the text direction to RTL
+                        ),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
 
-            // English Translation
-            Card(
+            // Show English translation only when language is English
+            if (currentLanguage == AppLanguage.ENGLISH) {
+                Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
                 ),
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -103,7 +120,7 @@ fun HadithScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "English Translation",
+                        text = stringResource(R.string.hadith_translation_english),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -114,15 +131,15 @@ fun HadithScreen(
 
 "Whoever recites ten verses in a night will not be written among the negligent,
 
-And whoever recites fifty verses will be written among those who remember Allah,
+And whoever recites fifty verses will be written among those who remember Allah (Dhakir),
 
-And whoever recites one hundred verses will be written among the devout,
+And whoever recites one hundred verses will be written among the devout (Qanit),
 
-And whoever recites two hundred verses will be written among the humble,
+And whoever recites two hundred verses will be written among the humble (Khashie),
 
-And whoever recites three hundred verses will be written among the successful,
+And whoever recites three hundred verses will be written among the successful (Faez),
 
-And whoever recites five hundred verses will be written among the diligent,
+And whoever recites five hundred verses will be written among the diligent (Mujtahhid),
 
 And whoever recites one thousand verses will be written for him a qintar of righteousness. The qintar is fifteen thousand (fifty thousand) mithqals, twenty-four carats, the smallest of which is like Mount Uhud and the largest is what is between heaven and earth.""",
                         fontSize = 16.sp,
@@ -131,10 +148,12 @@ And whoever recites one thousand verses will be written for him a qintar of righ
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+                }
             }
 
-            // Persian Translation
-            Card(
+            // Show Persian translation only when language is Farsi
+            if (currentLanguage == AppLanguage.FARSI) {
+                Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer
@@ -149,7 +168,7 @@ And whoever recites one thousand verses will be written for him a qintar of righ
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Persian Translation",
+                        text = stringResource(R.string.hadith_translation_farsi),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -176,6 +195,7 @@ And whoever recites one thousand verses will be written for him a qintar of righ
                         textAlign = TextAlign.Right,
                         modifier = Modifier.fillMaxWidth()
                     )
+                }
                 }
             }
         }

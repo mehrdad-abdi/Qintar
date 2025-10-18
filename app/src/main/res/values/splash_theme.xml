@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash Screen Theme -->
+    <style name="Theme.Qintar.Splash" parent="Theme.SplashScreen">
+        <!-- Set the splash screen background -->
+        <item name="windowSplashScreenBackground">@color/qintar_teal_primary</item>
+
+        <!-- Set the splash screen icon -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+
+        <!-- Icon background color (optional, use transparent for no background) -->
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+
+        <!-- Duration for the splash screen animation -->
+        <item name="windowSplashScreenAnimationDuration">500</item>
+
+        <!-- Post-splash screen theme to use -->
+        <item name="postSplashScreenTheme">@style/Theme.QuranBookmarks</item>
+    </style>
+</resources>

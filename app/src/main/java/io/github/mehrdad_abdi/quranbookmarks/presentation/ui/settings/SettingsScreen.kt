@@ -8,7 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,9 +17,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import io.github.mehrdad_abdi.quranbookmarks.R
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.AppLanguage
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.RtlIcons
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.AppTheme
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.ThemeColor
+import io.github.mehrdad_abdi.quranbookmarks.util.LocaleHelper
 import androidx.compose.foundation.layout.heightIn
+import android.app.Activity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,14 +40,17 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showThemeDialog by remember { mutableStateOf(false) }
     var showColorDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val activity = context as? Activity
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(R.string.settings)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, "Back")
+                        Icon(RtlIcons.ArrowBack, stringResource(R.string.back))
                     }
                 }
             )
@@ -55,10 +64,10 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             // Audio Settings Section
-            SettingsSectionHeader("Audio")
+            SettingsSectionHeader(stringResource(R.string.settings_audio))
 
             SettingsItem(
-                title = "Reciter",
+                title = stringResource(R.string.settings_reciter),
                 subtitle = uiState.availableReciters.find { it.identifier == uiState.settings.reciterEdition }?.name
                     ?: uiState.settings.reciterEdition,
                 onClick = onNavigateToReciterSelection
@@ -67,18 +76,18 @@ fun SettingsScreen(
             Divider(modifier = Modifier.padding(horizontal = 16.dp))
 
             // Notification Settings Section
-            SettingsSectionHeader("Notifications")
+            SettingsSectionHeader(stringResource(R.string.settings_notifications))
 
             SettingsSwitchItem(
-                title = "Daily Reminder",
-                subtitle = "Receive daily Quran reading reminders",
+                title = stringResource(R.string.settings_daily_reminder),
+                subtitle = stringResource(R.string.settings_daily_reminder_desc),
                 checked = uiState.settings.notificationSettings.enabled,
                 onCheckedChange = { viewModel.updateNotificationEnabled(it) }
             )
 
             if (uiState.settings.notificationSettings.enabled) {
                 SettingsItem(
-                    title = "Reminder Time",
+                    title = stringResource(R.string.settings_reminder_time),
                     subtitle = uiState.settings.notificationSettings.time,
                     onClick = { /* TODO: Implement time picker */ }
                 )
@@ -87,14 +96,14 @@ fun SettingsScreen(
             Divider(modifier = Modifier.padding(horizontal = 16.dp))
 
             // Theme Settings Section
-            SettingsSectionHeader("Appearance")
+            SettingsSectionHeader(stringResource(R.string.settings_appearance))
 
             SettingsItem(
-                title = "Theme",
+                title = stringResource(R.string.settings_theme),
                 subtitle = when (uiState.settings.theme) {
-                    AppTheme.LIGHT -> "Light"
-                    AppTheme.DARK -> "Dark"
-                    AppTheme.SYSTEM -> "System Default"
+                    AppTheme.LIGHT -> stringResource(R.string.settings_theme_light)
+                    AppTheme.DARK -> stringResource(R.string.settings_theme_dark)
+                    AppTheme.SYSTEM -> stringResource(R.string.settings_theme_system)
                 },
                 onClick = { showThemeDialog = true }
             )
@@ -102,7 +111,7 @@ fun SettingsScreen(
             Divider(modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsItem(
-                title = "Primary Color",
+                title = stringResource(R.string.settings_primary_color),
                 subtitle = ThemeColor.entries.find { it.hex == uiState.settings.primaryColorHex }?.displayName
                     ?: "Custom",
                 onClick = { showColorDialog = true }
@@ -110,12 +119,20 @@ fun SettingsScreen(
 
             Divider(modifier = Modifier.padding(horizontal = 16.dp))
 
+            SettingsItem(
+                title = stringResource(R.string.settings_language),
+                subtitle = uiState.settings.language.nativeName,
+                onClick = { showLanguageDialog = true }
+            )
+
+            Divider(modifier = Modifier.padding(horizontal = 16.dp))
+
             // Data Management Section
-            SettingsSectionHeader("Data")
+            SettingsSectionHeader(stringResource(R.string.settings_data))
 
             SettingsItem(
-                title = "Backup & Restore",
-                subtitle = "Export or import your data",
+                title = stringResource(R.string.settings_backup_restore),
+                subtitle = stringResource(R.string.settings_backup_restore_desc),
                 onClick = onNavigateToBackup
             )
 
@@ -127,7 +144,7 @@ fun SettingsScreen(
     if (showThemeDialog) {
         AlertDialog(
             onDismissRequest = { showThemeDialog = false },
-            title = { Text("Select Theme") },
+            title = { Text(stringResource(R.string.dialog_select_theme)) },
             text = {
                 Column {
                     AppTheme.entries.forEach { theme ->
@@ -151,9 +168,9 @@ fun SettingsScreen(
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
                                 text = when (theme) {
-                                    AppTheme.LIGHT -> "Light"
-                                    AppTheme.DARK -> "Dark"
-                                    AppTheme.SYSTEM -> "System Default"
+                                    AppTheme.LIGHT -> stringResource(R.string.settings_theme_light)
+                                    AppTheme.DARK -> stringResource(R.string.settings_theme_dark)
+                                    AppTheme.SYSTEM -> stringResource(R.string.settings_theme_system)
                                 }
                             )
                         }
@@ -162,7 +179,7 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showThemeDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -173,7 +190,7 @@ fun SettingsScreen(
     if (showColorDialog) {
         AlertDialog(
             onDismissRequest = { showColorDialog = false },
-            title = { Text("Select Primary Color") },
+            title = { Text(stringResource(R.string.dialog_select_color)) },
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ThemeColor.entries.forEach { themeColor ->
@@ -220,7 +237,50 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showColorDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    // Language Selection Dialog
+    if (showLanguageDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text(stringResource(R.string.dialog_select_language)) },
+            text = {
+                Column {
+                    AppLanguage.values().forEach { language ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.updateLanguage(language)
+                                    showLanguageDialog = false
+                                    // Restart activity to apply language change
+                                    activity?.let { act -> LocaleHelper.restartActivity(act) }
+                                }
+                                .padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = uiState.settings.language == language,
+                                onClick = {
+                                    viewModel.updateLanguage(language)
+                                    showLanguageDialog = false
+                                    // Restart activity to apply language change
+                                    activity?.let { act -> LocaleHelper.restartActivity(act) }
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(text = language.nativeName)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) {
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )

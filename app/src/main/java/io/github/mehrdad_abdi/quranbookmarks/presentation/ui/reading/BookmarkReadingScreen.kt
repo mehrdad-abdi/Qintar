@@ -5,7 +5,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RecordVoiceOver
@@ -13,12 +12,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.mehrdad_abdi.quranbookmarks.R
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.BookmarkHeaderCard
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.RtlIcons
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.PlaybackSpeedButton
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.VerseCard
 
@@ -72,8 +74,8 @@ fun BookmarkReadingScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            imageVector = RtlIcons.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 },
@@ -96,7 +98,7 @@ fun BookmarkReadingScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.RecordVoiceOver,
-                                    contentDescription = "Select Reciter"
+                                    contentDescription = stringResource(R.string.select_reciter)
                                 )
                             }
                         }
@@ -144,7 +146,7 @@ fun BookmarkReadingScreen(
                     Button(
                         onClick = { viewModel.loadBookmark(bookmarkId) }
                     ) {
-                        Text("Retry")
+                        Text(stringResource(R.string.retry))
                     }
                 }
             }
@@ -164,7 +166,7 @@ fun BookmarkReadingScreen(
                                 .padding(16.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("No verses to display")
+                            Text(stringResource(R.string.no_verses_display))
                         }
                     } else {
                         LazyColumn(
@@ -236,7 +238,7 @@ private fun ReciterSelectionDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Reciter") },
+        title = { Text(stringResource(R.string.select_reciter)) },
         text = {
             LazyColumn {
                 items(reciters) { reciter ->
@@ -261,7 +263,7 @@ private fun ReciterSelectionDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(stringResource(R.string.close))
             }
         }
     )

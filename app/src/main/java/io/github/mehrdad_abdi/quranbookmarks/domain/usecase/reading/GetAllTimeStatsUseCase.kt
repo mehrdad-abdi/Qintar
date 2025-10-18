@@ -1,5 +1,6 @@
 package io.github.mehrdad_abdi.quranbookmarks.domain.usecase.reading
 
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.BadgeLevel
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.ReadingActivity
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.ReadingActivityRepository
 import java.time.LocalDate
@@ -16,7 +17,7 @@ data class AllTimeStats(
     data class BestDayInfo(
         val date: LocalDate,
         val ayahsRead: Int,
-        val badgeLevel: String
+        val badgeLevel: BadgeLevel
     )
 }
 
@@ -43,7 +44,7 @@ class GetAllTimeStatsUseCase @Inject constructor(
                 AllTimeStats.BestDayInfo(
                     date = activity.date,
                     ayahsRead = activity.totalAyahsRead,
-                    badgeLevel = activity.badgeLevel.getDisplayString()
+                    badgeLevel = activity.badgeLevel
                 )
             }
 

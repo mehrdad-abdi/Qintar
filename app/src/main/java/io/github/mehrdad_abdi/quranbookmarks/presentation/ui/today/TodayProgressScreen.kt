@@ -10,13 +10,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shuffle
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.RtlIcons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,10 +27,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
+import android.util.Log
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.mehrdad_abdi.quranbookmarks.R
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.AppSettings
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.BadgeLevel
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,14 +51,21 @@ fun TodayProgressScreen(
     modifier: Modifier = Modifier,
     viewModel: TodayProgressViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Debug logging
+    Log.d("TodayProgressScreen", "Context locale: ${context.resources.configuration.locales[0]}")
+    val ayahsTodayString = stringResource(R.string.ayahs_today)
+    Log.d("TodayProgressScreen", "stringResource(R.string.ayahs_today) = '$ayahsTodayString'")
+    Log.d("TodayProgressScreen", "Current language from settings: ${uiState.currentLanguage.localeCode}")
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Today's Progress",
+                        text = stringResource(R.string.screen_today_title),
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -59,13 +73,13 @@ fun TodayProgressScreen(
                     IconButton(onClick = { viewModel.refresh() }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh"
+                            contentDescription = stringResource(R.string.refresh)
                         )
                     }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
+                            contentDescription = stringResource(R.string.settings)
                         )
                     }
                 }
@@ -126,7 +140,7 @@ fun TodayProgressScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Continue Reading",
+                                text = stringResource(R.string.button_continue_reading),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -159,7 +173,7 @@ fun TodayProgressScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Random Reading",
+                                text = stringResource(R.string.button_random_reading),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -247,7 +261,7 @@ private fun TodayStatsCard(
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Ayahs Today",
+                text = stringResource(R.string.ayahs_today),
                 fontSize = 20.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -260,13 +274,17 @@ private fun TodayStatsCard(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Current Badge:",
+                    text = stringResource(R.string.current_badge),
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = currentBadge.getDisplayString(),
+                    text = if (currentBadge.emoji.isEmpty()) {
+                        stringResource(currentBadge.nameResId)
+                    } else {
+                        "${currentBadge.emoji} ${stringResource(currentBadge.nameResId)}"
+                    },
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -289,7 +307,15 @@ private fun TodayStatsCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "$ayahsToNext more ayahs to reach ${nextBadge.getDisplayString()}",
+                    text = stringResource(
+                        R.string.badge_progress_format,
+                        ayahsToNext,
+                        if (nextBadge.emoji.isEmpty()) {
+                            stringResource(nextBadge.nameResId)
+                        } else {
+                            "${nextBadge.emoji} ${stringResource(nextBadge.nameResId)}"
+                        }
+                    ),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -297,7 +323,7 @@ private fun TodayStatsCard(
             } else if (currentBadge == BadgeLevel.SAHIB_QANTAR) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "🎉 Maximum badge achieved!",
+                    text = stringResource(R.string.badge_max_achieved),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -336,7 +362,7 @@ private fun StreaksCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Streaks",
+                    text = stringResource(R.string.streaks),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -351,11 +377,11 @@ private fun StreaksCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "📊 Overall Reading Streak",
+                    text = stringResource(R.string.overall_reading_streak),
                     fontSize = 16.sp
                 )
                 Text(
-                    text = "$overallStreak days",
+                    text = stringResource(R.string.days_format, overallStreak),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -377,11 +403,11 @@ private fun StreaksCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "${badge.emoji} ${badge.arabicName}",
+                            text = "${badge.emoji} ${stringResource(badge.nameResId)}",
                             fontSize = 15.sp
                         )
                         Text(
-                            text = "$days days",
+                            text = stringResource(R.string.days_format, days),
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -425,16 +451,16 @@ private fun Last7DaysCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Last 7 Days",
+                        text = stringResource(R.string.last_7_days),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
                 TextButton(onClick = onViewFullCalendar) {
-                    Text("View Calendar")
+                    Text(stringResource(R.string.view_calendar))
                     Icon(
-                        imageVector = Icons.Default.ChevronRight,
+                        imageVector = RtlIcons.ExpandForward,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp)
                     )
@@ -526,16 +552,16 @@ private fun AllTimeStatsCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "All-Time Stats",
+                        text = stringResource(R.string.all_time_stats),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
                 TextButton(onClick = onViewStatistics) {
-                    Text("View More")
+                    Text(stringResource(R.string.view_more))
                     Icon(
-                        imageVector = Icons.Default.ChevronRight,
+                        imageVector = RtlIcons.ExpandForward,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp)
                     )
@@ -549,7 +575,7 @@ private fun AllTimeStatsCard(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 StatItem(
-                    label = "Total Ayahs",
+                    label = stringResource(R.string.total_ayahs),
                     value = totalAyahs.toString(),
                     modifier = Modifier.weight(1f)
                 )
@@ -561,9 +587,9 @@ private fun AllTimeStatsCard(
                 )
 
                 StatItem(
-                    label = "Best Day",
+                    label = stringResource(R.string.best_day),
                     value = if (bestDayAyahs > 0) {
-                        "$bestDayAyahs ayahs"
+                        stringResource(R.string.ayahs_format, bestDayAyahs)
                     } else {
                         "—"
                     },

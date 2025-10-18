@@ -110,22 +110,6 @@ class BadgeLevelTest {
     }
 
     @Test
-    fun `getDisplayString returns formatted string for badges with emoji`() {
-        assertEquals("🔹 غیر غافل", BadgeLevel.GHAIR_GHAFIL.getDisplayString())
-        assertEquals("🔺 ذاکر", BadgeLevel.DHAKIR.getDisplayString())
-        assertEquals("🥉 قانت", BadgeLevel.QANIT.getDisplayString())
-        assertEquals("🥈 خاشع", BadgeLevel.KHASHIE.getDisplayString())
-        assertEquals("🥇 فائز", BadgeLevel.FAEZ.getDisplayString())
-        assertEquals("🎖️ مجتهد", BadgeLevel.MUJTAHID.getDisplayString())
-        assertEquals("👑 صاحب القنطار", BadgeLevel.SAHIB_QANTAR.getDisplayString())
-    }
-
-    @Test
-    fun `getDisplayString returns displayName for NONE`() {
-        assertEquals("No Badge", BadgeLevel.NONE.getDisplayString())
-    }
-
-    @Test
     fun `badge thresholds are correctly defined`() {
         assertEquals(0, BadgeLevel.NONE.threshold)
         assertEquals(10, BadgeLevel.GHAIR_GHAFIL.threshold)

@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.AppLanguage
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.BadgeLevel
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.reading.GetAllTimeStatsUseCase
 import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.reading.GetDailyHistoryUseCase
 import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.reading.GetStreaksUseCase
@@ -35,7 +37,10 @@ data class TodayProgressUiState(
     // All-time stats
     val totalAyahsAllTime: Int = 0,
     val bestDayAyahs: Int = 0,
-    val bestDayDate: LocalDate? = null
+    val bestDayDate: LocalDate? = null,
+
+    // Language
+    val currentLanguage: AppLanguage = AppLanguage.ENGLISH
 )
 
 data class DayBadge(
@@ -50,7 +55,8 @@ class TodayProgressViewModel @Inject constructor(
     private val getTodayStatsUseCase: GetTodayStatsUseCase,
     private val getStreaksUseCase: GetStreaksUseCase,
     private val getAllTimeStatsUseCase: GetAllTimeStatsUseCase,
-    private val getDailyHistoryUseCase: GetDailyHistoryUseCase
+    private val getDailyHistoryUseCase: GetDailyHistoryUseCase,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     companion object {
@@ -61,7 +67,16 @@ class TodayProgressViewModel @Inject constructor(
     val uiState: StateFlow<TodayProgressUiState> = _uiState.asStateFlow()
 
     init {
+        loadSettings()
         loadAllData()
+    }
+
+    private fun loadSettings() {
+        viewModelScope.launch {
+            settingsRepository.getSettings().collect { settings ->
+                _uiState.value = _uiState.value.copy(currentLanguage = settings.language)
+            }
+        }
     }
 
     private fun loadAllData() {

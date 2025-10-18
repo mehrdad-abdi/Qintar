@@ -1,0 +1,235 @@
+<resources>
+    <!-- App Name -->
+    <string name="app_name">علامات القرآن</string>
+
+    <!-- Common -->
+    <string name="back">رجوع</string>
+    <string name="settings">الإعدادات</string>
+    <string name="refresh">تحديث</string>
+    <string name="cancel">إلغاء</string>
+    <string name="save">حفظ</string>
+    <string name="delete">حذف</string>
+    <string name="edit">تعديل</string>
+    <string name="create">إنشاء</string>
+    <string name="loading">جارٍ التحميل…</string>
+    <string name="error_generic">حدث خطأ</string>
+
+    <!-- Today's Progress Screen -->
+    <string name="screen_today_title">تقدم اليوم</string>
+    <string name="ayahs_today">آيات اليوم</string>
+    <string name="current_badge">الشارة الحالية:</string>
+    <string name="button_continue_reading">متابعة القراءة</string>
+    <string name="button_random_reading">قراءة عشوائية</string>
+    <string name="badge_max_achieved">🎉 تم الوصول إلى أعلى شارة!</string>
+    <string name="badge_progress_format">%1$d آية أخرى للوصول إلى %2$s</string>
+
+    <!-- Streaks -->
+    <string name="streaks">التواصل</string>
+    <string name="overall_reading_streak">📊 التواصل الإجمالي للقراءة</string>
+    <string name="days_format">%d أيام</string>
+
+    <!-- Last 7 Days -->
+    <string name="last_7_days">آخر 7 أيام</string>
+    <string name="view_calendar">عرض التقويم</string>
+
+    <!-- All-Time Stats -->
+    <string name="all_time_stats">الإحصائيات الإجمالية</string>
+    <string name="view_more">عرض المزيد</string>
+    <string name="total_ayahs">إجمالي الآيات</string>
+    <string name="best_day">أفضل يوم</string>
+    <string name="ayahs_format">%d آيات</string>
+
+    <!-- Hadith Screen -->
+    <string name="screen_hadith_title">حديث عن قراءة القرآن</string>
+    <string name="hadith_arabic_title">العربية</string>
+    <string name="hadith_translation_english">الترجمة الإنجليزية</string>
+    <string name="hadith_translation_farsi">الترجمة الفارسية</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_audio">الصوت</string>
+    <string name="settings_reciter">القارئ</string>
+    <string name="settings_notifications">الإشعارات</string>
+    <string name="settings_daily_reminder">التذكير اليومي</string>
+    <string name="settings_daily_reminder_desc">استلام تذكيرات قراءة القرآن اليومية</string>
+    <string name="settings_reminder_time">وقت التذكير</string>
+    <string name="settings_appearance">المظهر</string>
+    <string name="settings_theme">السمة</string>
+    <string name="settings_theme_light">فاتح</string>
+    <string name="settings_theme_dark">داكن</string>
+    <string name="settings_theme_system">افتراضي النظام</string>
+    <string name="settings_primary_color">اللون الأساسي</string>
+    <string name="settings_language">اللغة</string>
+    <string name="settings_data">البيانات</string>
+    <string name="settings_backup_restore">النسخ الاحتياطي والاستعادة</string>
+    <string name="settings_backup_restore_desc">تصدير أو استيراد بياناتك</string>
+    <string name="dialog_select_theme">اختر السمة</string>
+    <string name="dialog_select_color">اختر اللون الأساسي</string>
+    <string name="dialog_select_language">اختر اللغة</string>
+
+    <!-- Add Bookmark Screen -->
+    <string name="screen_add_bookmark_title">إضافة علامة</string>
+    <string name="bookmark_type">نوع العلامة</string>
+    <string name="bookmark_type_ayah">آية واحدة</string>
+    <string name="bookmark_type_range">نطاق آيات</string>
+    <string name="bookmark_type_surah">سورة كاملة</string>
+    <string name="bookmark_type_page">مرجع صفحة</string>
+    <string name="bookmark_type_ayah_desc">وضع علامة على آية محددة</string>
+    <string name="bookmark_type_range_desc">وضع علامة على عدة آيات متتالية</string>
+    <string name="bookmark_type_surah_desc">وضع علامة على سورة كاملة</string>
+    <string name="bookmark_type_page_desc">وضع علامة برقم الصفحة</string>
+    <string name="select_surah">اختر السورة</string>
+    <string name="ayah_number">رقم الآية</string>
+    <string name="start_ayah">الآية الأولى</string>
+    <string name="end_ayah">الآية الأخيرة</string>
+    <string name="page_number">رقم الصفحة</string>
+    <string name="notes_optional">ملاحظات (اختياري)</string>
+    <string name="notes_placeholder">أضف ملاحظات شخصية عن هذه العلامة…</string>
+    <string name="button_create_bookmark">إنشاء علامة</string>
+    <string name="complete_surah_note">سيتم وضع علامة على السورة الكاملة</string>
+    <string name="bookmark_preview">معاينة</string>
+
+    <!-- Edit Bookmark Screen -->
+    <string name="screen_edit_bookmark_title">تعديل العلامة</string>
+    <string name="button_save_changes">حفظ التغييرات</string>
+    <string name="button_delete_bookmark">حذف العلامة</string>
+    <string name="button_update_bookmark">تحديث العلامة</string>
+
+    <!-- Statistics Screen -->
+    <string name="screen_statistics_title">الإحصائيات</string>
+    <string name="last_30_days">آخر 30 يوم</string>
+    <string name="summary_30_days">ملخص 30 يوماً</string>
+    <string name="days_read">الأيام المقروءة</string>
+    <string name="average_per_day">المتوسط/اليوم</string>
+    <string name="no_reading_data">لا توجد بيانات قراءة بعد</string>
+    <string name="badge_distribution">توزيع الشارات</string>
+    <string name="no_badges_earned">لم يتم كسب شارات بعد. ابدأ القراءة لكسب الشارات!</string>
+    <string name="days_count_format">%d أيام</string>
+    <string name="no_data_available">لا توجد بيانات متاحة</string>
+
+    <!-- Calendar Screen -->
+    <string name="screen_calendar_title">تقويم الشارات</string>
+    <string name="today">اليوم</string>
+    <string name="previous_month">الشهر السابق</string>
+    <string name="next_month">الشهر التالي</string>
+    <string name="day_sun">الأحد</string>
+    <string name="day_mon">الإثنين</string>
+    <string name="day_tue">الثلاثاء</string>
+    <string name="day_wed">الأربعاء</string>
+    <string name="day_thu">الخميس</string>
+    <string name="day_fri">الجمعة</string>
+    <string name="day_sat">السبت</string>
+    <string name="ayahs_count_short">%d آيات</string>
+    <string name="no_reading_recorded">لا توجد قراءة مسجلة</string>
+    <string name="badge_levels">مستويات الشارات</string>
+    <string name="badge_threshold_format">%d+ آيات</string>
+
+    <!-- Backup Screen -->
+    <string name="screen_backup_title">النسخ الاحتياطي والاستعادة</string>
+    <string name="about_backup">حول النسخ الاحتياطي</string>
+    <string name="backup_description">صدّر علاماتك ونشاط القراءة والإعدادات إلى ملف JSON. يمكنك استعادتها لاحقاً أو على جهاز آخر.</string>
+    <string name="export_data">تصدير البيانات</string>
+    <string name="export_all_data">تصدير جميع البيانات</string>
+    <string name="export_bookmarks_only">تصدير العلامات فقط</string>
+    <string name="import_data">استيراد البيانات</string>
+    <string name="import_from_file">استيراد من ملف</string>
+    <string name="import_note">ملاحظة: الاستيراد مع \'استبدال الكل\' سيحذف جميع البيانات الموجودة. استخدم \'دمج\' للجمع مع البيانات الموجودة.</string>
+    <string name="import_backup_title">استيراد نسخة احتياطية</string>
+    <string name="import_merge">دمج مع البيانات الموجودة</string>
+    <string name="import_replace_all">استبدال جميع البيانات</string>
+    <string name="import_bookmarks_only">العلامات فقط</string>
+    <string name="button_import">استيراد</string>
+    <string name="backup_exported">تم تصدير النسخة الاحتياطية بنجاح</string>
+    <string name="backup_imported">تم استيراد النسخة الاحتياطية بنجاح</string>
+    <string name="backup_summary_bookmarks">العلامات: %d</string>
+    <string name="backup_summary_activity">نشاط القراءة: %d أيام</string>
+    <string name="backup_summary_ayahs">إجمالي الآيات المقروءة: %d</string>
+    <string name="backup_summary_created">تاريخ الإنشاء: %s</string>
+    <string name="backup_summary_version">إصدار التطبيق: %s</string>
+    <string name="backup_export">تصدير البيانات</string>
+    <string name="backup_export_desc">احفظ ملفات التعريف والعلامات الخاصة بك</string>
+    <string name="backup_import">استيراد البيانات</string>
+    <string name="backup_import_desc">الاستعادة من ملف نسخ احتياطي</string>
+    <string name="backup_success">تم إنشاء النسخة الاحتياطية بنجاح</string>
+    <string name="restore_success">تم استعادة البيانات بنجاح</string>
+    <string name="backup_error">فشل إنشاء النسخة الاحتياطية</string>
+    <string name="restore_error">فشل استعادة البيانات</string>
+
+    <!-- Random Mode Screen -->
+    <string name="screen_random_title">قراءة عشوائية</string>
+    <string name="dismiss">إغلاق</string>
+    <string name="choose_reading_mode">اختر نمط القراءة</string>
+    <string name="select_how_read_today">اختر كيف تريد أن تقرأ اليوم</string>
+    <string name="random_ayah">آية عشوائية</string>
+    <string name="random_page">صفحة عشوائية</string>
+    <string name="random_mode_single">آية عشوائية</string>
+    <string name="random_mode_range">نطاق عشوائي</string>
+    <string name="random_mode_single_desc">اقرأ آية عشوائية واحدة</string>
+    <string name="random_mode_range_desc">اقرأ عدة آيات عشوائية</string>
+
+    <!-- Bookmarks Screen -->
+    <string name="screen_bookmarks_title">العلامات</string>
+    <string name="tab_all">الكل</string>
+    <string name="add_bookmark">إضافة علامة</string>
+    <string name="empty_bookmarks">لا توجد علامات بعد</string>
+    <string name="empty_bookmarks_desc">أضف علامتك الأولى للبدء</string>
+    <string name="empty_bookmarks_message">لا توجد علامات بعد. اضغط + لإضافة واحدة!</string>
+    <string name="empty_bookmarks_title">لا توجد علامات بعد</string>
+    <string name="button_add_first_bookmark">أضف علامتك الأولى</string>
+
+    <!-- Reading Screen -->
+    <string name="screen_reading_title">القراءة</string>
+    <string name="playback_speed">سرعة التشغيل</string>
+    <string name="play">تشغيل</string>
+    <string name="pause">إيقاف مؤقت</string>
+    <string name="select_reciter">اختر القارئ</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="no_verses_display">لا توجد آيات لعرضها</string>
+    <string name="close">إغلاق</string>
+
+    <!-- Profile Screens -->
+    <string name="add_profile">إضافة ملف تعريف</string>
+    <string name="edit_profile">تعديل ملف التعريف</string>
+    <string name="profile_name">اسم ملف التعريف</string>
+    <string name="delete_profile">حذف ملف التعريف</string>
+
+    <!-- Reciter Selection -->
+    <string name="reciter_selected">تم اختيار القارئ بنجاح</string>
+    <string name="screen_reciter_title">اختر القارئ</string>
+    <string name="play_sample">تشغيل عينة</string>
+    <string name="selected">محدد</string>
+
+    <!-- Time Picker -->
+    <string name="select_reminder_time">اختر وقت التذكير</string>
+    <string name="ok">موافق</string>
+
+    <!-- Surah Dropdown -->
+    <string name="open_surah_selection">فتح اختيار السورة</string>
+    <string name="search_surahs">البحث عن السور…</string>
+    <string name="search">بحث</string>
+    <string name="clear_search">مسح البحث</string>
+    <string name="surahs_found">تم العثور على %d سورة</string>
+    <string name="ayahs_in_surah">%d آيات</string>
+
+    <!-- Bookmark Header -->
+    <string name="delete_bookmark">حذف العلامة</string>
+    <string name="delete_bookmark_confirm">هل أنت متأكد من حذف هذه العلامة؟</string>
+
+    <!-- Notifications -->
+    <string name="notification_title">تذكير قراءة القرآن</string>
+    <string name="notification_message">حان وقت قراءة القرآن اليومية</string>
+
+    <!-- Errors -->
+    <string name="error_invalid_ayah">رقم آية غير صالح</string>
+    <string name="error_invalid_range">نطاق آيات غير صالح</string>
+    <string name="error_select_surah">يرجى اختيار سورة</string>
+
+    <!-- Badge Names -->
+    <string name="badge_none">بسم ٱللّٰهِ</string>
+    <string name="badge_ghair_ghafil">ليسَ من الغافلِين</string>
+    <string name="badge_dhakir">الذّاکِرینَ</string>
+    <string name="badge_qanit">القانتین</string>
+    <string name="badge_khashie">الخاشعین</string>
+    <string name="badge_faez">الفائزین</string>
+    <string name="badge_mujtahid">المجتهدین</string>
+    <string name="badge_sahib_qantar">القنطار</string>
+</resources>

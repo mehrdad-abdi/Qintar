@@ -10,7 +10,13 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-// Quran theme colors
+// Qintar theme colors
+val QintarTealPrimary = Color(0xFF006B7D)  // Primary teal from colors.xml
+val QintarTealLight = Color(0xFF1A9B8E)    // Light teal variant
+val QintarTealDark = Color(0xFF004D5A)     // Dark teal variant
+val QintarGold = Color(0xFFD4AF37)         // Gold accent for achievements
+
+// Legacy colors (keep for backward compatibility)
 val GoldPrimary = Color(0xFFD4A574)
 val GoldVariant = Color(0xFFB8956A)
 val DarkGreen = Color(0xFF1B4D3E)

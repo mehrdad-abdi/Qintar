@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Legacy Material Colors (keep for compatibility) -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -7,4 +8,30 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Qintar Brand Colors - Based on hadith-inspired badge progression -->
+    <!-- Primary Brand Colors -->
+    <color name="qintar_teal_primary">#006B7D</color>
+    <color name="qintar_teal_light">#1A9B8E</color>
+    <color name="qintar_teal_dark">#004D5A</color>
+
+    <!-- Gold/Treasure Accent Colors -->
+    <color name="qintar_gold">#D4AF37</color>
+    <color name="qintar_gold_bright">#FFD700</color>
+    <color name="qintar_gold_dark">#B8941F</color>
+
+    <!-- Badge Level Colors (from hadith progression) -->
+    <color name="badge_bronze">#CD7F32</color>
+    <color name="badge_silver">#C0C0C0</color>
+    <color name="badge_gold">#FFD700</color>
+    <color name="badge_platinum">#E5E4E2</color>
+
+    <!-- Semantic Colors -->
+    <color name="qintar_success">#2D9C5E</color>
+    <color name="qintar_warning">#F7B731</color>
+    <color name="qintar_error">#E74C3C</color>
+
+    <!-- Surface Colors (for cards, backgrounds) -->
+    <color name="qintar_surface_light">#F5F5F5</color>
+    <color name="qintar_surface_dark">#1E1E1E</color>
 </resources>

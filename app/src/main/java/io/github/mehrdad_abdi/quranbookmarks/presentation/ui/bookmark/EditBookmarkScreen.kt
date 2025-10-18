@@ -7,18 +7,20 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.mehrdad_abdi.quranbookmarks.R
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.BookmarkType
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.RtlIcons
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.SurahDropdown
 import androidx.compose.foundation.text.KeyboardOptions
 
@@ -52,15 +54,15 @@ fun EditBookmarkScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Edit Bookmark",
+                        text = stringResource(R.string.screen_edit_bookmark_title),
                         fontWeight = FontWeight.Bold
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            imageVector = RtlIcons.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 }
@@ -98,7 +100,7 @@ fun EditBookmarkScreen(
                         selectedSurah = uiState.selectedSurah,
                         surahs = uiState.surahs,
                         onSurahSelected = viewModel::updateSelectedSurah,
-                        label = "Select Surah",
+                        label = stringResource(R.string.select_surah),
                         isError = uiState.surahError != null,
                         supportingText = uiState.surahError,
                         isLoading = uiState.isLoadingSurahs,
@@ -112,7 +114,7 @@ fun EditBookmarkScreen(
                         OutlinedTextField(
                             value = uiState.ayahNumber,
                             onValueChange = viewModel::updateAyahNumber,
-                            label = { Text("Ayah Number") },
+                            label = { Text(stringResource(R.string.ayah_number)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth(),
                             isError = uiState.ayahError != null,
@@ -124,7 +126,7 @@ fun EditBookmarkScreen(
                         OutlinedTextField(
                             value = uiState.ayahNumber,
                             onValueChange = viewModel::updateAyahNumber,
-                            label = { Text("Start Ayah") },
+                            label = { Text(stringResource(R.string.start_ayah)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth(),
                             isError = uiState.ayahError != null,
@@ -134,7 +136,7 @@ fun EditBookmarkScreen(
                         OutlinedTextField(
                             value = uiState.endAyahNumber,
                             onValueChange = viewModel::updateEndAyahNumber,
-                            label = { Text("End Ayah") },
+                            label = { Text(stringResource(R.string.end_ayah)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth(),
                             isError = uiState.endAyahError != null,
@@ -145,7 +147,7 @@ fun EditBookmarkScreen(
                     BookmarkType.SURAH -> {
                         // For full surah, we don't need ayah numbers
                         Text(
-                            text = "Complete Surah will be bookmarked",
+                            text = stringResource(R.string.complete_surah_note),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -155,7 +157,7 @@ fun EditBookmarkScreen(
                         OutlinedTextField(
                             value = uiState.ayahNumber,
                             onValueChange = viewModel::updateAyahNumber,
-                            label = { Text("Page Number") },
+                            label = { Text(stringResource(R.string.page_number)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth(),
                             isError = uiState.ayahError != null,
@@ -168,8 +170,8 @@ fun EditBookmarkScreen(
                 OutlinedTextField(
                     value = uiState.description,
                     onValueChange = viewModel::updateDescription,
-                    label = { Text("Notes (Optional)") },
-                    placeholder = { Text("Add personal notes about this bookmark...") },
+                    label = { Text(stringResource(R.string.notes_optional)) },
+                    placeholder = { Text(stringResource(R.string.notes_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
                     maxLines = 5
@@ -199,7 +201,7 @@ fun EditBookmarkScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                     }
-                    Text("Update Bookmark")
+                    Text(stringResource(R.string.button_update_bookmark))
                 }
             }
         }
@@ -214,7 +216,7 @@ private fun EditBookmarkTypeSelector(
 ) {
     Column(modifier = modifier) {
         Text(
-            text = "Bookmark Type",
+            text = stringResource(R.string.bookmark_type),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium
         )
@@ -281,7 +283,7 @@ private fun EditBookmarkPreviewCard(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Preview",
+                text = stringResource(R.string.bookmark_preview),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -304,24 +306,27 @@ private fun EditBookmarkPreviewCard(
     }
 }
 
+@Composable
 private fun getEditBookmarkTypeDisplayName(type: BookmarkType): String {
     return when (type) {
-        BookmarkType.AYAH -> "Single Ayah"
-        BookmarkType.RANGE -> "Ayah Range"
-        BookmarkType.SURAH -> "Complete Surah"
-        BookmarkType.PAGE -> "Page Reference"
+        BookmarkType.AYAH -> stringResource(R.string.bookmark_type_ayah)
+        BookmarkType.RANGE -> stringResource(R.string.bookmark_type_range)
+        BookmarkType.SURAH -> stringResource(R.string.bookmark_type_surah)
+        BookmarkType.PAGE -> stringResource(R.string.bookmark_type_page)
     }
 }
 
+@Composable
 private fun getEditBookmarkTypeDescription(type: BookmarkType): String {
     return when (type) {
-        BookmarkType.AYAH -> "Bookmark a specific verse"
-        BookmarkType.RANGE -> "Bookmark multiple consecutive verses"
-        BookmarkType.SURAH -> "Bookmark an entire chapter"
-        BookmarkType.PAGE -> "Bookmark by page number"
+        BookmarkType.AYAH -> stringResource(R.string.bookmark_type_ayah_desc)
+        BookmarkType.RANGE -> stringResource(R.string.bookmark_type_range_desc)
+        BookmarkType.SURAH -> stringResource(R.string.bookmark_type_surah_desc)
+        BookmarkType.PAGE -> stringResource(R.string.bookmark_type_page_desc)
     }
 }
 
+@Composable
 private fun generateEditPreviewText(
     type: BookmarkType,
     selectedSurah: io.github.mehrdad_abdi.quranbookmarks.domain.model.Surah?,
@@ -334,7 +339,7 @@ private fun generateEditPreviewText(
             "Page $pageNumber"
         }
         else -> {
-            val surahName = selectedSurah?.name ?: "Select Surah"
+            val surahName = selectedSurah?.name ?: stringResource(R.string.select_surah)
             val ayah = ayahNumber.ifBlank { "?" }
             val endAyah = endAyahNumber.ifBlank { "?" }
 

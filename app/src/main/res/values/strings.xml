@@ -1,3 +1,240 @@
 <resources>
-    <string name="app_name">Quran Bookmarks</string>
+    <!-- App Name -->
+    <string name="app_name">Qintar</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="settings">Settings</string>
+    <string name="refresh">Refresh</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="create">Create</string>
+    <string name="loading">Loading…</string>
+    <string name="error_generic">An error occurred</string>
+
+    <!-- Today's Progress Screen -->
+    <string name="screen_today_title">Today\'s Progress</string>
+    <string name="ayahs_today">Ayahs Today</string>
+    <string name="current_badge">Current Badge:</string>
+    <string name="button_continue_reading">Continue Reading</string>
+    <string name="button_random_reading">Random Reading</string>
+    <string name="badge_max_achieved">🎉 Maximum badge achieved!</string>
+    <string name="badge_progress_format">%1$d more ayahs to reach %2$s</string>
+
+    <!-- Streaks -->
+    <string name="streaks">Streaks</string>
+    <string name="overall_reading_streak">📊 Overall Reading Streak</string>
+    <string name="days_format">%d days</string>
+
+    <!-- Last 7 Days -->
+    <string name="last_7_days">Last 7 Days</string>
+    <string name="view_calendar">View Calendar</string>
+
+    <!-- All-Time Stats -->
+    <string name="all_time_stats">All-Time Stats</string>
+    <string name="view_more">View More</string>
+    <string name="total_ayahs">Total Ayahs</string>
+    <string name="best_day">Best Day</string>
+    <string name="ayahs_format">%d ayahs</string>
+
+    <!-- Hadith Screen -->
+    <string name="screen_hadith_title">Hadith about Quran Reading</string>
+    <string name="hadith_arabic_title">Arabic</string>
+    <string name="hadith_translation_english">English Translation</string>
+    <string name="hadith_translation_farsi">Persian Translation</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_audio">Audio</string>
+    <string name="settings_reciter">Reciter</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_daily_reminder">Daily Reminder</string>
+    <string name="settings_daily_reminder_desc">Receive daily Quran reading reminders</string>
+    <string name="settings_reminder_time">Reminder Time</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_system">System Default</string>
+    <string name="settings_primary_color">Primary Color</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_data">Data</string>
+    <string name="settings_backup_restore">Backup &amp; Restore</string>
+    <string name="settings_backup_restore_desc">Export or import your data</string>
+    <string name="dialog_select_theme">Select Theme</string>
+    <string name="dialog_select_color">Select Primary Color</string>
+    <string name="dialog_select_language">Select Language</string>
+
+    <!-- Add Bookmark Screen -->
+    <string name="screen_add_bookmark_title">Add Bookmark</string>
+    <string name="bookmark_type">Bookmark Type</string>
+    <string name="bookmark_type_ayah">Single Ayah</string>
+    <string name="bookmark_type_range">Ayah Range</string>
+    <string name="bookmark_type_surah">Complete Surah</string>
+    <string name="bookmark_type_page">Page Reference</string>
+    <string name="bookmark_type_ayah_desc">Bookmark a specific verse</string>
+    <string name="bookmark_type_range_desc">Bookmark multiple consecutive verses</string>
+    <string name="bookmark_type_surah_desc">Bookmark an entire chapter</string>
+    <string name="bookmark_type_page_desc">Bookmark by page number</string>
+    <string name="select_surah">Select Surah</string>
+    <string name="ayah_number">Ayah Number</string>
+    <string name="start_ayah">Start Ayah</string>
+    <string name="end_ayah">End Ayah</string>
+    <string name="page_number">Page Number</string>
+    <string name="notes_optional">Notes (Optional)</string>
+    <string name="notes_placeholder">Add personal notes about this bookmark…</string>
+    <string name="button_create_bookmark">Create Bookmark</string>
+    <string name="complete_surah_note">Complete Surah will be bookmarked</string>
+    <string name="bookmark_preview">Preview</string>
+
+    <!-- Edit Bookmark Screen -->
+    <string name="screen_edit_bookmark_title">Edit Bookmark</string>
+    <string name="button_save_changes">Save Changes</string>
+    <string name="button_delete_bookmark">Delete Bookmark</string>
+    <string name="button_update_bookmark">Update Bookmark</string>
+
+    <!-- Statistics Screen -->
+    <string name="screen_statistics_title">Statistics</string>
+    <string name="last_30_days">Last 30 Days</string>
+    <string name="summary_30_days">30-Day Summary</string>
+    <string name="days_read">Days Read</string>
+    <string name="average_per_day">Average/Day</string>
+    <string name="no_reading_data">No reading data yet</string>
+    <string name="badge_distribution">Badge Distribution</string>
+    <string name="no_badges_earned">No badges earned yet. Start reading to earn badges!</string>
+    <string name="days_count_format">%d days</string>
+    <string name="no_data_available">No data available</string>
+
+    <!-- Calendar Screen -->
+    <string name="screen_calendar_title">Badge Calendar</string>
+    <string name="today">Today</string>
+    <string name="previous_month">Previous month</string>
+    <string name="next_month">Next month</string>
+    <string name="day_sun">Sun</string>
+    <string name="day_mon">Mon</string>
+    <string name="day_tue">Tue</string>
+    <string name="day_wed">Wed</string>
+    <string name="day_thu">Thu</string>
+    <string name="day_fri">Fri</string>
+    <string name="day_sat">Sat</string>
+    <string name="ayahs_count_short">%d Ayahs</string>
+    <string name="no_reading_recorded">No reading recorded</string>
+    <string name="badge_levels">Badge Levels</string>
+    <string name="badge_threshold_format">%d+ ayahs</string>
+
+    <!-- Backup Screen -->
+    <string name="screen_backup_title">Backup &amp; Restore</string>
+    <string name="about_backup">About Backup</string>
+    <string name="backup_description">Export your bookmarks, reading activity, and settings to a JSON file. You can restore them later or on another device.</string>
+    <string name="export_data">Export Data</string>
+    <string name="export_all_data">Export All Data</string>
+    <string name="export_bookmarks_only">Export Bookmarks Only</string>
+    <string name="import_data">Import Data</string>
+    <string name="import_from_file">Import from File</string>
+    <string name="import_note">Note: Importing with \'Replace All\' will delete all existing data. Use \'Merge\' to combine with existing data.</string>
+    <string name="import_backup_title">Import Backup</string>
+    <string name="backup_summary_title">Backup Summary:</string>
+    <string name="import_strategy_title">Import Strategy:</string>
+    <string name="import_merge">Merge with existing data</string>
+    <string name="import_merge_desc">Add new items, keep existing</string>
+    <string name="import_replace_all">Replace all data</string>
+    <string name="import_replace_all_desc">Delete existing, import all</string>
+    <string name="import_bookmarks_only">Bookmarks only</string>
+    <string name="import_bookmarks_only_desc">Import only bookmarks</string>
+    <string name="button_import">Import</string>
+    <string name="backup_exported">Backup exported successfully</string>
+    <string name="backup_imported">Backup imported successfully</string>
+    <string name="backup_summary_bookmarks">Bookmarks: %d</string>
+    <string name="backup_summary_activity">Reading Activity: %d days</string>
+    <string name="backup_summary_ayahs">Total Ayahs Read: %d</string>
+    <string name="backup_summary_created">Created: %s</string>
+    <string name="backup_summary_version">App Version: %s</string>
+    <string name="backup_export">Export Data</string>
+    <string name="backup_export_desc">Save your profiles and bookmarks</string>
+    <string name="backup_import">Import Data</string>
+    <string name="backup_import_desc">Restore from a backup file</string>
+    <string name="backup_success">Backup created successfully</string>
+    <string name="restore_success">Data restored successfully</string>
+    <string name="backup_error">Failed to create backup</string>
+    <string name="restore_error">Failed to restore data</string>
+
+    <!-- Random Mode Screen -->
+    <string name="screen_random_title">Random Reading</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="choose_reading_mode">Choose Reading Mode</string>
+    <string name="select_how_read_today">Select how you want to read today</string>
+    <string name="random_ayah">Random Ayah</string>
+    <string name="random_page">Random Page</string>
+    <string name="random_mode_single">Random Ayah</string>
+    <string name="random_mode_range">Random Range</string>
+    <string name="random_mode_single_desc">Read one random verse</string>
+    <string name="random_mode_range_desc">Read multiple random verses</string>
+
+    <!-- Bookmarks Screen -->
+    <string name="screen_bookmarks_title">Bookmarks</string>
+    <string name="tab_all">All</string>
+    <string name="add_bookmark">Add Bookmark</string>
+    <string name="empty_bookmarks">No bookmarks yet</string>
+    <string name="empty_bookmarks_desc">Add your first bookmark to get started</string>
+    <string name="empty_bookmarks_message">No bookmarks yet. Tap + to add one!</string>
+    <string name="empty_bookmarks_title">No bookmarks yet</string>
+    <string name="button_add_first_bookmark">Add Your First Bookmark</string>
+
+    <!-- Reading Screen -->
+    <string name="screen_reading_title">Reading</string>
+    <string name="playback_speed">Playback Speed</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="select_reciter">Select Reciter</string>
+    <string name="retry">Retry</string>
+    <string name="no_verses_display">No verses to display</string>
+    <string name="close">Close</string>
+
+    <!-- Profile Screens -->
+    <string name="add_profile">Add Profile</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="profile_name">Profile Name</string>
+    <string name="delete_profile">Delete Profile</string>
+
+    <!-- Reciter Selection -->
+    <string name="reciter_selected">Reciter selected successfully</string>
+    <string name="screen_reciter_title">Select Reciter</string>
+    <string name="play_sample">Play Sample</string>
+    <string name="selected">Selected</string>
+
+    <!-- Time Picker -->
+    <string name="select_reminder_time">Select Reminder Time</string>
+    <string name="ok">OK</string>
+
+    <!-- Surah Dropdown -->
+    <string name="open_surah_selection">Open surah selection</string>
+    <string name="search_surahs">Search surahs…</string>
+    <string name="search">Search</string>
+    <string name="clear_search">Clear search</string>
+    <string name="surahs_found">%d surah(s) found</string>
+    <string name="ayahs_in_surah">%d ayahs</string>
+
+    <!-- Bookmark Header -->
+    <string name="delete_bookmark">Delete Bookmark</string>
+    <string name="delete_bookmark_confirm">Are you sure you want to delete this bookmark?</string>
+
+    <!-- Notifications -->
+    <string name="notification_title">Qintar - Time to Read</string>
+    <string name="notification_message">Collect your spiritual treasure. Read Quran and earn your daily badge!</string>
+
+    <!-- Errors -->
+    <string name="error_invalid_ayah">Invalid ayah number</string>
+    <string name="error_invalid_range">Invalid ayah range</string>
+    <string name="error_select_surah">Please select a surah</string>
+
+    <!-- Badge Names -->
+    <string name="badge_none">Bismillah</string>
+    <string name="badge_ghair_ghafil">Not Ghafil</string>
+    <string name="badge_dhakir">Zakir</string>
+    <string name="badge_qanit">Qanit</string>
+    <string name="badge_khashie">Khashie</string>
+    <string name="badge_faez">Faez</string>
+    <string name="badge_mujtahid">Mujtahid</string>
+    <string name="badge_sahib_qantar">Qintar</string>
 </resources>

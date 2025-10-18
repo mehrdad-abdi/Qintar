@@ -10,10 +10,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Today
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.RtlIcons
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,12 +19,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.mehrdad_abdi.quranbookmarks.R
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.BadgeLevel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -43,12 +43,12 @@ fun BadgeCalendarScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Badge Calendar") },
+                title = { Text(stringResource(R.string.screen_calendar_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            imageVector = RtlIcons.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 },
@@ -56,7 +56,7 @@ fun BadgeCalendarScreen(
                     IconButton(onClick = { viewModel.goToCurrentMonth() }) {
                         Icon(
                             imageVector = Icons.Default.Today,
-                            contentDescription = "Today"
+                            contentDescription = stringResource(R.string.today)
                         )
                     }
                 }
@@ -148,8 +148,8 @@ private fun MonthNavigationBar(
         ) {
             IconButton(onClick = onPreviousClick) {
                 Icon(
-                    imageVector = Icons.Default.ChevronLeft,
-                    contentDescription = "Previous month"
+                    imageVector = RtlIcons.ArrowBack,
+                    contentDescription = stringResource(R.string.previous_month)
                 )
             }
 
@@ -161,8 +161,8 @@ private fun MonthNavigationBar(
 
             IconButton(onClick = onNextClick) {
                 Icon(
-                    imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "Next month"
+                    imageVector = RtlIcons.ArrowForward,
+                    contentDescription = stringResource(R.string.next_month)
                 )
             }
         }
@@ -190,7 +190,15 @@ private fun CalendarGrid(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat").forEach { day ->
+                listOf(
+                    stringResource(R.string.day_sun),
+                    stringResource(R.string.day_mon),
+                    stringResource(R.string.day_tue),
+                    stringResource(R.string.day_wed),
+                    stringResource(R.string.day_thu),
+                    stringResource(R.string.day_fri),
+                    stringResource(R.string.day_sat)
+                ).forEach { day ->
                     Text(
                         text = day,
                         fontSize = 12.sp,
@@ -315,14 +323,14 @@ private fun SelectedDayCard(day: CalendarDay) {
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "${day.ayahCount} Ayahs",
+                            text = stringResource(R.string.ayahs_count_short, day.ayahCount),
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
                         if (day.badge != BadgeLevel.NONE) {
                             Text(
-                                text = day.badge.arabicName,
+                                text = stringResource(day.badge.nameResId),
                                 fontSize = 16.sp,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
@@ -331,7 +339,7 @@ private fun SelectedDayCard(day: CalendarDay) {
                 }
             } else {
                 Text(
-                    text = "No reading recorded",
+                    text = stringResource(R.string.no_reading_recorded),
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -353,7 +361,7 @@ private fun BadgeLegendCard() {
                 .padding(20.dp)
         ) {
             Text(
-                text = "Badge Levels",
+                text = stringResource(R.string.badge_levels),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 12.dp)
@@ -374,12 +382,12 @@ private fun BadgeLegendCard() {
                             modifier = Modifier.width(40.dp)
                         )
                         Text(
-                            text = badge.arabicName,
+                            text = stringResource(badge.nameResId),
                             fontSize = 14.sp,
                             modifier = Modifier.weight(1f)
                         )
                         Text(
-                            text = "${badge.threshold}+ ayahs",
+                            text = stringResource(R.string.badge_threshold_format, badge.threshold),
                             fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

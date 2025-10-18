@@ -1,62 +1,57 @@
 package io.github.mehrdad_abdi.quranbookmarks.domain.model
 
+import androidx.annotation.StringRes
+import io.github.mehrdad_abdi.quranbookmarks.R
+
 /**
  * Badge levels based on daily ayah reading count.
- * Each level has a threshold (minimum ayahs required) and associated emoji.
+ * Each level has a threshold (minimum ayahs required) and a localized name.
+ * Badge names are extracted from the authentic Hadith about Quran reading rewards.
  */
 enum class BadgeLevel(
     val threshold: Int,
     val emoji: String,
-    val arabicName: String,
-    val displayName: String
+    @StringRes val nameResId: Int
 ) {
     NONE(
         threshold = 0,
         emoji = "",
-        arabicName = "",
-        displayName = "No Badge"
+        nameResId = R.string.badge_none
     ),
     GHAIR_GHAFIL(
         threshold = 10,
         emoji = "🔹",
-        arabicName = "غیر غافل",
-        displayName = "Ghair Ghafil"
+        nameResId = R.string.badge_ghair_ghafil
     ),
     DHAKIR(
         threshold = 50,
         emoji = "🔺",
-        arabicName = "ذاکر",
-        displayName = "Dhakir"
+        nameResId = R.string.badge_dhakir
     ),
     QANIT(
         threshold = 100,
         emoji = "🥉",
-        arabicName = "قانت",
-        displayName = "Qanit"
+        nameResId = R.string.badge_qanit
     ),
     KHASHIE(
         threshold = 200,
         emoji = "🥈",
-        arabicName = "خاشع",
-        displayName = "Khashie"
+        nameResId = R.string.badge_khashie
     ),
     FAEZ(
         threshold = 300,
         emoji = "🥇",
-        arabicName = "فائز",
-        displayName = "Faez"
+        nameResId = R.string.badge_faez
     ),
     MUJTAHID(
         threshold = 500,
-        emoji = "🎖️",
-        arabicName = "مجتهد",
-        displayName = "Mujtahid"
+        emoji = "🎖",
+        nameResId = R.string.badge_mujtahid
     ),
     SAHIB_QANTAR(
         threshold = 1000,
         emoji = "👑",
-        arabicName = "صاحب القنطار",
-        displayName = "Sahib Al-Qantar"
+        nameResId = R.string.badge_sahib_qantar
     );
 
     companion object {
@@ -100,16 +95,5 @@ enum class BadgeLevel(
     fun getAyahsToNextLevel(currentCount: Int): Int? {
         val nextLevel = getNextLevel(this) ?: return null
         return (nextLevel.threshold - currentCount).coerceAtLeast(0)
-    }
-
-    /**
-     * Get formatted display string with emoji and name.
-     */
-    fun getDisplayString(): String {
-        return if (this == NONE) {
-            displayName
-        } else {
-            "$emoji $arabicName"
-        }
     }
 }

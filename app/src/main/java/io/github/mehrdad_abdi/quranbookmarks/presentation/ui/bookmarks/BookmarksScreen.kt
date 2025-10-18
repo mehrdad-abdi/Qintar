@@ -5,19 +5,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.UnfoldLess
 import androidx.compose.material.icons.filled.UnfoldMore
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.RtlIcons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import io.github.mehrdad_abdi.quranbookmarks.R
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.BookmarkHeaderCard
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.PlaybackSpeedButton
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.VerseCard
@@ -35,10 +36,10 @@ fun BookmarksScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Bookmarks") },
+                title = { Text(stringResource(R.string.screen_bookmarks_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(RtlIcons.ArrowBack, "Back")
                     }
                 },
                 actions = {
@@ -95,7 +96,7 @@ fun BookmarksScreen(
                         FilterChip(
                             selected = uiState.selectedTag == null,
                             onClick = { viewModel.selectTag(null) },
-                            label = { Text("All") }
+                            label = { Text(stringResource(R.string.tab_all)) }
                         )
                     }
 
@@ -124,7 +125,7 @@ fun BookmarksScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No bookmarks yet. Tap + to add one!")
+                        Text(stringResource(R.string.empty_bookmarks_message))
                     }
                 }
                 else -> {

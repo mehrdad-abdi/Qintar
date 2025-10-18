@@ -3,19 +3,21 @@ package io.github.mehrdad_abdi.quranbookmarks.presentation.ui.random
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Pages
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.mehrdad_abdi.quranbookmarks.R
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.RtlIcons
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,15 +42,15 @@ fun RandomModeSelectionScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Random Reading",
+                        text = stringResource(R.string.screen_random_title),
                         fontWeight = FontWeight.Bold
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            imageVector = RtlIcons.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 }
@@ -75,7 +77,7 @@ fun RandomModeSelectionScreen(
                         textAlign = TextAlign.Center
                     )
                     Button(onClick = { viewModel.clearError() }) {
-                        Text("Dismiss")
+                        Text(stringResource(R.string.dismiss))
                     }
                 }
             } else {
@@ -87,14 +89,14 @@ fun RandomModeSelectionScreen(
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     Text(
-                        text = "Choose Reading Mode",
+                        text = stringResource(R.string.choose_reading_mode),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
 
                     Text(
-                        text = "Select how you want to read today",
+                        text = stringResource(R.string.select_how_read_today),
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -124,7 +126,7 @@ fun RandomModeSelectionScreen(
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = "Random Ayah",
+                                text = stringResource(R.string.random_ayah),
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -153,7 +155,7 @@ fun RandomModeSelectionScreen(
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = "Random Page",
+                                text = stringResource(R.string.random_page),
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )

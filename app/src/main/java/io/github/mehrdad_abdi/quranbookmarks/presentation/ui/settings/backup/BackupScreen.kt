@@ -14,10 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Info
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.RtlIcons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -44,8 +44,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import io.github.mehrdad_abdi.quranbookmarks.R
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.backup.ImportStrategy
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,6 +59,7 @@ fun BackupScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     // Track the current URI for import
     var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
@@ -88,11 +92,11 @@ fun BackupScreen(
     LaunchedEffect(uiState.exportSuccess, uiState.importSuccess, uiState.errorMessage) {
         when {
             uiState.exportSuccess -> {
-                snackbarHostState.showSnackbar("Backup exported successfully")
+                snackbarHostState.showSnackbar(context.getString(R.string.backup_exported))
                 viewModel.clearMessages()
             }
             uiState.importSuccess -> {
-                snackbarHostState.showSnackbar("Backup imported successfully")
+                snackbarHostState.showSnackbar(context.getString(R.string.backup_imported))
                 viewModel.clearMessages()
                 pendingImportUri = null
             }
@@ -122,10 +126,10 @@ fun BackupScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Backup & Restore") },
+                title = { Text(stringResource(R.string.screen_backup_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(RtlIcons.ArrowBack, stringResource(R.string.back))
                     }
                 }
             )
@@ -167,13 +171,13 @@ fun BackupScreen(
                     )
                     Column {
                         Text(
-                            text = "About Backup",
+                            text = stringResource(R.string.about_backup),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Export your bookmarks, reading activity, and settings to a JSON file. You can restore them later or on another device.",
+                            text = stringResource(R.string.backup_description),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -183,7 +187,7 @@ fun BackupScreen(
 
             // Export section
             Text(
-                text = "Export Data",
+                text = stringResource(R.string.export_data),
                 style = MaterialTheme.typography.titleLarge
             )
 
@@ -194,9 +198,9 @@ fun BackupScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading
             ) {
-                Icon(Icons.Default.CloudUpload, "Export")
+                Icon(Icons.Default.CloudUpload, stringResource(R.string.export_data))
                 Spacer(modifier = Modifier.padding(4.dp))
-                Text("Export All Data")
+                Text(stringResource(R.string.export_all_data))
             }
 
             OutlinedButton(
@@ -207,14 +211,14 @@ fun BackupScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading
             ) {
-                Icon(Icons.Default.CloudUpload, "Export")
+                Icon(Icons.Default.CloudUpload, stringResource(R.string.export_data))
                 Spacer(modifier = Modifier.padding(4.dp))
-                Text("Export Bookmarks Only")
+                Text(stringResource(R.string.export_bookmarks_only))
             }
 
             // Import section
             Text(
-                text = "Import Data",
+                text = stringResource(R.string.import_data),
                 style = MaterialTheme.typography.titleLarge
             )
 
@@ -225,9 +229,9 @@ fun BackupScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading
             ) {
-                Icon(Icons.Default.CloudDownload, "Import")
+                Icon(Icons.Default.CloudDownload, stringResource(R.string.import_data))
                 Spacer(modifier = Modifier.padding(4.dp))
-                Text("Import from File")
+                Text(stringResource(R.string.import_from_file))
             }
 
             // Warning text
@@ -238,7 +242,7 @@ fun BackupScreen(
                 )
             ) {
                 Text(
-                    text = "Note: Importing with 'Replace All' will delete all existing data. Use 'Merge' to combine with existing data.",
+                    text = stringResource(R.string.import_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     modifier = Modifier.padding(12.dp)
@@ -258,39 +262,39 @@ fun ImportConfirmationDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Import Backup") },
+        title = { Text(stringResource(R.string.import_backup_title)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Backup Summary:", style = MaterialTheme.typography.titleSmall)
-                Text("Bookmarks: ${summary.bookmarkCount}")
-                Text("Reading Activity: ${summary.readingActivityCount} days")
-                Text("Total Ayahs Read: ${summary.totalAyahsRead}")
-                Text("Created: ${summary.timestamp.take(10)}")
-                Text("App Version: ${summary.appVersion}")
+                Text(stringResource(R.string.backup_summary_title), style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(R.string.backup_summary_bookmarks, summary.bookmarkCount))
+                Text(stringResource(R.string.backup_summary_activity, summary.readingActivityCount))
+                Text(stringResource(R.string.backup_summary_ayahs, summary.totalAyahsRead))
+                Text(stringResource(R.string.backup_summary_created, summary.timestamp.take(10)))
+                Text(stringResource(R.string.backup_summary_version, summary.appVersion))
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text("Import Strategy:", style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(R.string.import_strategy_title), style = MaterialTheme.typography.titleSmall)
 
                 ImportStrategyOption(
-                    label = "Merge with existing data",
-                    description = "Add new items, keep existing",
+                    label = stringResource(R.string.import_merge),
+                    description = stringResource(R.string.import_merge_desc),
                     selected = currentStrategy == ImportStrategy.MERGE,
                     onClick = { onStrategyChange(ImportStrategy.MERGE) }
                 )
 
                 ImportStrategyOption(
-                    label = "Replace all data",
-                    description = "Delete existing, import all",
+                    label = stringResource(R.string.import_replace_all),
+                    description = stringResource(R.string.import_replace_all_desc),
                     selected = currentStrategy == ImportStrategy.REPLACE_ALL,
                     onClick = { onStrategyChange(ImportStrategy.REPLACE_ALL) }
                 )
 
                 ImportStrategyOption(
-                    label = "Bookmarks only",
-                    description = "Import only bookmarks",
+                    label = stringResource(R.string.import_bookmarks_only),
+                    description = stringResource(R.string.import_bookmarks_only_desc),
                     selected = currentStrategy == ImportStrategy.BOOKMARKS_ONLY,
                     onClick = { onStrategyChange(ImportStrategy.BOOKMARKS_ONLY) }
                 )
@@ -298,12 +302,12 @@ fun ImportConfirmationDialog(
         },
         confirmButton = {
             Button(onClick = onConfirm) {
-                Text("Import")
+                Text(stringResource(R.string.button_import))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

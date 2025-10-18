@@ -9,12 +9,15 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.VerseMetadata
 
@@ -41,16 +44,20 @@ fun VerseCard(
             }
         )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top
+        // Force LTR layout for Arabic ayah display regardless of UI language
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
             ) {
-                // Play button
+                // Always: play button left, verse center, number right
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                // Play button (always on the left)
                 IconButton(
                     onClick = onPlayClick,
                     modifier = Modifier.size(32.dp)
@@ -64,7 +71,7 @@ fun VerseCard(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // Verse text
+                // Verse text (always in the center, right-aligned Arabic)
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -90,7 +97,7 @@ fun VerseCard(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // Verse number badge
+                // Verse number badge (always on the right)
                 Box(
                     modifier = Modifier
                         .size(32.dp)
@@ -110,21 +117,22 @@ fun VerseCard(
             // Read status indicator at bottom left
             Spacer(modifier = Modifier.height(4.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = onToggleReadStatus,
-                    modifier = Modifier.size(32.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = if (isReadToday) "Mark as unread" else "Mark as read",
-                        tint = if (isReadToday) Color(0xFF4CAF50) else Color(0xFFBDBDBD),
-                        modifier = Modifier.size(20.dp)
-                    )
+                    IconButton(
+                        onClick = onToggleReadStatus,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = if (isReadToday) "Mark as unread" else "Mark as read",
+                            tint = if (isReadToday) Color(0xFF4CAF50) else Color(0xFFBDBDBD),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }

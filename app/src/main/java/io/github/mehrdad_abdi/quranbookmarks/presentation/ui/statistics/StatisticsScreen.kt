@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -18,13 +17,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.mehrdad_abdi.quranbookmarks.R
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.BadgeLevel
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.components.RtlIcons
 import java.time.format.DateTimeFormatter
 import kotlin.math.max
 
@@ -40,12 +42,12 @@ fun StatisticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Reading Statistics") },
+                title = { Text(stringResource(R.string.screen_statistics_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            imageVector = RtlIcons.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 },
@@ -53,7 +55,7 @@ fun StatisticsScreen(
                     IconButton(onClick = { viewModel.refresh() }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh"
+                            contentDescription = stringResource(R.string.refresh)
                         )
                     }
                 }
@@ -104,7 +106,6 @@ fun StatisticsScreen(
                 // 30-day chart
                 item {
                     ChartCard(
-                        title = "Last 30 Days",
                         dayDataList = uiState.last30Days,
                         maxValue = uiState.maxAyahsInPeriod
                     )
@@ -140,7 +141,7 @@ private fun SummaryStatsCard(
                 .padding(20.dp)
         ) {
             Text(
-                text = "30-Day Summary",
+                text = stringResource(R.string.summary_30_days),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -151,7 +152,7 @@ private fun SummaryStatsCard(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 StatBox(
-                    label = "Total Ayahs",
+                    label = stringResource(R.string.total_ayahs),
                     value = totalAyahs.toString(),
                     modifier = Modifier.weight(1f)
                 )
@@ -161,7 +162,7 @@ private fun SummaryStatsCard(
                         .height(60.dp)
                 )
                 StatBox(
-                    label = "Days Read",
+                    label = stringResource(R.string.days_read),
                     value = daysRead.toString(),
                     modifier = Modifier.weight(1f)
                 )
@@ -176,7 +177,7 @@ private fun SummaryStatsCard(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 StatBox(
-                    label = "Average/Day",
+                    label = stringResource(R.string.average_per_day),
                     value = String.format("%.1f", averagePerDay),
                     modifier = Modifier.weight(1f)
                 )
@@ -186,7 +187,7 @@ private fun SummaryStatsCard(
                         .height(60.dp)
                 )
                 StatBox(
-                    label = "Best Day",
+                    label = stringResource(R.string.best_day),
                     value = bestDay?.ayahCount?.toString() ?: "—",
                     subtitle = bestDay?.date?.format(DateTimeFormatter.ofPattern("MMM dd")),
                     modifier = Modifier.weight(1f)
@@ -231,7 +232,6 @@ private fun StatBox(
 
 @Composable
 private fun ChartCard(
-    title: String,
     dayDataList: List<DayData>,
     maxValue: Int
 ) {
@@ -246,7 +246,7 @@ private fun ChartCard(
                 .padding(20.dp)
         ) {
             Text(
-                text = title,
+                text = stringResource(R.string.last_30_days),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -260,7 +260,7 @@ private fun ChartCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No reading data yet",
+                        text = stringResource(R.string.no_reading_data),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -331,7 +331,7 @@ private fun BadgeDistributionCard(
                 .padding(20.dp)
         ) {
             Text(
-                text = "Badge Distribution",
+                text = stringResource(R.string.badge_distribution),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -339,7 +339,7 @@ private fun BadgeDistributionCard(
 
             if (badgeDistribution.isEmpty()) {
                 Text(
-                    text = "No badges earned yet. Start reading to earn badges!",
+                    text = stringResource(R.string.no_badges_earned),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -381,13 +381,13 @@ private fun BadgeDistributionRow(
                     modifier = Modifier.width(32.dp)
                 )
                 Text(
-                    text = badge.arabicName,
+                    text = stringResource(badge.nameResId),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
             Text(
-                text = "$daysCount days",
+                text = stringResource(R.string.days_count_format, daysCount),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

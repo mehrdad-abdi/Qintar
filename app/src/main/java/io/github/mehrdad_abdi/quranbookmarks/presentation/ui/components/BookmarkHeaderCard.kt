@@ -13,9 +13,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.mehrdad_abdi.quranbookmarks.R
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.Bookmark
 
 @Composable
@@ -94,8 +96,8 @@ fun BookmarkHeaderCard(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Bookmark") },
-            text = { Text("Are you sure you want to delete this bookmark?") },
+            title = { Text(stringResource(R.string.delete_bookmark)) },
+            text = { Text(stringResource(R.string.delete_bookmark_confirm)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -103,12 +105,12 @@ fun BookmarkHeaderCard(
                         showDeleteDialog = false
                     }
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )

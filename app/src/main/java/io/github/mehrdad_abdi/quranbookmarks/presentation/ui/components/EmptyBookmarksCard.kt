@@ -8,9 +8,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import io.github.mehrdad_abdi.quranbookmarks.R
 
 @Composable
 fun EmptyBookmarksCard(
@@ -37,7 +39,7 @@ fun EmptyBookmarksCard(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "No bookmarks yet",
+                text = stringResource(R.string.empty_bookmarks_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center
@@ -46,7 +48,7 @@ fun EmptyBookmarksCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Start adding bookmarks to organize your favorite verses",
+                text = stringResource(R.string.empty_bookmarks_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -64,7 +66,7 @@ fun EmptyBookmarksCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Add Your First Bookmark")
+                Text(stringResource(R.string.button_add_first_bookmark))
             }
         }
     }

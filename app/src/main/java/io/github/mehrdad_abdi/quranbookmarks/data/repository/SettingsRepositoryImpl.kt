@@ -3,6 +3,7 @@ package io.github.mehrdad_abdi.quranbookmarks.data.repository
 import android.content.Context
 import android.content.SharedPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.AppLanguage
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.AppSettings
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.AppTheme
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.NotificationSettings
@@ -66,6 +67,10 @@ class SettingsRepositoryImpl @Inject constructor(
         prefs.edit().putFloat(KEY_PLAYBACK_SPEED, speed).apply()
     }
 
+    override suspend fun updateLanguage(language: AppLanguage) {
+        prefs.edit().putString(KEY_LANGUAGE, language.localeCode).apply()
+    }
+
     private fun loadSettings(): AppSettings {
         val reciter = prefs.getString(KEY_RECITER, DEFAULT_RECITER) ?: DEFAULT_RECITER
         val bitrate = prefs.getString(KEY_BITRATE, DEFAULT_BITRATE) ?: DEFAULT_BITRATE
@@ -74,11 +79,15 @@ class SettingsRepositoryImpl @Inject constructor(
         val themeName = prefs.getString(KEY_THEME, AppTheme.SYSTEM.name) ?: AppTheme.SYSTEM.name
         val primaryColor = prefs.getString(KEY_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR) ?: DEFAULT_PRIMARY_COLOR
         val playbackSpeed = prefs.getFloat(KEY_PLAYBACK_SPEED, DEFAULT_PLAYBACK_SPEED)
+        val languageCode = prefs.getString(KEY_LANGUAGE, DEFAULT_LANGUAGE) ?: DEFAULT_LANGUAGE
+
         val theme = try {
             AppTheme.valueOf(themeName)
         } catch (e: IllegalArgumentException) {
             AppTheme.SYSTEM
         }
+
+        val language = AppLanguage.fromLocaleCode(languageCode)
 
         return AppSettings(
             reciterEdition = reciter,
@@ -89,7 +98,8 @@ class SettingsRepositoryImpl @Inject constructor(
             ),
             theme = theme,
             primaryColorHex = primaryColor,
-            playbackSpeed = playbackSpeed
+            playbackSpeed = playbackSpeed,
+            language = language
         )
     }
 
@@ -101,11 +111,13 @@ class SettingsRepositoryImpl @Inject constructor(
         private const val KEY_THEME = "theme"
         private const val KEY_PRIMARY_COLOR = "primary_color"
         private const val KEY_PLAYBACK_SPEED = "playback_speed"
+        private const val KEY_LANGUAGE = "language"
 
         private const val DEFAULT_RECITER = "ar.alafasy"
         private const val DEFAULT_BITRATE = "64"
         private const val DEFAULT_TIME = "07:00"
-        private const val DEFAULT_PRIMARY_COLOR = "#C5A05C" // Gold
+        private const val DEFAULT_PRIMARY_COLOR = "#006B7D" // Qintar Teal
         private const val DEFAULT_PLAYBACK_SPEED = 1.0f
+        private const val DEFAULT_LANGUAGE = "en" // English
     }
 }
