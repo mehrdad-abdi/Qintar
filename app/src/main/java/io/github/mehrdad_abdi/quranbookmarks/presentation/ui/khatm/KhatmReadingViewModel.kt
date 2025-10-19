@@ -55,9 +55,11 @@ class KhatmReadingViewModel @Inject constructor(
         getTodayStatsUseCase()
     ) { uiState, audioState, todayStats ->
         // Handle auto-play next ayah when current one completes
+        // Don't handle completion if bismillah is playing (AudioService handles that)
         if (audioState.completedUrl != null &&
             audioState.completedUrl != lastCompletedUrl &&
-            !audioState.isPlaying) {
+            !audioState.isPlaying &&
+            !audioState.isPlayingBismillah) {
             lastCompletedUrl = audioState.completedUrl
             handleAudioCompletion()
         }
@@ -143,14 +145,9 @@ class KhatmReadingViewModel @Inject constructor(
             val verse = verses[verseIndex]
             Log.d(TAG, "Playing audio for verse $verseIndex: Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
 
-            val audioUrl = getAudioUrl(verse)
-            if (audioUrl != null) {
-                _uiState.value = currentState.copy(currentPlayingIndex = verseIndex)
-                audioService.playAudio(audioUrl)
-            } else {
-                Log.e(TAG, "Unable to get audio URL for verse")
-                _uiState.value = currentState.copy(error = "Unable to get audio URL")
-            }
+            // Use audioService.playVerse to handle bismillah automatically
+            _uiState.value = currentState.copy(currentPlayingIndex = verseIndex)
+            audioService.playVerse(verse)
         }
     }
 

@@ -32,8 +32,6 @@ data class BookmarkReadingUiState(
     val selectedReciter: ReciterData? = null,
     val showReciterSelection: Boolean = false,
     val playbackSpeed: PlaybackSpeed = PlaybackSpeed.SPEED_1,
-    val pendingVerseAfterBismillah: Int? = null, // Tracks which verse to play after bismillah completes
-    val isPlayingBismillah: Boolean = false, // Indicates bismillah is currently playing
     val readAyahIds: Set<String> = emptySet() // Set of ayah IDs read today
 )
 
@@ -265,50 +263,10 @@ class BookmarkReadingViewModel @Inject constructor(
             val verse = verseItem.verse
             Log.d(TAG, "=== PLAYING AUDIO DEBUG ===")
             Log.d(TAG, "Verse: Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}, GlobalIndex $globalIndex")
-            Log.d(TAG, "Selected Reciter: ${currentState.selectedReciter?.identifier}")
 
-            // Check if bismillah should be played first
-            if (shouldPlayBismillah(verseItem)) {
-                Log.d(TAG, "✓ BISMILLAH REQUIRED for Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
-                val bismillahUrl = getBismillahAudioUrl()
-
-                Log.d(TAG, "Bismillah URL: $bismillahUrl")
-                if (bismillahUrl != null) {
-                    Log.d(TAG, "▶ PLAYING BISMILLAH: $bismillahUrl")
-                    // Set pending verse and play bismillah
-                    _uiState.value = currentState.copy(
-                        currentPlayingIndex = globalIndex,
-                        pendingVerseAfterBismillah = globalIndex,
-                        isPlayingBismillah = true
-                    )
-                    audioService.playAudio(bismillahUrl)
-                    return@launch
-                } else {
-                    Log.e(TAG, "✗ BISMILLAH URL IS NULL - playing verse directly")
-                }
-            } else {
-                Log.d(TAG, "✗ No bismillah needed for Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
-            }
-
-            // Play the verse directly (either no bismillah needed or bismillah URL failed)
-            val audioUrl = getAudioUrl(verseItem)
-
-            if (audioUrl != null) {
-                Log.d(TAG, "Playing verse at globalIndex $globalIndex: $audioUrl")
-                _uiState.value = currentState.copy(
-                    currentPlayingIndex = globalIndex,
-                    isPlayingBismillah = false,
-                    pendingVerseAfterBismillah = null
-                )
-                audioService.playAudio(audioUrl)
-            } else {
-                Log.e(TAG, "Unable to get audio URL for verse at globalIndex $globalIndex")
-                _uiState.value = currentState.copy(
-                    error = "Unable to get audio URL for this verse",
-                    isPlayingBismillah = false,
-                    pendingVerseAfterBismillah = null
-                )
-            }
+            // Use audioService.playVerse to handle bismillah automatically
+            _uiState.value = currentState.copy(currentPlayingIndex = globalIndex)
+            audioService.playVerse(verse)
         }
     }
 
@@ -340,58 +298,6 @@ class BookmarkReadingViewModel @Inject constructor(
         Log.d(TAG, "Playback speed changed to ${speed.displayText}")
     }
 
-    /**
-     * Check if bismillah should be played before this verse
-     * Bismillah plays for first verses (ayahInSurah == 1) of surahs 2-114, excluding surah 9 (At-Tawbah)
-     */
-    private fun shouldPlayBismillah(verseItem: ReadingListItem.VerseItem): Boolean {
-        val verse = verseItem.verse
-        Log.d(TAG, "Checking bismillah: Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
-        Log.d(TAG, "  - ayahInSurah == 1? ${verse.ayahInSurah == 1}")
-        Log.d(TAG, "  - surahNumber in 2..114? ${verse.surahNumber in 2..114}")
-        Log.d(TAG, "  - surahNumber != 9? ${verse.surahNumber != 9}")
-
-        val shouldPlay = verse.ayahInSurah == 1 &&
-                        verse.surahNumber in 2..114 &&
-                        verse.surahNumber != 9
-
-        Log.d(TAG, "  - RESULT: shouldPlay = $shouldPlay")
-        return shouldPlay
-    }
-
-    /**
-     * Get audio URL for bismillah (global ayah number 1 - Al-Fatiha 1:1)
-     * Check for cached bismillah first, fall back to streaming
-     */
-    private suspend fun getBismillahAudioUrl(): String? {
-        val state = _uiState.value
-        val reciter = state.selectedReciter
-
-        Log.d(TAG, "getBismillahAudioUrl called")
-        Log.d(TAG, "  - selectedReciter: ${reciter?.identifier}")
-
-        return if (reciter != null) {
-            // Check if bismillah is cached (surah 1, ayah 1)
-            val cachedContent = quranRepository.getCachedContent(1, 1)
-            Log.d(TAG, "  - Cached content for 1:1: ${cachedContent != null}")
-            Log.d(TAG, "  - Cached audio path: ${cachedContent?.audioPath}")
-
-            if (cachedContent?.audioPath != null) {
-                Log.d(TAG, "  → Using cached bismillah audio: ${cachedContent.audioPath}")
-                return cachedContent.audioPath
-            }
-
-            // Fall back to streaming URL for global ayah number 1 using settings bitrate
-            val settings = settingsRepository.getSettings().stateIn(viewModelScope).value
-            val audioUrl = quranRepository.getAudioUrl(reciter.identifier, 1, settings.reciterBitrate)
-            Log.d(TAG, "  → Using streaming bismillah URL: $audioUrl (bitrate: ${settings.reciterBitrate})")
-            audioUrl
-        } else {
-            Log.e(TAG, "  ✗ No reciter selected for bismillah!")
-            null
-        }
-    }
-
     private fun handleAudioCompletion(completedUrl: String) {
         viewModelScope.launch {
             try {
@@ -399,39 +305,6 @@ class BookmarkReadingViewModel @Inject constructor(
                 val currentPlayingIndex = currentState.currentPlayingIndex
 
                 Log.d(TAG, "Audio completed: $completedUrl, current index: $currentPlayingIndex")
-
-                // Check if bismillah just completed - if so, play the pending verse
-                if (currentState.isPlayingBismillah && currentState.pendingVerseAfterBismillah != null) {
-                    Log.d(TAG, "Bismillah completed, playing pending verse: ${currentState.pendingVerseAfterBismillah}")
-
-                    // Clear completion BEFORE playing next to prevent race condition
-                    audioService.clearCompletion()
-
-                    // Small delay to ensure MediaPlayer has fully released
-                    kotlinx.coroutines.delay(100)
-
-                    val verseItems = currentState.listItems.filterIsInstance<ReadingListItem.VerseItem>()
-                    val verseItem = verseItems.find { it.globalIndex == currentState.pendingVerseAfterBismillah }
-
-                    if (verseItem != null) {
-                        val audioUrl = getAudioUrl(verseItem)
-                        if (audioUrl != null) {
-                            _uiState.value = currentState.copy(
-                                isPlayingBismillah = false,
-                                pendingVerseAfterBismillah = null
-                            )
-                            audioService.playAudio(audioUrl)
-                        } else {
-                            Log.e(TAG, "Unable to get audio URL for pending verse")
-                            _uiState.value = currentState.copy(
-                                isPlayingBismillah = false,
-                                pendingVerseAfterBismillah = null,
-                                error = "Unable to get audio URL for verse"
-                            )
-                        }
-                    }
-                    return@launch
-                }
 
                 // Normal verse-to-verse progression
                 if (currentPlayingIndex != null) {
@@ -463,9 +336,7 @@ class BookmarkReadingViewModel @Inject constructor(
                         lastCompletedUrl = null
                         _uiState.value = currentState.copy(
                             currentPlayingIndex = null,
-                            isPlayingAudio = false,
-                            isPlayingBismillah = false,
-                            pendingVerseAfterBismillah = null
+                            isPlayingAudio = false
                         )
                     }
                 } else {
@@ -476,10 +347,6 @@ class BookmarkReadingViewModel @Inject constructor(
                 Log.e(TAG, "Error in handleAudioCompletion", e)
                 audioService.clearCompletion()
                 lastCompletedUrl = null
-                _uiState.value = _uiState.value.copy(
-                    isPlayingBismillah = false,
-                    pendingVerseAfterBismillah = null
-                )
             }
         }
     }

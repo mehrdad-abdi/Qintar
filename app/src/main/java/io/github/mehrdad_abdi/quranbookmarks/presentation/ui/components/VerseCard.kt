@@ -73,6 +73,19 @@ fun VerseCard(
 
                 // Verse text (always in the center, right-aligned Arabic)
                 Column(modifier = Modifier.weight(1f)) {
+                    // Show surah name if this is the first ayah
+                    if (verse.ayahInSurah == 1) {
+                        Text(
+                            text = verse.surahName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = primaryColor,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End,

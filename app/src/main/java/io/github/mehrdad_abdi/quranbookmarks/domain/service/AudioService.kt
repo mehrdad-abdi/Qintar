@@ -8,12 +8,15 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.VerseMetadata
+import io.github.mehrdad_abdi.quranbookmarks.domain.repository.QuranRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,7 +29,9 @@ data class AudioPlaybackState(
     val progress: Int = 0,
     val duration: Int = 0,
     val playbackSpeed: Float = 1.0f,
-    val completedUrl: String? = null // URL of the audio that just completed
+    val completedUrl: String? = null, // URL of the audio that just completed
+    val isPlayingBismillah: Boolean = false,
+    val pendingVerseAfterBismillah: VerseMetadata? = null
 )
 
 enum class PlaybackSpeed(val value: Float, val displayText: String) {
@@ -47,7 +52,8 @@ enum class PlaybackSpeed(val value: Float, val displayText: String) {
 @Singleton
 class AudioService @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val quranRepository: QuranRepository
 ) {
     private var mediaPlayer: MediaPlayer? = null
     private var audioManager: AudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -159,6 +165,11 @@ class AudioService @Inject constructor(
                         completedUrl = completedUrl
                     )
                     releaseAudioFocus()
+
+                    // Check if bismillah just completed - if so, play the pending verse
+                    if (_playbackState.value.isPlayingBismillah) {
+                        handleBismillahCompletion()
+                    }
                 }
 
                 setOnErrorListener { _, what, extra ->
@@ -336,6 +347,155 @@ class AudioService @Inject constructor(
         } else {
             @Suppress("DEPRECATION")
             audioManager.abandonAudioFocus(audioFocusListener)
+        }
+    }
+
+    /**
+     * Play a verse with automatic bismillah handling.
+     * If the verse is the first ayah of a surah (2-114, excluding surah 9),
+     * bismillah will be played first, then the verse.
+     */
+    suspend fun playVerse(verse: VerseMetadata) {
+        try {
+            Log.d("AudioService", "=== PLAY VERSE ===")
+            Log.d("AudioService", "Verse: Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
+
+            // Check if bismillah should be played first
+            if (shouldPlayBismillah(verse)) {
+                Log.d("AudioService", "✓ BISMILLAH REQUIRED")
+                val bismillahUrl = getBismillahUrl()
+
+                if (bismillahUrl != null) {
+                    Log.d("AudioService", "▶ PLAYING BISMILLAH: $bismillahUrl")
+                    // Store the pending verse and mark as playing bismillah
+                    _playbackState.value = _playbackState.value.copy(
+                        isPlayingBismillah = true,
+                        pendingVerseAfterBismillah = verse
+                    )
+                    playAudio(bismillahUrl)
+                    return
+                } else {
+                    Log.e("AudioService", "✗ BISMILLAH URL IS NULL - playing verse directly")
+                }
+            } else {
+                Log.d("AudioService", "✗ No bismillah needed")
+            }
+
+            // Play the verse directly (either no bismillah needed or bismillah URL failed)
+            playVerseDirectly(verse)
+        } catch (e: Exception) {
+            Log.e("AudioService", "Exception in playVerse", e)
+            _playbackState.value = _playbackState.value.copy(
+                isLoading = false,
+                isPlaying = false,
+                error = "Failed to play verse: ${e.message}",
+                isPlayingBismillah = false,
+                pendingVerseAfterBismillah = null
+            )
+        }
+    }
+
+    /**
+     * Play a verse directly without bismillah check
+     */
+    private suspend fun playVerseDirectly(verse: VerseMetadata) {
+        try {
+            val audioUrl = getVerseAudioUrl(verse)
+            Log.d("AudioService", "▶ PLAYING VERSE: $audioUrl")
+            _playbackState.value = _playbackState.value.copy(
+                isPlayingBismillah = false,
+                pendingVerseAfterBismillah = null
+            )
+            playAudio(audioUrl)
+        } catch (e: Exception) {
+            Log.e("AudioService", "Failed to play verse directly", e)
+            _playbackState.value = _playbackState.value.copy(
+                error = "Failed to play audio: ${e.message}",
+                isPlayingBismillah = false,
+                pendingVerseAfterBismillah = null
+            )
+        }
+    }
+
+    /**
+     * Check if bismillah should be played before this verse.
+     * Bismillah plays for first verses (ayahInSurah == 1) of surahs 2-114, excluding surah 9 (At-Tawbah)
+     */
+    private fun shouldPlayBismillah(verse: VerseMetadata): Boolean {
+        Log.d("AudioService", "Checking bismillah: Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
+        val shouldPlay = verse.ayahInSurah == 1 &&
+                        verse.surahNumber in 2..114 &&
+                        verse.surahNumber != 9
+        Log.d("AudioService", "  - RESULT: shouldPlay = $shouldPlay")
+        return shouldPlay
+    }
+
+    /**
+     * Get audio URL for bismillah (global ayah number 1 - Al-Fatiha 1:1)
+     */
+    private suspend fun getBismillahUrl(): String? {
+        Log.d("AudioService", "getBismillahUrl called")
+
+        return try {
+            // Check if bismillah is cached (surah 1, ayah 1)
+            val cachedContent = quranRepository.getCachedContent(1, 1)
+            Log.d("AudioService", "  - Cached content for 1:1: ${cachedContent != null}")
+            Log.d("AudioService", "  - Cached audio path: ${cachedContent?.audioPath}")
+
+            if (cachedContent?.audioPath != null) {
+                Log.d("AudioService", "  → Using cached bismillah audio: ${cachedContent.audioPath}")
+                return "file://${cachedContent.audioPath}"
+            }
+
+            // Fall back to streaming URL for global ayah number 1
+            val settings = settingsRepository.getSettings().stateIn(serviceScope).value
+            val audioUrl = quranRepository.getAudioUrl(settings.reciterEdition, 1, settings.reciterBitrate)
+            Log.d("AudioService", "  → Using streaming bismillah URL: $audioUrl (bitrate: ${settings.reciterBitrate})")
+            audioUrl
+        } catch (e: Exception) {
+            Log.e("AudioService", "  ✗ Error getting bismillah URL", e)
+            null
+        }
+    }
+
+    /**
+     * Get audio URL for a verse (cached or streaming)
+     */
+    private suspend fun getVerseAudioUrl(verse: VerseMetadata): String {
+        // Check if we have cached audio first
+        val cachedContent = quranRepository.getCachedContent(verse.surahNumber, verse.ayahInSurah)
+        if (cachedContent?.audioPath != null) {
+            Log.d("AudioService", "Using cached audio: ${cachedContent.audioPath}")
+            return "file://${cachedContent.audioPath}"
+        }
+
+        // Fall back to streaming URL using settings
+        val settings = settingsRepository.getSettings().stateIn(serviceScope).value
+        val audioUrl = quranRepository.getAudioUrl(
+            settings.reciterEdition,
+            verse.globalAyahNumber,
+            settings.reciterBitrate
+        )
+        Log.d("AudioService", "Using streaming audio URL: $audioUrl")
+        return audioUrl
+    }
+
+    /**
+     * Handle the completion transition from bismillah to verse
+     */
+    private fun handleBismillahCompletion() {
+        serviceScope.launch {
+            val pendingVerse = _playbackState.value.pendingVerseAfterBismillah
+            if (pendingVerse != null) {
+                Log.d("AudioService", "Bismillah completed, playing pending verse")
+
+                // Clear completion BEFORE playing next
+                clearCompletion()
+                kotlinx.coroutines.delay(100)
+
+                // Play the pending verse
+                playVerseDirectly(pendingVerse)
+            }
         }
     }
 
