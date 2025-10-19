@@ -9,6 +9,7 @@
 > وَمَنْ قَرَأَ ثَلاثَ مِئَةِ آیةٍ کُتِبَ مِنَ الْفائِزینَ 🥇،
 > وَمَنْ قَرَأَ خَمْسَ مِائَةِ آیةٍ کُتِبَ مِنَ المُجْتَهدینَ 🎖️،
 > وَمَنْ قَرَأَ ألْفَ آیةٍ کُتِبَ لَهُ قِنْطارٌ مِنْ بِرًْ 👑
+> القِنطارُ خَمْسَهَ عَشَرَ ألفَ (خَمْسونَ الفَ) مِثْقالٍ أرْبَعَةٌ وَعِشْرونَ قیراطاً أصْغَرُها مِثْلُ جَبَلِ اُحُدٍ وَأَکْبَرُها مابَیْنَ السماءِ وَالارض
 >
 > *"The Messenger of Allah (peace be upon him and his family and companions) said:*
 > *Whoever recites ten verses in a night will not be written among the heedless,*
@@ -19,7 +20,7 @@
 > *whoever recites five hundred verses will be written among the strivers,*
 > *and whoever recites one thousand verses will be rewarded with a Qintar of virtue."*
 
-A modern Android app inspired by this Hadith, helping you build consistent Quran reading habits through personalized bookmarks, automatic daily tracking, and spiritual progress badges.
+A modern Android app inspired by this Hadith, helping you build consistent Quran reading habits through gamification, personalized bookmarks, automatic daily tracking, and spiritual progress badges.
 
 ## Overview
 
