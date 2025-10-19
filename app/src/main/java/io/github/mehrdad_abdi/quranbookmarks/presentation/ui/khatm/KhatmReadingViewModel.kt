@@ -104,10 +104,7 @@ class KhatmReadingViewModel @Inject constructor(
             )
 
             try {
-                // Save progress
-                updateKhatmProgressUseCase(pageNumber)
-
-                // Load verses for this page
+                // Load verses for this page (don't save progress until ayah is marked)
                 val result = quranRepository.getPageMetadata(pageNumber)
                 if (result.isSuccess) {
                     val verses = result.getOrThrow()
@@ -258,6 +255,7 @@ class KhatmReadingViewModel @Inject constructor(
         }
     }
 
+
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
         audioService.clearError()
@@ -266,12 +264,17 @@ class KhatmReadingViewModel @Inject constructor(
     /**
      * Toggle read status for a specific ayah in Khatm reading
      * Uses KHATM_BOOKMARK_ID (-1) as the bookmark identifier
+     * Also updates lastPageRead to current page when marking as read
      */
     fun toggleAyahReadStatus(verse: VerseMetadata) {
         viewModelScope.launch {
             val ayahId = getAyahId(verse)
+            val currentPage = _uiState.value.currentPage
             try {
                 toggleAyahTrackingUseCase(ayahId = ayahId)
+                // Update last page read to current page
+                updateKhatmProgressUseCase(currentPage)
+                Log.d(TAG, "Toggled ayah read status and updated lastPageRead to $currentPage")
             } catch (e: Exception) {
                 Log.e(TAG, "Error toggling ayah read status", e)
             }
@@ -281,6 +284,7 @@ class KhatmReadingViewModel @Inject constructor(
     /**
      * Mark ayah as read (called when audio completes)
      * Only marks if not already read today
+     * Also updates lastPageRead to current page when marking as read
      */
     private fun markAyahAsRead(verse: VerseMetadata) {
         viewModelScope.launch {
@@ -291,7 +295,9 @@ class KhatmReadingViewModel @Inject constructor(
             if (ayahId !in currentState.readAyahIds) {
                 try {
                     toggleAyahTrackingUseCase(ayahId = ayahId)
-                    Log.d(TAG, "Marked ayah as read: $ayahId")
+                    // Update last page read to current page
+                    updateKhatmProgressUseCase(currentState.currentPage)
+                    Log.d(TAG, "Marked ayah as read: $ayahId and updated lastPageRead to ${currentState.currentPage}")
                 } catch (e: Exception) {
                     Log.e(TAG, "Error marking ayah as read", e)
                 }

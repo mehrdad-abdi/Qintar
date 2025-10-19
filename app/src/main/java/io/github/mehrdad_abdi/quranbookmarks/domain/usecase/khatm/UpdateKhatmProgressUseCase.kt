@@ -6,6 +6,7 @@ import javax.inject.Inject
 
 /**
  * Use case to update the last page read in Khatm reading
+ * Only called when user marks an ayah as read (manual or audio completion)
  */
 class UpdateKhatmProgressUseCase @Inject constructor(
     private val repository: KhatmProgressRepository
