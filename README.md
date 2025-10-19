@@ -20,7 +20,7 @@
 > *whoever recites five hundred verses will be written among the strivers,*
 > *and whoever recites one thousand verses will be rewarded with a Qintar of virtue."*
 
-A modern Android app inspired by this Hadith, helping you build consistent Quran reading habits through personalized bookmarks, automatic daily tracking, and spiritual progress badges.
+A modern Android app inspired by this Hadith, helping you build consistent Quran reading habits through gamification, personalized bookmarks, automatic daily tracking, and spiritual progress badges.
 
 ## Overview
 
