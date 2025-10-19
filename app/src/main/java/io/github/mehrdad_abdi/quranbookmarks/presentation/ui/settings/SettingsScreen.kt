@@ -34,6 +34,7 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToReciterSelection: () -> Unit,
     onNavigateToBackup: () -> Unit = {},
+    onNavigateToAbout: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -134,6 +135,17 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_backup_restore),
                 subtitle = stringResource(R.string.settings_backup_restore_desc),
                 onClick = onNavigateToBackup
+            )
+
+            Divider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            // About Section
+            SettingsSectionHeader("About")
+
+            SettingsItem(
+                title = stringResource(R.string.screen_about_title),
+                subtitle = "Version ${stringResource(R.string.about_version_name)} - ${stringResource(R.string.about_powered_by)}",
+                onClick = onNavigateToAbout
             )
 
             Spacer(modifier = Modifier.height(16.dp))

@@ -8,9 +8,12 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.PlaybackContext
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.VerseMetadata
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.QuranRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
+import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.cache.AyahReference
+import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.cache.CacheAyahContentUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +34,11 @@ data class AudioPlaybackState(
     val playbackSpeed: Float = 1.0f,
     val completedUrl: String? = null, // URL of the audio that just completed
     val isPlayingBismillah: Boolean = false,
-    val pendingVerseAfterBismillah: VerseMetadata? = null
+    val pendingVerseAfterBismillah: VerseMetadata? = null,
+    val prefetchInProgress: Boolean = false,
+    val lastPrefetchedAyah: String? = null, // Format: "surah:ayah"
+    val playbackContext: PlaybackContext? = null,
+    val currentVerse: VerseMetadata? = null
 )
 
 enum class PlaybackSpeed(val value: Float, val displayText: String) {
@@ -53,7 +60,8 @@ enum class PlaybackSpeed(val value: Float, val displayText: String) {
 class AudioService @Inject constructor(
     @ApplicationContext private val context: Context,
     private val settingsRepository: SettingsRepository,
-    private val quranRepository: QuranRepository
+    private val quranRepository: QuranRepository,
+    private val cacheAyahContentUseCase: CacheAyahContentUseCase
 ) {
     private var mediaPlayer: MediaPlayer? = null
     private var audioManager: AudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -154,6 +162,17 @@ class AudioService @Inject constructor(
                     )
                     it.start()
                     Log.d("AudioService", "Audio playback started")
+
+                    // Start prefetch after playback begins (skip for bismillah)
+                    if (!_playbackState.value.isPlayingBismillah) {
+                        serviceScope.launch {
+                            val verse = _playbackState.value.currentVerse
+                            val ctx = _playbackState.value.playbackContext
+                            if (verse != null && ctx != null) {
+                                prefetchNextAyah(verse, ctx)
+                            }
+                        }
+                    }
                 }
 
                 setOnCompletionListener {
@@ -351,14 +370,24 @@ class AudioService @Inject constructor(
     }
 
     /**
-     * Play a verse with automatic bismillah handling.
+     * Play a verse with automatic bismillah handling and smart prefetching.
      * If the verse is the first ayah of a surah (2-114, excluding surah 9),
      * bismillah will be played first, then the verse.
+     *
+     * @param verse The verse to play
+     * @param context Optional playback context for smart prefetching of next ayah
      */
-    suspend fun playVerse(verse: VerseMetadata) {
+    suspend fun playVerse(verse: VerseMetadata, context: PlaybackContext? = null) {
         try {
             Log.d("AudioService", "=== PLAY VERSE ===")
             Log.d("AudioService", "Verse: Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
+            Log.d("AudioService", "Context: ${context?.javaClass?.simpleName}")
+
+            // Store context and current verse for prefetching
+            _playbackState.value = _playbackState.value.copy(
+                playbackContext = context,
+                currentVerse = verse
+            )
 
             // Check if bismillah should be played first
             if (shouldPlayBismillah(verse)) {
@@ -496,6 +525,126 @@ class AudioService @Inject constructor(
                 // Play the pending verse
                 playVerseDirectly(pendingVerse)
             }
+        }
+    }
+
+    /**
+     * Prefetch the next ayah in the background based on playback context.
+     * This ensures seamless playback by downloading the next ayah while the current one plays.
+     */
+    private suspend fun prefetchNextAyah(currentVerse: VerseMetadata, context: PlaybackContext) {
+        if (_playbackState.value.prefetchInProgress) {
+            Log.d("AudioService", "Prefetch already in progress, skipping")
+            return
+        }
+
+        val nextVerse = determineNextVerse(currentVerse, context) ?: return
+        val ayahId = "${nextVerse.surahNumber}:${nextVerse.ayahInSurah}"
+
+        // Skip if already prefetched
+        if (_playbackState.value.lastPrefetchedAyah == ayahId) {
+            Log.d("AudioService", "Next ayah already prefetched: $ayahId")
+            return
+        }
+
+        // Check if already cached
+        val cached = quranRepository.getCachedContent(nextVerse.surahNumber, nextVerse.ayahInSurah)
+        if (cached?.audioPath != null) {
+            Log.d("AudioService", "Next ayah already cached: $ayahId")
+            _playbackState.value = _playbackState.value.copy(lastPrefetchedAyah = ayahId)
+            return
+        }
+
+        // Start prefetch in background
+        _playbackState.value = _playbackState.value.copy(prefetchInProgress = true)
+
+        serviceScope.launch {
+            try {
+                Log.d("AudioService", "Prefetching next ayah: $ayahId")
+
+                // Prefetch bismillah if needed for next verse
+                if (shouldPlayBismillah(nextVerse)) {
+                    val bismillahCached = quranRepository.getCachedContent(1, 1)
+                    if (bismillahCached?.audioPath == null) {
+                        Log.d("AudioService", "Prefetching bismillah for next ayah")
+                        cacheAyahContentUseCase(AyahReference(1, 1, 1))
+                    }
+                }
+
+                // Prefetch next ayah
+                val result = cacheAyahContentUseCase(
+                    AyahReference(
+                        nextVerse.surahNumber,
+                        nextVerse.ayahInSurah,
+                        nextVerse.globalAyahNumber
+                    )
+                )
+
+                if (result.isSuccess) {
+                    Log.d("AudioService", "Successfully prefetched: $ayahId")
+                    _playbackState.value = _playbackState.value.copy(
+                        lastPrefetchedAyah = ayahId,
+                        prefetchInProgress = false
+                    )
+                } else {
+                    Log.w("AudioService", "Failed to prefetch: $ayahId - ${result.exceptionOrNull()?.message}")
+                    _playbackState.value = _playbackState.value.copy(prefetchInProgress = false)
+                }
+            } catch (e: Exception) {
+                Log.e("AudioService", "Error during prefetch", e)
+                _playbackState.value = _playbackState.value.copy(prefetchInProgress = false)
+            }
+        }
+    }
+
+    /**
+     * Determine the next verse to prefetch based on playback context
+     */
+    private suspend fun determineNextVerse(
+        current: VerseMetadata,
+        context: PlaybackContext
+    ): VerseMetadata? {
+        return when (context) {
+            is PlaybackContext.SingleBookmark -> {
+                val nextIndex = context.currentIndex + 1
+                if (nextIndex < context.allAyahs.size) {
+                    context.allAyahs[nextIndex]
+                } else {
+                    null
+                }
+            }
+            is PlaybackContext.AllBookmarks -> {
+                val nextIndex = context.currentIndex + 1
+                if (nextIndex < context.allAyahs.size) {
+                    context.allAyahs[nextIndex].verse
+                } else {
+                    null
+                }
+            }
+            is PlaybackContext.KhatmReading -> {
+                val nextIndex = context.currentIndex + 1
+                if (nextIndex < context.allAyahsOnPage.size) {
+                    // Next ayah on same page
+                    context.allAyahsOnPage[nextIndex]
+                } else {
+                    // Last ayah on page - fetch first ayah of next page
+                    val nextPageNumber = context.currentPageNumber + 1
+                    if (nextPageNumber <= 604) { // Quran has 604 pages
+                        Log.d("AudioService", "Prefetching first ayah of next page: $nextPageNumber")
+                        val nextPageResult = quranRepository.getPageMetadata(nextPageNumber)
+                        if (nextPageResult.isSuccess) {
+                            val nextPageAyahs = nextPageResult.getOrThrow()
+                            nextPageAyahs.firstOrNull()
+                        } else {
+                            Log.w("AudioService", "Failed to get next page metadata")
+                            null
+                        }
+                    } else {
+                        null // End of Quran
+                    }
+                }
+            }
+            is PlaybackContext.Random -> null // No prefetch for random
         }
     }
 

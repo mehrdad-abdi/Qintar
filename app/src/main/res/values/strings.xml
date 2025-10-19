@@ -251,4 +251,29 @@
     <string name="invalid_page">Invalid page number</string>
     <string name="play_all_page">Play All</string>
     <string name="juz_format">Juz %d</string>
+
+    <!-- About Screen -->
+    <string name="screen_about_title">About</string>
+    <string name="about_app_description">A modern Android app for organizing and studying your favorite Quran passages through personalized bookmarks.</string>
+    <string name="about_open_source">Open Source</string>
+    <string name="about_open_source_desc">This app is open source and free for the Muslim community. Contributions are welcome!</string>
+    <string name="about_built_with_claude">Built with Claude Code</string>
+    <string name="about_built_with_claude_desc">100% vibe coding project - This entire application was built through AI-assisted development with Claude Code, from architecture to implementation.</string>
+    <string name="about_github_repo">GitHub Repository</string>
+    <string name="about_github_url">https://github.com/mehrdad-abdi/Qintar</string>
+    <string name="about_visit_github">Visit on GitHub</string>
+    <string name="about_license">License</string>
+    <string name="about_license_desc">MIT License - Free to use, modify, and distribute</string>
+    <string name="about_acknowledgments">Acknowledgments</string>
+    <string name="about_api_provider">Quran API: alquran.cloud</string>
+    <string name="about_api_provider_desc">Islamic Network for Quran data and high-quality Arabic calligraphy</string>
+    <string name="about_version">Version</string>
+    <string name="about_version_name">1.0.0</string>
+    <string name="about_powered_by">Powered by Claude Code 🤖</string>
+    <string name="about_footer_built">Built with ❤️ in Antwerp 🇧🇪</string>
+    <string name="about_footer_for">For the Muslim community and all people</string>
+    <string name="about_claude_code">Claude Code</string>
+    <string name="about_claude_code_desc">AI-powered development tool - 100% vibe coding</string>
+    <string name="about_claude_url">https://claude.com/claude-code</string>
+    <string name="about_alquran_url">https://alquran.cloud</string>
 </resources>

@@ -1,4 +1,6 @@
-# Quran-Bookmarks
+# Qintar
+
+> 🤖 **100% Vibe Coding Project** - Built entirely with [Claude Code](https://claude.com/claude-code)
 
 A modern Android app for organizing and studying your favorite Quran passages through personalized bookmark profiles.
 
@@ -98,8 +100,8 @@ export PATH=/usr/local/opt/openjdk@17/bin:$PATH
 ### Getting Started
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourusername/Quran-Bookmarks.git
-   cd Quran-Bookmarks
+   git clone https://github.com/mehrdad-abdi/Qintar.git
+   cd Qintar
    ```
 
 2. Open in Android Studio
@@ -219,10 +221,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **API Provider**: [alquran.cloud](https://alquran.cloud) for free Quran API access
 - **Calligraphy**: Islamic Network for high-quality Arabic text images
+- **Development Tool**: [Claude Code](https://claude.com/claude-code) - This entire project was built through AI-assisted vibe coding
 - **Inspiration**: The global Muslim community's need for personalized Quran study tools
+
+## About This Project
+
+**Qintar** is a testament to the power of AI-assisted development. This entire application - from architecture to implementation, from UI design to testing - was built through collaborative "vibe coding" sessions with Claude Code. Every line of code, every feature, and every design decision represents a conversation between human vision and AI capability.
+
+**Repository**: [github.com/mehrdad-abdi/Qintar](https://github.com/mehrdad-abdi/Qintar)
 
 ---
 
-**Built with ❤️ for the Muslim community**
+**Built with ❤️ in Antwerp 🇧🇪 for the Muslim community and all people, powered by 🤖 Claude Code**
 
 *May this app help you strengthen your connection with the Quran and find peace in its verses.*

@@ -3,6 +3,7 @@ package io.github.mehrdad_abdi.quranbookmarks.presentation.ui.khatm
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -170,6 +171,23 @@ private fun PageContent(
     readAyahIds: Set<String> = emptySet(),
     onToggleReadStatus: (io.github.mehrdad_abdi.quranbookmarks.domain.model.VerseMetadata) -> Unit = {}
 ) {
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    // Auto-scroll to currently playing ayah
+    LaunchedEffect(currentPlayingIndex) {
+        if (currentPlayingIndex != null && currentPlayingIndex in verses.indices) {
+            coroutineScope.launch {
+                // Scroll to make the playing ayah visible
+                // Use animateScrollToItem for smooth scrolling
+                listState.animateScrollToItem(
+                    index = currentPlayingIndex,
+                    scrollOffset = -100 // Add some offset to show context above
+                )
+            }
+        }
+    }
+
     when {
         isLoading -> {
             Box(
@@ -210,6 +228,7 @@ private fun PageContent(
         }
         else -> {
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)

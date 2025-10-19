@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.mehrdad_abdi.quranbookmarks.data.remote.dto.ReciterData
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.Bookmark
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.PlaybackContext
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.VerseMetadata
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.QuranRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
@@ -264,9 +265,22 @@ class BookmarkReadingViewModel @Inject constructor(
             Log.d(TAG, "=== PLAYING AUDIO DEBUG ===")
             Log.d(TAG, "Verse: Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}, GlobalIndex $globalIndex")
 
+            // Prepare playback context for prefetching
+            val bookmark = currentState.bookmark
+            val allVersesList = verseItems.map { it.verse }
+            val context = if (bookmark != null && allVersesList.isNotEmpty()) {
+                PlaybackContext.SingleBookmark(
+                    bookmarkId = bookmark.id,
+                    allAyahs = allVersesList,
+                    currentIndex = verseItems.indexOfFirst { it.globalIndex == globalIndex }
+                )
+            } else {
+                null
+            }
+
             // Use audioService.playVerse to handle bismillah automatically
             _uiState.value = currentState.copy(currentPlayingIndex = globalIndex)
-            audioService.playVerse(verse)
+            audioService.playVerse(verse, context)
         }
     }
 

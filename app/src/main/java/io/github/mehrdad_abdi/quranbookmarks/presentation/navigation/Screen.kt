@@ -18,4 +18,5 @@ sealed class Screen(val route: String) {
     object ReciterSelection : Screen("reciter_selection")
     object Backup : Screen("backup")
     object Hadith : Screen("hadith")
+    object About : Screen("about")
 }

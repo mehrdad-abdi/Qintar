@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.KhatmProgress
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.PlaybackContext
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.VerseMetadata
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.QuranRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
@@ -145,9 +146,16 @@ class KhatmReadingViewModel @Inject constructor(
             val verse = verses[verseIndex]
             Log.d(TAG, "Playing audio for verse $verseIndex: Surah ${verse.surahNumber}, Ayah ${verse.ayahInSurah}")
 
+            // Provide Khatm reading context for cross-page prefetching
+            val context = PlaybackContext.KhatmReading(
+                currentPageNumber = currentState.currentPage,
+                allAyahsOnPage = verses,
+                currentIndex = verseIndex
+            )
+
             // Use audioService.playVerse to handle bismillah automatically
             _uiState.value = currentState.copy(currentPlayingIndex = verseIndex)
-            audioService.playVerse(verse)
+            audioService.playVerse(verse, context)
         }
     }
 
@@ -217,15 +225,31 @@ class KhatmReadingViewModel @Inject constructor(
 
                         playAudioAtIndex(nextIndex)
                     } else {
-                        // End of page reached
-                        Log.d(TAG, "Reached end of page, stopping")
-                        audioService.clearCompletion()
-                        audioService.stop()
-                        lastCompletedUrl = null
-                        _uiState.value = currentState.copy(
-                            currentPlayingIndex = null,
-                            isPlayingAudio = false
-                        )
+                        // End of page reached - move to next page if available
+                        val currentPage = currentState.currentPage
+                        if (currentPage < KhatmProgress.TOTAL_PAGES) {
+                            Log.d(TAG, "Reached end of page $currentPage, moving to next page")
+                            audioService.clearCompletion()
+                            lastCompletedUrl = null
+
+                            // Load next page and start playing from first ayah
+                            val nextPage = currentPage + 1
+                            loadPage(nextPage)
+
+                            // Wait for page to load before starting playback
+                            kotlinx.coroutines.delay(500)
+                            playAudioAtIndex(0)
+                        } else {
+                            // End of Quran reached
+                            Log.d(TAG, "Reached end of Quran, stopping")
+                            audioService.clearCompletion()
+                            audioService.stop()
+                            lastCompletedUrl = null
+                            _uiState.value = currentState.copy(
+                                currentPlayingIndex = null,
+                                isPlayingAudio = false
+                            )
+                        }
                     }
                 } else {
                     audioService.clearCompletion()

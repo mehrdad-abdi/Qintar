@@ -3,7 +3,9 @@ package io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmarks
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.AyahWithBookmark
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.Bookmark
+import io.github.mehrdad_abdi.quranbookmarks.domain.model.PlaybackContext
 import io.github.mehrdad_abdi.quranbookmarks.domain.model.VerseMetadata
 import io.github.mehrdad_abdi.quranbookmarks.domain.service.AudioService
 import io.github.mehrdad_abdi.quranbookmarks.domain.usecase.bookmark.DeleteBookmarkUseCase
@@ -26,15 +28,6 @@ data class BookmarkWithAyahs(
     val ayahs: List<VerseMetadata> = emptyList(),
     val isLoadingAyahs: Boolean = false,
     val isExpanded: Boolean = false
-)
-
-/**
- * Wrapper class to uniquely identify an ayah with its bookmark context
- * This prevents confusion when the same ayah appears in multiple bookmarks
- */
-data class AyahWithBookmark(
-    val bookmarkId: Long,
-    val verse: VerseMetadata
 )
 
 data class BookmarksUiState(
@@ -238,8 +231,22 @@ class BookmarksViewModel @Inject constructor(
 
                 // Different verse or different bookmark - play it
                 currentPlayingBookmarkId = bookmarkId
+
+                // Get all ayahs for this bookmark for context
+                val bookmarkWithAyahs = _uiState.value.bookmarksWithAyahs.find { it.bookmark.id == bookmarkId }
+                val allAyahs = bookmarkWithAyahs?.ayahs ?: emptyList()
+                val currentIndex = allAyahs.indexOfFirst {
+                    it.surahNumber == verse.surahNumber && it.ayahInSurah == verse.ayahInSurah
+                }
+
+                val context = if (currentIndex >= 0 && allAyahs.isNotEmpty()) {
+                    PlaybackContext.SingleBookmark(bookmarkId, allAyahs, currentIndex)
+                } else {
+                    null
+                }
+
                 _uiState.value = _uiState.value.copy(currentPlayingAyah = playbackKey)
-                audioService.playVerse(verse)
+                audioService.playVerse(verse, context)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(error = "Failed to play audio: ${e.message}")
             }
@@ -337,8 +344,16 @@ class BookmarksViewModel @Inject constructor(
 
                 // Use audioService.playVerse to properly handle bismillah
                 val playbackKey = io.github.mehrdad_abdi.quranbookmarks.domain.model.AyahPlaybackKey(playingBookmarkId, nextAyah.surahNumber, nextAyah.ayahInSurah)
+
+                // Provide context for prefetching
+                val context = PlaybackContext.SingleBookmark(
+                    playingBookmarkId,
+                    bookmarkWithAyahs.ayahs,
+                    nextIndex
+                )
+
                 _uiState.value = _uiState.value.copy(currentPlayingAyah = playbackKey)
-                audioService.playVerse(nextAyah)
+                audioService.playVerse(nextAyah, context)
             }
         } else {
             // No more ayahs in this bookmark - stop
@@ -365,8 +380,12 @@ class BookmarksViewModel @Inject constructor(
                     ayahWithBookmark.verse.surahNumber,
                     ayahWithBookmark.verse.ayahInSurah
                 )
+
+                // Provide context for Play All
+                val context = PlaybackContext.AllBookmarks(allAyahsList, index)
+
                 _uiState.value = _uiState.value.copy(currentPlayingAyah = playbackKey)
-                audioService.playVerse(ayahWithBookmark.verse)
+                audioService.playVerse(ayahWithBookmark.verse, context)
             }
         }
     }

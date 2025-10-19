@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.about.AboutScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmark.AddBookmarkScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmark.EditBookmarkScreen
 import io.github.mehrdad_abdi.quranbookmarks.presentation.ui.bookmarks.BookmarksScreen
@@ -189,6 +190,9 @@ fun NavGraph(
                 },
                 onNavigateToBackup = {
                     navController.navigate(Screen.Backup.route)
+                },
+                onNavigateToAbout = {
+                    navController.navigate(Screen.About.route)
                 }
             )
         }
@@ -214,6 +218,15 @@ fun NavGraph(
         // Hadith Screen
         composable(route = Screen.Hadith.route) {
             HadithScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // About Screen
+        composable(route = Screen.About.route) {
+            AboutScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }
