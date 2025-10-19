@@ -1,47 +1,69 @@
 # Qintar
 
-> 🤖 **100% Vibe Coding Project** - Built entirely with [Claude Code](https://claude.com/claude-code)
+> **قال رسول الله (ص):**
+>
+> *"من قرأ ألف آیة كتب له قنطار من بر"*
+>
+> "Whoever recites one thousand verses will be rewarded with a Qintar of virtue"
 
-A modern Android app for organizing and studying your favorite Quran passages through personalized bookmark profiles.
+A modern Android app for organizing and studying your favorite Quran passages through personalized bookmarks, daily reading tracking, and spiritual progress badges.
 
 ## Overview
 
-Quran-Bookmarks allows users to create custom bookmark profiles (e.g., "Daily Duas", "Comfort Verses", "Memorization List") and organize their favorite Quran passages with visual Arabic text, synchronized audio recitation, and smart notifications.
+Qintar is a comprehensive Quran companion app that helps you build consistent reading habits through bookmarks, daily tracking, and motivating progress badges. Organize your favorite passages, track your daily reading achievements, and work towards spiritual milestones inspired by authentic Hadith.
 
-### Why Quran-Bookmarks?
+### Why Qintar?
 
-- **Personal Organization**: Create themed bookmark collections for different spiritual needs
+- **Daily Reading Tracking**: Automatically track your daily Quran reading with beautiful progress badges
+- **Spiritual Milestones**: Seven badge levels from "Bismillah" to "Qintar" based on daily ayah counts
+- **Flexible Bookmarking**: Save individual ayahs, ranges, complete surahs, or specific pages
 - **Visual Experience**: High-quality Arabic calligraphy images for authentic reading
-- **Audio Synchronization**: Seamless audio-visual experience with auto-scroll functionality
-- **Smart Reminders**: Custom notification scheduling per bookmark profile
-- **Offline Access**: Download and cache content for uninterrupted study
+- **Audio Playback**: Professional audio with reciter selection and playback controls
+- **Statistics & Calendar**: View reading streaks, 30-day charts, and monthly badge calendar
+- **Offline Access**: Automatic content caching for uninterrupted study
+- **Multiple Reading Modes**: Bookmarks, Random Ayah, and Khatm (complete Quran) reading
 
 ## Core Features
 
-### 🔖 Bookmark Profile Management
-- Create unlimited bookmark profiles with custom names and descriptions (up to 500 characters)
-- Color-code profiles for easy visual organization
-- Individual reciter selection per profile
-- Custom notification scheduling (daily, weekly, or specific times)
+### 📊 Daily Reading Tracking & Badges
+- **Automatic Progress Tracking**: Every ayah you read is automatically tracked
+- **Seven Badge Levels**: Progress from Bismillah → Not Ghafil → Zakir → Qanit → Khashie → Faez → Mujtahid → Qintar
+- **Daily Goals**: Based on authentic Hadith (10, 50, 100, 200, 300, 500, 1000 ayahs)
+- **Reading Streaks**: Track your consistency with daily streak counters
+- **Statistics Dashboard**: 30-day bar charts, total ayahs read, best day, and average per day
+- **Badge Calendar**: Monthly view showing your daily achievements with visual badges
+- **Last 7 Days View**: Quick glance at recent reading activity
 
-### 📖 Flexible Content Addition
-- **Individual Ayahs**: Bookmark specific verses
-- **Ayah Ranges**: Save multiple consecutive verses (e.g., Ayah 255-257)
-- **Full Surahs**: Bookmark entire chapters
-- **Specific Pages**: Reference by page number
-- **Personal Notes**: Add descriptions to each bookmark (up to 500 characters)
+### 🔖 Flexible Bookmark Management
+- **Multiple Types**: Save individual ayahs, ayah ranges, complete surahs, or specific pages
+- **Personal Notes**: Add descriptions to bookmarks (up to 500 characters)
+- **Full CRUD Operations**: Create, read, update, and delete bookmarks easily
+- **Smart Organization**: Bookmarks organized by creation date
 
-### 🎵 Advanced Reading Experience
-- **Visual Arabic Text**: High-resolution calligraphy images from trusted sources
-- **Audio Controls**: Play, pause, stop with speed and volume adjustment
-- **Auto-Scroll**: Adjustable scroll speed synchronized with audio playback
-- **Screen Wake Lock**: Prevent screen timeout during reading sessions
-- **Audio-Visual Sync**: Perfectly timed highlighting and scrolling
+### 📖 Rich Reading Experience
+- **Visual Arabic Text**: High-resolution calligraphy images from Islamic Network CDN
+- **Audio Playback**: Professional reciters with play/pause/stop controls
+- **Multiple Reading Modes**:
+  - **Bookmark Reading**: Read your saved passages
+  - **Random Ayah/Page**: Get a random verse or page for variety
+  - **Khatm Reading**: Read the complete Quran (604 pages) with page navigation
+- **Auto-Scroll**: Synchronized scrolling with audio playback
+- **Jump Navigation**: Quickly jump to any surah, juz, or page number
 
-### 🔔 Smart Notifications
-- Profile-specific reminder scheduling
-- Custom timing options (daily at 7 AM, Fridays at 4 PM, etc.)
-- Non-intrusive reminders to revisit your saved passages
+### 🎵 Audio Features
+- **Reciter Selection**: Choose from multiple professional reciters
+- **Offline Playback**: Automatic caching of audio files for offline listening
+- **Playback Controls**: Play, pause, stop with intuitive controls
+
+### 🔔 Daily Notifications
+- **Smart Reminders**: Customizable daily notifications
+- **Badge Motivation**: Reminders encourage you to earn your daily badge
+- **Flexible Scheduling**: Set your preferred notification time
+
+### 💾 Backup & Restore
+- **Export Data**: Export all bookmarks and reading history
+- **Import Data**: Restore from backup files
+- **Data Portability**: Take your progress with you
 
 ## Technical Architecture
 
@@ -122,25 +144,49 @@ export PATH=/usr/local/opt/openjdk@17/bin:$PATH
 
 ### Development Status
 
-#### ✅ Completed Features
-- **Profile Management**: Create, list, and manage bookmark profiles
-- **Audio Settings**: Simplified checkbox with default reciter (Mishary Al-Afasy)
-- **Navigation**: Complete app navigation flow with proper back handling
-- **UI Components**: Profile creation, profile detail screens with modern Compose UI
-- **Database Layer**: Room implementation with entities, DAOs, and repositories
-- **Architecture**: Clean architecture with ViewModels, use cases, and dependency injection
-- **Testing**: Comprehensive unit tests for ViewModels, use cases, and repositories
+#### ✅ All Core Features Completed!
 
-#### 🔄 Currently In Development
-- UI tests for profile creation flow
-- Bookmark CRUD operations (Add/Edit/Delete bookmarks)
+**Reading & Tracking:**
+- ✅ Daily ayah reading tracking with automatic badge progression
+- ✅ Seven badge levels based on Hadith (Bismillah → Qintar)
+- ✅ Reading streak calculation and display
+- ✅ Statistics dashboard with 30-day charts
+- ✅ Badge calendar with monthly view
+- ✅ Last 7 days quick view
 
-#### ⭐ Planned Features
-- Bookmark reading screen with Quran text and audio
-- Profile editing functionality
-- Offline caching with WorkManager
-- Notification system for bookmarks
-- Search functionality within bookmarks
+**Bookmark Management:**
+- ✅ Create bookmarks (ayah, range, surah, page)
+- ✅ Edit and delete bookmarks
+- ✅ Personal notes for each bookmark
+- ✅ Full CRUD operations
+
+**Reading Experience:**
+- ✅ Bookmark reading screen with Arabic text and audio
+- ✅ Random ayah/page selection
+- ✅ Khatm reading (complete Quran 604 pages)
+- ✅ Jump navigation (surah, juz, page)
+- ✅ Auto-scroll synchronized with audio
+
+**Audio & Media:**
+- ✅ Multiple reciter selection
+- ✅ Audio playback controls
+- ✅ Offline caching with WorkManager
+- ✅ Background audio playback
+
+**Settings & Personalization:**
+- ✅ Theme selection (Light/Dark/System)
+- ✅ Primary color customization
+- ✅ Multilingual support (English, Arabic, Persian)
+- ✅ Daily notification scheduling
+- ✅ Backup and restore functionality
+
+**Technical:**
+- ✅ Clean architecture (Domain/Data/Presentation layers)
+- ✅ Jetpack Compose UI
+- ✅ Room database with offline-first approach
+- ✅ Hilt dependency injection
+- ✅ Comprehensive unit tests
+- ✅ Reactive data with Kotlin Flow
 
 ### Project Structure
 ```
@@ -158,46 +204,42 @@ app/
 └── build.gradle
 ```
 
-## Unique Value Proposition
+## What Makes Qintar Special?
 
-### vs. Existing Quran Apps
-- **Profile-Centric Approach**: Unlike folder-based organization, bookmark profiles provide themed collections with individual settings
-- **Visual-First Experience**: High-quality Arabic calligraphy images instead of rendered text
-- **Advanced Audio Sync**: Sophisticated audio-visual synchronization with customizable auto-scroll
-- **Granular Control**: Per-profile reciter selection and notification scheduling
-- **Offline Excellence**: Smart caching system for uninterrupted study
+### Hadith-Inspired Badge System
+Unlike other Quran apps, Qintar's badge system is directly inspired by an authentic Hadith that rewards readers based on the number of ayahs read daily. This gamification approach motivates consistent reading while staying true to Islamic traditions.
 
-### Target Benefits
-- **For Daily Readers**: Quick access to daily verses with automated reminders
-- **For Students**: Organized study materials with visual and audio learning
-- **For Memorizers**: Profile-based organization for different memorization goals
-- **For Researchers**: Categorized verse collections for specific topics
+### Comprehensive Progress Tracking
+- **Daily Tracking**: Automatic tracking of every ayah you read
+- **Visual Calendar**: See your entire month's reading activity at a glance
+- **Meaningful Metrics**: Streaks, totals, averages, and best days
+- **Badge Progression**: Visual representation of spiritual growth
 
-## Roadmap
+### Flexible Reading Experience
+- **Bookmarks**: Save and organize your favorite passages
+- **Random Mode**: Discover new verses with random ayah/page selection
+- **Khatm Mode**: Read the complete Quran with page-by-page navigation
+- **Offline First**: All content cached for uninterrupted access
 
-### Phase 1: Core Functionality ✅
-- [x] Project setup and architecture
-- [x] Basic bookmark CRUD operations
-- [x] API integration and caching
-- [x] Image display and audio playback
+### Modern Architecture
+- **Native Android**: Built with latest Jetpack Compose
+- **Clean Code**: Follows clean architecture principles
+- **Well-Tested**: Comprehensive unit test coverage
+- **Multilingual**: Full support for English, Arabic, and Persian
 
-### Phase 2: Enhanced Experience
-- [ ] Audio-visual synchronization
-- [ ] Auto-scroll implementation
-- [ ] Advanced playback controls
-- [ ] Notification system
+## Future Roadmap
 
-### Phase 3: Polish & Optimization
-- [ ] Performance optimization
-- [ ] Error handling and offline support
-- [ ] UI/UX improvements
-- [ ] Comprehensive testing
+### Potential Enhancements
+- 📊 **Advanced Analytics**: Deeper insights into reading patterns and habits
+- 🌙 **Prayer Times Integration**: Combine reading with prayer time reminders
+- 📝 **Translation Support**: Display verse translations alongside Arabic text
+- 🎯 **Reading Goals**: Set and track custom reading goals
+- 🔍 **Search Functionality**: Search within your bookmarks and notes
+- 👥 **Community Features**: Share achievements and inspire others (optional)
+- 🌐 **Cloud Sync**: Sync data across multiple devices
+- 🎨 **Custom Themes**: More color schemes and customization options
 
-### Future Considerations
-- Multilingual UI support
-- Translation text alongside Arabic images
-- Community features and sharing
-- Advanced search capabilities
+**Note**: The app is feature-complete and fully functional. Future enhancements will be based on community feedback and requests.
 
 ## Contributing
 
@@ -219,19 +261,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- **API Provider**: [alquran.cloud](https://alquran.cloud) for free Quran API access
-- **Calligraphy**: Islamic Network for high-quality Arabic text images
-- **Development Tool**: [Claude Code](https://claude.com/claude-code) - This entire project was built through AI-assisted vibe coding
-- **Inspiration**: The global Muslim community's need for personalized Quran study tools
+- **Quran API**: [alquran.cloud](https://alquran.cloud) - Free Quran API and Islamic Network for high-quality Arabic calligraphy images
+- **Development**: [Claude Code](https://claude.com/claude-code) - AI-assisted development tool used to build this entire project
+- **Inspiration**: The Hadith of Prophet Muhammad (ﷺ) about the rewards of Quran recitation
 
 ## About This Project
 
-**Qintar** is a testament to the power of AI-assisted development. This entire application - from architecture to implementation, from UI design to testing - was built through collaborative "vibe coding" sessions with Claude Code. Every line of code, every feature, and every design decision represents a conversation between human vision and AI capability.
+**Qintar** was built entirely through AI-assisted development with Claude Code. From architecture design to implementation, from UI/UX to testing, every aspect of this app represents a collaboration between human vision and AI capability.
 
 **Repository**: [github.com/mehrdad-abdi/Qintar](https://github.com/mehrdad-abdi/Qintar)
 
 ---
 
-**Built with ❤️ in Antwerp 🇧🇪 for the Muslim community and all people, powered by 🤖 Claude Code**
+**Built with ❤️ in Antwerp 🇧🇪**
+
+**For the Muslim community and all people**
 
 *May this app help you strengthen your connection with the Quran and find peace in its verses.*

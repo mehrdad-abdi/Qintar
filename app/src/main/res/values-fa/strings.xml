@@ -1,6 +1,6 @@
 <resources>
     <!-- App Name -->
-    <string name="app_name">نشانه‌های قرآن</string>
+    <string name="app_name">قنطار</string>
 
     <!-- Common -->
     <string name="back">بازگشت</string>
@@ -24,7 +24,7 @@
     <string name="badge_progress_format">%1$d آیه دیگر تا رسیدن به %2$s</string>
 
     <!-- Streaks -->
-    <string name="streaks">سابقه مداوم</string>
+    <string name="streaks">سابقه تداوم</string>
     <string name="overall_reading_streak">📊 سابقه کلی خواندن</string>
     <string name="days_format">%d روز</string>
 
@@ -236,21 +236,21 @@
     <!-- About Screen -->
     <string name="screen_about_title">درباره</string>
     <string name="about_app_description">یک برنامه مدرن اندروید برای سازماندهی و مطالعه آیات مورد علاقه شما از قرآن از طریق نشانه‌های شخصی.</string>
-    <string name="about_open_source">منبع باز</string>
-    <string name="about_open_source_desc">این برنامه منبع باز و رایگان برای جامعه مسلمانان است. مشارکت‌ها خوش آمدید!</string>
+    <string name="about_open_source">متن باز</string>
+    <string name="about_open_source_desc">این برنامه متن باز و رایگان برای همه مردم است.</string>
     <string name="about_built_with_claude">ساخته شده با Claude Code</string>
-    <string name="about_built_with_claude_desc">پروژه کدنویسی 100٪ با کمک هوش مصنوعی - این برنامه به طور کامل از طریق توسعه با کمک هوش مصنوعی با Claude Code ساخته شده است.</string>
-    <string name="about_github_repo">مخزن GitHub</string>
+    <string name="about_built_with_claude_desc">این برنامه به طور کامل از طریق توسعه با کمک هوش مصنوعی با Claude Code ساخته شده است.</string>
+    <string name="about_github_repo">صفحه GitHub</string>
     <string name="about_visit_github">بازدید در GitHub</string>
     <string name="about_license">مجوز</string>
     <string name="about_license_desc">مجوز MIT - آزاد برای استفاده، تغییر و توزیع</string>
     <string name="about_acknowledgments">قدردانی‌ها</string>
     <string name="about_api_provider">API قرآن: alquran.cloud</string>
-    <string name="about_api_provider_desc">شبکه اسلامی برای داده‌های قرآن و خوشنویسی عربی با کیفیت بالا</string>
+    <string name="about_api_provider_desc">شبکه اسلامی برای داده‌های قرآن</string>
     <string name="about_version">نسخه</string>
     <string name="about_powered_by">قدرت گرفته از Claude Code 🤖</string>
     <string name="about_footer_built">ساخته شده با ❤️ در آنتورپ 🇧🇪</string>
     <string name="about_footer_for">برای جامعه مسلمانان و همه مردم</string>
     <string name="about_claude_code">Claude Code</string>
-    <string name="about_claude_code_desc">ابزار توسعه مبتنی بر هوش مصنوعی - کدنویسی 100٪</string>
+    <string name="about_claude_code_desc"> توسعه مبتنی بر هوش مصنوعی</string>
 </resources>
