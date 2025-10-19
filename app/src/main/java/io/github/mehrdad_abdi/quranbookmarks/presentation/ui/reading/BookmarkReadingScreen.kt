@@ -67,7 +67,7 @@ fun BookmarkReadingScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = uiState.bookmark?.getDisplayText() ?: "Reading",
+                        text = uiState.bookmark?.getDisplayText() ?: stringResource(R.string.screen_reading_title),
                         fontWeight = FontWeight.Bold
                     )
                 },

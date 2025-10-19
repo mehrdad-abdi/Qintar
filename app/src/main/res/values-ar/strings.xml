@@ -1,6 +1,6 @@
 <resources>
     <!-- App Name -->
-    <string name="app_name">علامات القرآن</string>
+    <string name="app_name">قنطار</string>
 
     <!-- Common -->
     <string name="back">رجوع</string>
@@ -134,9 +134,14 @@
     <string name="import_from_file">استيراد من ملف</string>
     <string name="import_note">ملاحظة: الاستيراد مع \'استبدال الكل\' سيحذف جميع البيانات الموجودة. استخدم \'دمج\' للجمع مع البيانات الموجودة.</string>
     <string name="import_backup_title">استيراد نسخة احتياطية</string>
+    <string name="backup_summary_title">ملخص النسخة الاحتياطية:</string>
+    <string name="import_strategy_title">استراتيجية الاستيراد:</string>
     <string name="import_merge">دمج مع البيانات الموجودة</string>
+    <string name="import_merge_desc">إضافة عناصر جديدة، الاحتفاظ بالموجودة</string>
     <string name="import_replace_all">استبدال جميع البيانات</string>
+    <string name="import_replace_all_desc">حذف الموجودة، استيراد الكل</string>
     <string name="import_bookmarks_only">العلامات فقط</string>
+    <string name="import_bookmarks_only_desc">استيراد العلامات فقط</string>
     <string name="button_import">استيراد</string>
     <string name="backup_exported">تم تصدير النسخة الاحتياطية بنجاح</string>
     <string name="backup_imported">تم استيراد النسخة الاحتياطية بنجاح</string>
@@ -215,8 +220,10 @@
     <string name="delete_bookmark_confirm">هل أنت متأكد من حذف هذه العلامة؟</string>
 
     <!-- Notifications -->
-    <string name="notification_title">تذكير قراءة القرآن</string>
-    <string name="notification_message">حان وقت قراءة القرآن اليومية</string>
+    <string name="notification_title">قنطار - وقت القراءة</string>
+    <string name="notification_message">اجمع كنزك الروحي. اقرأ القرآن واكسب شارتك اليومية!</string>
+    <string name="notification_channel_name">تذكيرات القراءة اليومية</string>
+    <string name="notification_channel_description">إشعارات لتذكيرك بقراءة علاماتك</string>
 
     <!-- Errors -->
     <string name="error_invalid_ayah">رقم آية غير صالح</string>
@@ -233,13 +240,30 @@
     <string name="badge_mujtahid">المجتهدین</string>
     <string name="badge_sahib_qantar">القنطار</string>
 
+    <!-- Khatm Reading Screen -->
+    <string name="screen_khatm_title">قراءة الختم</string>
+    <string name="button_khatm_reading">قراءة الختم</string>
+    <string name="page_indicator">صفحة %1$d / 604</string>
+    <string name="jump_to">الانتقال إلى</string>
+    <string name="tab_page">صفحة</string>
+    <string name="tab_juz">جزء</string>
+    <string name="tab_surah">سورة</string>
+    <string name="enter_page_number">أدخل رقم الصفحة (1-604)</string>
+    <string name="select_juz">اختر الجزء (1-30)</string>
+    <string name="invalid_page">رقم صفحة غير صالح</string>
+    <string name="play_all_page">تشغيل الكل</string>
+    <string name="juz_format">الجزء %d</string>
+
     <!-- About Screen -->
     <string name="screen_about_title">حول</string>
-    <string name="about_app_description">تطبيق أندرويد حديث لتنظيم ودراسة آياتك المفضلة من القرآن من خلال علامات مرجعية شخصية.</string>
+    <string name="about_app_description">تطبيق أندرويد حديث مستوحى من الحديث، يساعدك على بناء عادات قراءة قرآنية متسقة من خلال علامات مرجعية شخصية، وتتبع يومي تلقائي، وشارات التقدم الروحي.</string>
+    <string name="about_hadith_title">الحديث الملهم</string>
+    <string name="about_hadith_arabic">من قَرَأَ عَشْرَ آیاتٍ فی لَیْلَةٍ لَمْ یُکْتَبْ مِنَ الْغافِلینَ 🔹، وَمَنْ‌ قَرَأَ خَمْسینَ آیَةً کُتِبَ مِنَ الذّاکِرینَ 🔺،‌ وَمَنْ قَرَأَ‌ مِائَة آیةٍ کتب من القانِتینَ 🥉، وَمَنْ‌ قَرَأَ مِائتی آیَةٍ کُتِبَ مِنَ الْخاشِعینَ 🥈، وَمَنْ قَرَأَ ثَلاثَ مِئَةِ آیةٍ کُتِبَ مِنَ الْفائِزینَ 🥇، وَمَنْ قَرَأَ خَمْسَ مِائَةِ آیةٍ کُتِبَ مِنَ المُجْتَهدینَ 🎖️، وَمَنْ قَرَأَ ألْفَ آیةٍ کُتِبَ لَهُ قِنْطارٌ مِنْ بِرًْ 👑</string>
+    <string name="about_hadith_translation">قال رسول الله (صلى الله عليه وآله وصحبه وسلم): من قرأ عشر آيات في ليلة لم يكتب من الغافلين، ومن قرأ خمسين آية كتب من الذاكرين، ومن قرأ مائة آية كتب من القانتين، ومن قرأ مائتي آية كتب من الخاشعين، ومن قرأ ثلاث مائة آية كتب من الفائزين، ومن قرأ خمس مائة آية كتب من المجتهدين، ومن قرأ ألف آية كتب له قنطار من بر.</string>
     <string name="about_open_source">مفتوح المصدر</string>
-    <string name="about_open_source_desc">هذا التطبيق مفتوح المصدر ومجاني للمجتمع الإسلامي. المساهمات مرحب بها!</string>
+    <string name="about_open_source_desc">هذا التطبيق مفتوح المصدر ومجاني للجميع. المساهمات مرحب بها!</string>
     <string name="about_built_with_claude">بُني باستخدام Claude Code</string>
-    <string name="about_built_with_claude_desc">مشروع برمجة بنسبة 100٪ بمساعدة الذكاء الاصطناعي - تم بناء هذا التطبيق بالكامل من خلال التطوير بمساعدة الذكاء الاصطناعي باستخدام Claude Code.</string>
+    <string name="about_built_with_claude_desc">مشروع برمجة بنسبة 100٪ بمساعدة الذكاء الاصطناعي - تم بناء هذا التطبيق بالكامل من خلال التطوير بمساعدة الذكاء الاصطناعي مع Claude Code، من الهيكلة إلى التنفيذ.</string>
     <string name="about_github_repo">مستودع GitHub</string>
     <string name="about_visit_github">زيارة على GitHub</string>
     <string name="about_license">الترخيص</string>
@@ -253,4 +277,8 @@
     <string name="about_footer_for">للمجتمع الإسلامي وجميع الناس</string>
     <string name="about_claude_code">Claude Code</string>
     <string name="about_claude_code_desc">أداة تطوير مدعومة بالذكاء الاصطناعي - برمجة 100٪</string>
+    <string name="about_github_url">https://github.com/mehrdad-abdi/Qintar</string>
+    <string name="about_alquran_url">https://alquran.cloud</string>
+    <string name="about_claude_url">https://claude.com/claude-code</string>
+    <string name="about_version_name">1.0.0</string>
 </resources>

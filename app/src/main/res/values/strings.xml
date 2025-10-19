@@ -222,6 +222,8 @@
     <!-- Notifications -->
     <string name="notification_title">Qintar - Time to Read</string>
     <string name="notification_message">Collect your spiritual treasure. Read Quran and earn your daily badge!</string>
+    <string name="notification_channel_name">Daily Reading Reminders</string>
+    <string name="notification_channel_description">Notifications to remind you to read your bookmarks</string>
 
     <!-- Errors -->
     <string name="error_invalid_ayah">Invalid ayah number</string>
@@ -254,7 +256,10 @@
 
     <!-- About Screen -->
     <string name="screen_about_title">About</string>
-    <string name="about_app_description">A modern Android app for organizing and studying your favorite Quran passages through personalized bookmarks.</string>
+    <string name="about_app_description">A modern Android app inspired by Hadith, helping you build consistent Quran reading habits through personalized bookmarks, automatic daily tracking, and spiritual progress badges.</string>
+    <string name="about_hadith_title">Hadith Inspiration</string>
+    <string name="about_hadith_arabic">من قَرَأَ عَشْرَ آیاتٍ فی لَیْلَةٍ لَمْ یُکْتَبْ مِنَ الْغافِلینَ 🔹، وَمَنْ‌ قَرَأَ خَمْسینَ آیَةً کُتِبَ مِنَ الذّاکِرینَ 🔺،‌ وَمَنْ قَرَأَ‌ مِائَة آیةٍ کتب من القانِتینَ 🥉، وَمَنْ‌ قَرَأَ مِائتی آیَةٍ کُتِبَ مِنَ الْخاشِعینَ 🥈، وَمَنْ قَرَأَ ثَلاثَ مِئَةِ آیةٍ کُتِبَ مِنَ الْفائِزینَ 🥇، وَمَنْ قَرَأَ خَمْسَ مِائَةِ آیةٍ کُتِبَ مِنَ المُجْتَهدینَ 🎖️، وَمَنْ قَرَأَ ألْفَ آیةٍ کُتِبَ لَهُ قِنْطارٌ مِنْ بِرًْ 👑</string>
+    <string name="about_hadith_translation">The Messenger of Allah (peace be upon him and his family and companions) said: Whoever recites ten verses in a night will not be written among the heedless, whoever recites fifty verses will be written among those who remember Allah, whoever recites one hundred verses will be written among the devout, whoever recites two hundred verses will be written among the humble, whoever recites three hundred verses will be written among the winners, whoever recites five hundred verses will be written among the strivers, and whoever recites one thousand verses will be rewarded with a Qintar of virtue.</string>
     <string name="about_open_source">Open Source</string>
     <string name="about_open_source_desc">This app is open source and free for the Muslim community. Contributions are welcome!</string>
     <string name="about_built_with_claude">Built with Claude Code</string>

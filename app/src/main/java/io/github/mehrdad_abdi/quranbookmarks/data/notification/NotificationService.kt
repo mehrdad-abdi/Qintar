@@ -21,9 +21,6 @@ class NotificationService @Inject constructor(
 
     companion object {
         const val CHANNEL_ID = "daily_reading_reminders"
-        const val CHANNEL_NAME = "Daily Reading Reminders"
-        const val CHANNEL_DESCRIPTION = "Notifications to remind you to read your bookmarks"
-
         private const val NOTIFICATION_ID_BASE = 1000
     }
 
@@ -35,10 +32,10 @@ class NotificationService @Inject constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                CHANNEL_NAME,
+                context.getString(R.string.notification_channel_name),
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = CHANNEL_DESCRIPTION
+                description = context.getString(R.string.notification_channel_description)
                 enableVibration(true)
                 setShowBadge(true)
             }
@@ -64,8 +61,8 @@ class NotificationService @Inject constructor(
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Time to read")
-            .setContentText("Time to read your bookmarks")
+            .setContentTitle(context.getString(R.string.notification_title))
+            .setContentText(context.getString(R.string.notification_message))
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

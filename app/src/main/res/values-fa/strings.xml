@@ -134,9 +134,14 @@
     <string name="import_from_file">وارد کردن از فایل</string>
     <string name="import_note">توجه: وارد کردن با \'جایگزینی همه\' تمام داده‌های موجود را حذف می‌کند. از \'ادغام\' برای ترکیب با داده‌های موجود استفاده کنید.</string>
     <string name="import_backup_title">وارد کردن پشتیبان</string>
+    <string name="backup_summary_title">خلاصه پشتیبان:</string>
+    <string name="import_strategy_title">استراتژی واردات:</string>
     <string name="import_merge">ادغام با داده‌های موجود</string>
+    <string name="import_merge_desc">افزودن موارد جدید، نگه‌داشتن موجود</string>
     <string name="import_replace_all">جایگزینی تمام داده‌ها</string>
+    <string name="import_replace_all_desc">حذف موجود، وارد کردن همه</string>
     <string name="import_bookmarks_only">فقط نشانه‌ها</string>
+    <string name="import_bookmarks_only_desc">فقط نشانه‌ها را وارد کنید</string>
     <string name="button_import">وارد کردن</string>
     <string name="backup_exported">پشتیبان با موفقیت صادر شد</string>
     <string name="backup_imported">پشتیبان با موفقیت وارد شد</string>
@@ -215,8 +220,10 @@
     <string name="delete_bookmark_confirm">آیا مطمئن هستید که می‌خواهید این نشانه را حذف کنید؟</string>
 
     <!-- Notifications -->
-    <string name="notification_title">یادآوری خواندن قرآن</string>
-    <string name="notification_message">وقت خواندن قرآن روزانه شما است</string>
+    <string name="notification_title">قنطار - وقت خواندن</string>
+    <string name="notification_message">گنج معنوی خود را جمع کنید. قرآن بخوانید و نشان روزانه خود را کسب کنید!</string>
+    <string name="notification_channel_name">یادآوری‌های خواندن روزانه</string>
+    <string name="notification_channel_description">اعلان‌ها برای یادآوری خواندن نشانه‌های شما</string>
 
     <!-- Errors -->
     <string name="error_invalid_ayah">شماره آیه نامعتبر است</string>
@@ -233,9 +240,26 @@
     <string name="badge_mujtahid">مجتهد</string>
     <string name="badge_sahib_qantar">صاحب القنطار</string>
 
+    <!-- Khatm Reading Screen -->
+    <string name="screen_khatm_title">خواندن ختم</string>
+    <string name="button_khatm_reading">خواندن ختم</string>
+    <string name="page_indicator">صفحه %1$d / 604</string>
+    <string name="jump_to">پرش به</string>
+    <string name="tab_page">صفحه</string>
+    <string name="tab_juz">جزء</string>
+    <string name="tab_surah">سوره</string>
+    <string name="enter_page_number">شماره صفحه را وارد کنید (1-604)</string>
+    <string name="select_juz">انتخاب جزء (1-30)</string>
+    <string name="invalid_page">شماره صفحه نامعتبر</string>
+    <string name="play_all_page">پخش همه</string>
+    <string name="juz_format">جزء %d</string>
+
     <!-- About Screen -->
     <string name="screen_about_title">درباره</string>
-    <string name="about_app_description">یک برنامه مدرن اندروید برای سازماندهی و مطالعه آیات مورد علاقه شما از قرآن از طریق نشانه‌های شخصی.</string>
+    <string name="about_app_description">یک برنامه مدرن اندروید الهام گرفته از حدیث، که به شما کمک می‌کند عادت‌های مداوم خواندن قرآن را از طریق نشانه‌های شخصی، پیگیری خودکار روزانه و نشان‌های پیشرفت معنوی بسازید.</string>
+    <string name="about_hadith_title">حدیث الهام‌بخش</string>
+    <string name="about_hadith_arabic">من قَرَأَ عَشْرَ آیاتٍ فی لَیْلَةٍ لَمْ یُکْتَبْ مِنَ الْغافِلینَ 🔹، وَمَنْ‌ قَرَأَ خَمْسینَ آیَةً کُتِبَ مِنَ الذّاکِرینَ 🔺،‌ وَمَنْ قَرَأَ‌ مِائَة آیةٍ کتب من القانِتینَ 🥉، وَمَنْ‌ قَرَأَ مِائتی آیَةٍ کُتِبَ مِنَ الْخاشِعینَ 🥈، وَمَنْ قَرَأَ ثَلاثَ مِئَةِ آیةٍ کُتِبَ مِنَ الْفائِزینَ 🥇، وَمَنْ قَرَأَ خَمْسَ مِائَةِ آیةٍ کُتِبَ مِنَ المُجْتَهدینَ 🎖️، وَمَنْ قَرَأَ ألْفَ آیةٍ کُتِبَ لَهُ قِنْطارٌ مِنْ بِرًْ 👑</string>
+    <string name="about_hadith_translation">رسول خدا (صلی الله علیه و آله و صحبه و سلم) فرمودند: کسی که در یک شب ده آیه بخواند از غافلان نوشته نمی‌شود، کسی که پنجاه آیه بخواند از ذاکران نوشته می‌شود، کسی که صد آیه بخواند از قانتان نوشته می‌شود، کسی که دویست آیه بخواند از خاشعان نوشته می‌شود، کسی که سیصد آیه بخواند از فایزان نوشته می‌شود، کسی که پانصد آیه بخواند از مجتهدان نوشته می‌شود، و کسی که هزار آیه بخواند برایش یک قنطار از نیکی نوشته می‌شود.</string>
     <string name="about_open_source">متن باز</string>
     <string name="about_open_source_desc">این برنامه متن باز و رایگان برای همه مردم است.</string>
     <string name="about_built_with_claude">ساخته شده با Claude Code</string>
@@ -252,5 +276,9 @@
     <string name="about_footer_built">ساخته شده با ❤️ در آنتورپ 🇧🇪</string>
     <string name="about_footer_for">برای جامعه مسلمانان و همه مردم</string>
     <string name="about_claude_code">Claude Code</string>
-    <string name="about_claude_code_desc"> توسعه مبتنی بر هوش مصنوعی</string>
+    <string name="about_claude_code_desc">توسعه مبتنی بر هوش مصنوعی</string>
+    <string name="about_github_url">https://github.com/mehrdad-abdi/Qintar</string>
+    <string name="about_alquran_url">https://alquran.cloud</string>
+    <string name="about_claude_url">https://claude.com/claude-code</string>
+    <string name="about_version_name">1.0.0</string>
 </resources>
