@@ -2,11 +2,24 @@
 
 > **قال رسول الله (ص):**
 >
-> *"من قرأ ألف آیة كتب له قنطار من بر"*
+> من قَرَأَ عَشْرَ آیاتٍ فی لَیْلَةٍ لَمْ یُکْتَبْ مِنَ الْغافِلینَ 🔹،
+> وَمَنْ‌ قَرَأَ خَمْسینَ آیَةً کُتِبَ مِنَ الذّاکِرینَ 🔺،‌
+> وَمَنْ قَرَأَ‌ مِائَة آیةٍ کتب من القانِتینَ 🥉،
+> وَمَنْ‌ قَرَأَ مِائتی آیَةٍ کُتِبَ مِنَ الْخاشِعینَ 🥈،
+> وَمَنْ قَرَأَ ثَلاثَ مِئَةِ آیةٍ کُتِبَ مِنَ الْفائِزینَ 🥇،
+> وَمَنْ قَرَأَ خَمْسَ مِائَةِ آیةٍ کُتِبَ مِنَ المُجْتَهدینَ 🎖️،
+> وَمَنْ قَرَأَ ألْفَ آیةٍ کُتِبَ لَهُ قِنْطارٌ مِنْ بِرًْ 👑
 >
-> "Whoever recites one thousand verses will be rewarded with a Qintar of virtue"
+> *"The Messenger of Allah (peace be upon him and his family and companions) said:*
+> *Whoever recites ten verses in a night will not be written among the heedless,*
+> *whoever recites fifty verses will be written among those who remember Allah,*
+> *whoever recites one hundred verses will be written among the devout,*
+> *whoever recites two hundred verses will be written among the humble,*
+> *whoever recites three hundred verses will be written among the winners,*
+> *whoever recites five hundred verses will be written among the strivers,*
+> *and whoever recites one thousand verses will be rewarded with a Qintar of virtue."*
 
-A modern Android app for organizing and studying your favorite Quran passages through personalized bookmarks, daily reading tracking, and spiritual progress badges.
+A modern Android app inspired by this Hadith, helping you build consistent Quran reading habits through personalized bookmarks, automatic daily tracking, and spiritual progress badges.
 
 ## Overview
 
@@ -27,8 +40,14 @@ Qintar is a comprehensive Quran companion app that helps you build consistent re
 
 ### 📊 Daily Reading Tracking & Badges
 - **Automatic Progress Tracking**: Every ayah you read is automatically tracked
-- **Seven Badge Levels**: Progress from Bismillah → Not Ghafil → Zakir → Qanit → Khashie → Faez → Mujtahid → Qintar
-- **Daily Goals**: Based on authentic Hadith (10, 50, 100, 200, 300, 500, 1000 ayahs)
+- **Seven Badge Levels** (based on the Hadith above):
+  - 🔹 **Not Ghafil** (10 ayahs) - Not among the heedless
+  - 🔺 **Zakir** (50 ayahs) - Among those who remember Allah
+  - 🥉 **Qanit** (100 ayahs) - Among the devout
+  - 🥈 **Khashie** (200 ayahs) - Among the humble
+  - 🥇 **Faez** (300 ayahs) - Among the winners
+  - 🎖️ **Mujtahid** (500 ayahs) - Among the strivers
+  - 👑 **Qintar** (1000 ayahs) - Rewarded with a Qintar of virtue
 - **Reading Streaks**: Track your consistency with daily streak counters
 - **Statistics Dashboard**: 30-day bar charts, total ayahs read, best day, and average per day
 - **Badge Calendar**: Monthly view showing your daily achievements with visual badges
@@ -148,7 +167,8 @@ export PATH=/usr/local/opt/openjdk@17/bin:$PATH
 
 **Reading & Tracking:**
 - ✅ Daily ayah reading tracking with automatic badge progression
-- ✅ Seven badge levels based on Hadith (Bismillah → Qintar)
+- ✅ Seven Hadith-based badge levels (10, 50, 100, 200, 300, 500, 1000 ayahs)
+- ✅ Badge icons: 🔹 → 🔺 → 🥉 → 🥈 → 🥇 → 🎖️ → 👑
 - ✅ Reading streak calculation and display
 - ✅ Statistics dashboard with 30-day charts
 - ✅ Badge calendar with monthly view
