@@ -1,0 +1,68 @@
+name: Version Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  version-check:
+    name: Verify versionCode increase
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Checkout main branch
+        run: git fetch origin main:main
+
+      - name: Extract versionCode from main
+        id: main_version
+        run: |
+          MAIN_VERSION=$(git show main:app/build.gradle.kts | grep -oP 'versionCode\s*=\s*\d+' | grep -oP '\d+')
+          echo "main_version=$MAIN_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Extract versionCode from PR
+        id: pr_version
+        run: |
+          PR_VERSION=$(grep -oP 'versionCode\s*=\s*\d+' app/build.gradle.kts | grep -oP '\d+')
+          echo "pr_version=$PR_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Verify versionCode increased
+        run: |
+          MAIN_VERSION=${{ steps.main_version.outputs.main_version }}
+          PR_VERSION=${{ steps.pr_version.outputs.pr_version }}
+
+          echo "Main versionCode: $MAIN_VERSION"
+          echo "PR versionCode: $PR_VERSION"
+
+          if [ -z "$PR_VERSION" ]; then
+            echo "ERROR: versionCode not found in PR"
+            exit 1
+          fi
+
+          if [ "$PR_VERSION" -le "$MAIN_VERSION" ]; then
+            echo "ERROR: versionCode ($PR_VERSION) must be greater than main ($MAIN_VERSION)"
+            exit 1
+          fi
+
+          echo "✓ versionCode increased from $MAIN_VERSION to $PR_VERSION"
+
+      - name: Check versionName change
+        run: |
+          MAIN_VERSION_NAME=$(git show main:app/build.gradle.kts | grep -oP 'versionName\s*=\s*"\K[^"]+')
+          PR_VERSION_NAME=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
+
+          echo "Main versionName: $MAIN_VERSION_NAME"
+          echo "PR versionName: $PR_VERSION_NAME"
+
+          if [ "$MAIN_VERSION_NAME" = "$PR_VERSION_NAME" ]; then
+            echo "⚠ Warning: versionName not changed"
+          else
+            echo "✓ versionName updated"
+          fi
