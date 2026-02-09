@@ -17,6 +17,9 @@ interface QuranDao {
     @Query("SELECT * FROM verses WHERE globalAyahNumber = :globalAyahNumber")
     suspend fun getVerseByGlobalAyahNumber(globalAyahNumber: Int): VerseEntity?
 
+    @Query("SELECT * FROM verses WHERE surahNumber = :surahNumber AND ayahInSurah = :ayahNumber")
+    suspend fun getVerseBySurahAndAyah(surahNumber: Int, ayahNumber: Int): VerseEntity?
+
     @Query("SELECT * FROM verses WHERE surahNumber = :surahNumber ORDER BY ayahInSurah ASC")
     suspend fun getVersesBySurah(surahNumber: Int): List<VerseEntity>
 
