@@ -1,31 +1,12 @@
 package io.github.mehrdad_abdi.quranbookmarks.data.remote.api
 
-import io.github.mehrdad_abdi.quranbookmarks.data.remote.dto.*
+import io.github.mehrdad_abdi.quranbookmarks.data.remote.dto.ReciterResponse
+import io.github.mehrdad_abdi.quranbookmarks.data.remote.dto.VerseResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface QuranApiService {
-    @GET("v1/surah")
-    suspend fun getAllSurahs(): Response<SurahListResponseDto>
-
-    @GET("v1/ayah/{ayahNumber}")
-    suspend fun getAyah(@Path("ayahNumber") ayahNumber: Int): Response<VerseResponse>
-
-    @GET("v1/surah/{surahNumber}")
-    suspend fun getSurah(@Path("surahNumber") surahNumber: Int): Response<SurahResponse>
-
-    @GET("v1/surah/{surahNumber}")
-    suspend fun getAyahRange(
-        @Path("surahNumber") surahNumber: Int,
-        @Query("offset") offset: Int,
-        @Query("limit") limit: Int
-    ): Response<SurahResponse>
-
-    @GET("v1/page/{pageNumber}")
-    suspend fun getPage(@Path("pageNumber") pageNumber: Int): Response<PageResponse>
-
     @GET("v1/edition/format/audio")
     suspend fun getAudioEditions(): Response<ReciterResponse>
 

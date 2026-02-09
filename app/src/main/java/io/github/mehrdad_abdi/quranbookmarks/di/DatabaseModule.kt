@@ -9,8 +9,10 @@ import dagger.hilt.components.SingletonComponent
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.BookmarkDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.CachedContentDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.KhatmProgressDao
+import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.QuranDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.dao.ReadingActivityDao
 import io.github.mehrdad_abdi.quranbookmarks.data.local.database.QuranBookmarksDatabase
+import io.github.mehrdad_abdi.quranbookmarks.data.local.QuranDatabase
 import javax.inject.Singleton
 
 @Module
@@ -41,5 +43,16 @@ object DatabaseModule {
     @Provides
     fun provideKhatmProgressDao(database: QuranBookmarksDatabase): KhatmProgressDao {
         return database.khatmProgressDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideQuranDatabase(@ApplicationContext context: Context): QuranDatabase {
+        return QuranDatabase.getDatabase(context)
+    }
+
+    @Provides
+    fun provideQuranDao(database: QuranDatabase): QuranDao {
+        return database.quranDao()
     }
 }

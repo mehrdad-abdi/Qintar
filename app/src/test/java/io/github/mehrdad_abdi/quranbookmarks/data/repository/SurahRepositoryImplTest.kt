@@ -1,11 +1,6 @@
 package io.github.mehrdad_abdi.quranbookmarks.data.repository
 
-import android.content.Context
-import android.content.SharedPreferences
-import com.google.gson.Gson
-import io.github.mehrdad_abdi.quranbookmarks.data.remote.api.QuranApiService
-import io.github.mehrdad_abdi.quranbookmarks.data.remote.dto.SurahDto
-import io.github.mehrdad_abdi.quranbookmarks.data.remote.dto.SurahListResponseDto
+import io.github.mehrdad_abdi.quranbookmarks.data.local.entities.SurahEntity
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -13,61 +8,32 @@ import org.junit.Assert.*
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.*
-import retrofit2.Response
 
 class SurahRepositoryImplTest {
 
     @Mock
-    private lateinit var apiService: QuranApiService
+    private lateinit var offlineVerseRepository: OfflineVerseRepository
 
-    @Mock
-    private lateinit var context: Context
-
-    @Mock
-    private lateinit var sharedPreferences: SharedPreferences
-
-    @Mock
-    private lateinit var editor: SharedPreferences.Editor
-
-    private lateinit var gson: Gson
     private lateinit var repository: SurahRepositoryImpl
 
-    private val sampleSurahDto = SurahDto(
-        number = 1,
-        name = "الفاتحة",
-        englishName = "Al-Fatihah",
-        englishNameTranslation = "The Opening",
-        numberOfAyahs = 7,
-        revelationType = "Meccan"
-    )
-
-    private val sampleResponse = SurahListResponseDto(
-        code = 200,
-        status = "OK",
-        data = listOf(sampleSurahDto)
+    private val sampleSurahEntity = SurahEntity(
+        surahNumber = 1,
+        surahName = "الفاتحة",
+        surahNameEn = "Al-Fatihah",
+        revelationType = "Meccan",
+        numberOfAyahs = 7
     )
 
     @Before
     fun setup() {
         MockitoAnnotations.openMocks(this)
-        gson = Gson()
-
-        whenever(context.getSharedPreferences("surah_cache", Context.MODE_PRIVATE))
-            .thenReturn(sharedPreferences)
-        whenever(sharedPreferences.edit()).thenReturn(editor)
-        whenever(editor.putString(any(), any())).thenReturn(editor)
-        whenever(editor.putLong(any(), any())).thenReturn(editor)
-        whenever(editor.apply()).then { }
-
-        repository = SurahRepositoryImpl(apiService, context, gson)
+        repository = SurahRepositoryImpl(offlineVerseRepository)
     }
 
     @Test
-    fun `getAllSurahs should return success when API call succeeds`() = runTest {
+    fun `getAllSurahs should return success when DB query succeeds`() = runTest {
         // Given
-        whenever(sharedPreferences.getString(any(), any())).thenReturn(null)
-        whenever(sharedPreferences.getLong(any(), eq(0))).thenReturn(0)
-        whenever(apiService.getAllSurahs()).thenReturn(Response.success(sampleResponse))
+        whenever(offlineVerseRepository.getAllSurahs()).thenReturn(listOf(sampleSurahEntity))
 
         // When
         val result = repository.getAllSurahs()
@@ -83,11 +49,9 @@ class SurahRepositoryImplTest {
     }
 
     @Test
-    fun `getAllSurahs should return failure when API call fails`() = runTest {
+    fun `getAllSurahs should return failure when DB query fails`() = runTest {
         // Given
-        whenever(sharedPreferences.getString(any(), any())).thenReturn(null)
-        whenever(sharedPreferences.getLong(any(), eq(0))).thenReturn(0)
-        whenever(apiService.getAllSurahs()).thenReturn(Response.error(404, mock()))
+        doAnswer { throw RuntimeException("Database error") }.whenever(offlineVerseRepository).getAllSurahs()
 
         // When
         val result = repository.getAllSurahs()
@@ -97,34 +61,9 @@ class SurahRepositoryImplTest {
     }
 
     @Test
-    fun `getAllSurahs should return cached data when cache is valid`() = runTest {
-        // Given
-        val cachedJson = gson.toJson(listOf(sampleSurahDto))
-        val validTimestamp = System.currentTimeMillis() - 1000 // 1 second ago
-
-        whenever(sharedPreferences.getString("cached_surahs", null)).thenReturn(cachedJson)
-        whenever(sharedPreferences.getLong("cache_timestamp", 0)).thenReturn(validTimestamp)
-
-        // When
-        val result = repository.getAllSurahs()
-
-        // Then
-        assertTrue(result.isSuccess)
-        val surahs = result.getOrNull()
-        assertNotNull(surahs)
-        assertEquals(1, surahs!!.size)
-        assertEquals("Al-Fatihah", surahs[0].englishName)
-
-        // Verify API was not called
-        verify(apiService, never()).getAllSurahs()
-    }
-
-    @Test
     fun `getSurahByNumber should return correct surah when exists`() = runTest {
         // Given
-        whenever(sharedPreferences.getString(any(), any())).thenReturn(null)
-        whenever(sharedPreferences.getLong(any(), eq(0))).thenReturn(0)
-        whenever(apiService.getAllSurahs()).thenReturn(Response.success(sampleResponse))
+        whenever(offlineVerseRepository.getSurah(1)).thenReturn(sampleSurahEntity)
 
         // When
         val result = repository.getSurahByNumber(1)
@@ -138,18 +77,26 @@ class SurahRepositoryImplTest {
     }
 
     @Test
-    fun `getSurahByNumber should return null when surah does not exist`() = runTest {
+    fun `getSurahByNumber should return failure when surah not found`() = runTest {
         // Given
-        whenever(sharedPreferences.getString(any(), any())).thenReturn(null)
-        whenever(sharedPreferences.getLong(any(), eq(0))).thenReturn(0)
-        whenever(apiService.getAllSurahs()).thenReturn(Response.success(sampleResponse))
+        whenever(offlineVerseRepository.getSurah(999)).thenReturn(null)
 
         // When
         val result = repository.getSurahByNumber(999)
 
         // Then
-        assertTrue(result.isSuccess)
-        val surah = result.getOrNull()
-        assertNull(surah)
+        assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun `getSurahByNumber should return failure when DB query fails`() = runTest {
+        // Given
+        doAnswer { throw RuntimeException("Database error") }.whenever(offlineVerseRepository).getSurah(1)
+
+        // When
+        val result = repository.getSurahByNumber(1)
+
+        // Then
+        assertTrue(result.isFailure)
     }
 }

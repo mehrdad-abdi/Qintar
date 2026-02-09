@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.BackupRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.BookmarkRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.KhatmProgressRepositoryImpl
+import io.github.mehrdad_abdi.quranbookmarks.data.repository.OfflineVerseRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.QuranRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.ReadingActivityRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.data.repository.SettingsRepositoryImpl
@@ -14,6 +15,7 @@ import io.github.mehrdad_abdi.quranbookmarks.data.repository.SurahRepositoryImpl
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.BackupRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.BookmarkRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.KhatmProgressRepository
+import io.github.mehrdad_abdi.quranbookmarks.data.repository.OfflineVerseRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.QuranRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.ReadingActivityRepository
 import io.github.mehrdad_abdi.quranbookmarks.domain.repository.SettingsRepository
@@ -65,4 +67,10 @@ abstract class RepositoryModule {
     abstract fun bindKhatmProgressRepository(
         khatmProgressRepositoryImpl: KhatmProgressRepositoryImpl
     ): KhatmProgressRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindOfflineVerseRepository(
+        offlineVerseRepositoryImpl: OfflineVerseRepositoryImpl
+    ): OfflineVerseRepository
 }
