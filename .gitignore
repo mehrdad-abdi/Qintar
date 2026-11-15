@@ -16,3 +16,7 @@ local.properties
 
 # Debug output files (root folder only)
 /*.txt
+
+# Build output captured by contributors
+/build-logs/
+**/build/
