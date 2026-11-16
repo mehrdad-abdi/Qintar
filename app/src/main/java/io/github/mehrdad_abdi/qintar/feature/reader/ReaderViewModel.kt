@@ -17,6 +17,7 @@ import io.github.mehrdad_abdi.qintar.domain.model.Rank
 import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
 import io.github.mehrdad_abdi.qintar.domain.model.ReadMethod
 import io.github.mehrdad_abdi.qintar.domain.model.Segment
+import io.github.mehrdad_abdi.qintar.domain.model.SurahInfo
 import io.github.mehrdad_abdi.qintar.domain.model.UserPrefs
 import io.github.mehrdad_abdi.qintar.domain.port.PrefsStore
 import io.github.mehrdad_abdi.qintar.domain.port.QuranTextSource
@@ -28,12 +29,15 @@ import io.github.mehrdad_abdi.qintar.domain.service.BookmarkTitle
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkTitles
 import io.github.mehrdad_abdi.qintar.domain.service.BulkRangeResolver
 import io.github.mehrdad_abdi.qintar.domain.service.DayTotals
+import io.github.mehrdad_abdi.qintar.domain.service.GoToParser
+import io.github.mehrdad_abdi.qintar.domain.service.GoToResult
 import io.github.mehrdad_abdi.qintar.domain.service.KhatmProgress
 import io.github.mehrdad_abdi.qintar.domain.service.RankCalculator
 import io.github.mehrdad_abdi.qintar.domain.service.RankProgress
 import io.github.mehrdad_abdi.qintar.domain.service.ReadingTracker
 import io.github.mehrdad_abdi.qintar.domain.service.StarResult
 import io.github.mehrdad_abdi.qintar.domain.time.DayClock
+import io.github.mehrdad_abdi.qintar.ui.common.GoToProblem
 import io.github.mehrdad_abdi.qintar.ui.common.RankReachedDetector
 import io.github.mehrdad_abdi.qintar.ui.designsystem.AyahCheckState
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderEntry
@@ -83,6 +87,30 @@ sealed interface ReaderDialog {
     data class ConfirmUnstar(override val row: ReaderRow.Ayah, val bookmark: Bookmark) : ReaderDialog
 }
 
+/** What a sheet over the reader shows. */
+enum class ReaderSheet {
+    /** The position bar's sheet: jump to a surah, juz, page or ayah within the scope. */
+    JUMP,
+
+    /** The "Aa" panel. */
+    TEXT,
+}
+
+/** A bookmark's header in the reader: its description and today's progress against its repeat target. */
+data class SegmentHeaderInfo(
+    val description: String?,
+    /** Σ of today's counts, each capped at the target. */
+    val readings: Int,
+    val required: Int,
+    /** Complete readings today ("37 / 100"). */
+    val fullReadings: Int,
+    val repeatTarget: Int,
+    val done: Boolean,
+)
+
+/** Asks the list to scroll to [row]; [token] tells one request from the next. */
+data class ScrollRequest(val row: Int, val token: Int)
+
 data class ReaderUiState(
     val entry: ReaderEntry,
     val phase: ReaderPhase = ReaderPhase.LOADING,
@@ -110,11 +138,42 @@ data class ReaderUiState(
     val dialog: ReaderDialog? = null,
     /** The last bulk mark, while its Undo is offered. */
     val bulk: Batch? = null,
+    /** Per segment of a bookmark or group reader: header details; null where there is none. */
+    val headers: List<SegmentHeaderInfo?> = emptyList(),
+    val sheet: ReaderSheet? = null,
+    val jumpText: String = "",
+    val jumpProblem: GoToProblem? = null,
+    /** Surahs and juz the scope touches: what the position sheet offers. */
+    val scopeSurahs: List<SurahInfo> = emptyList(),
+    val scopeJuz: List<Int> = emptyList(),
+    /** Khatm entry: the resume position, and "first unread" when it is elsewhere (§4.6). */
+    val resume: AyahId? = null,
+    val firstUnread: AyahId? = null,
+    val scrollRequest: ScrollRequest? = null,
 ) {
     val rows: List<ReaderRow> get() = model?.rows.orEmpty()
 
     /** Readings of this row's ayah today, in this row's context. */
     fun count(row: ReaderRow.Ayah): Int = counts.getOrNull(row.segment)?.get(row.id) ?: 0
+
+    /**
+     * Whether the page that ends just above row [belowRow] has an ayah still unread in its context:
+     * "Mark page" is offered only then. [belowRow] is a page divider's row, or the row count for the
+     * last page of the scope.
+     */
+    fun pageAboveHasUnread(belowRow: Int): Boolean {
+        val rows = model?.rows ?: return false
+        var i = minOf(belowRow, rows.size) - 1
+        while (i >= 0) {
+            when (val row = rows[i]) {
+                is ReaderRow.Ayah -> if (checkState(row) == AyahCheckState.Unread) return true
+                is ReaderRow.PageDivider, is ReaderRow.SegmentHeader -> return false
+                else -> Unit
+            }
+            i--
+        }
+        return false
+    }
 
     fun checkState(row: ReaderRow.Ayah): AyahCheckState = when {
         count(row) > 0 -> AyahCheckState.ReadToday
@@ -161,6 +220,9 @@ class ReaderViewModel @AssistedInject constructor(
     /** Per segment: where "mark up to here" may start at the earliest (§4.2.2). */
     private var scopeStarts: List<AyahId> = emptyList()
 
+    private var quran: QuranIndex? = null
+    private var scrollToken = 0
+
     private val firstVisible = MutableStateFlow<AyahId?>(null)
     private val pages = LinkedHashMap<Int, Map<AyahId, String>>(16, 0.75f, true)
     private val pagesLoading = HashSet<Int>()
@@ -196,6 +258,7 @@ class ReaderViewModel @AssistedInject constructor(
                 return@launch
             }
             model = opened.model
+            quran = opened.index
             scopeStarts = opened.scopeStarts
             firstVisible.value = opened.start
             _state.update {
@@ -206,10 +269,14 @@ class ReaderViewModel @AssistedInject constructor(
                     model = opened.model,
                     initialRowIndex = opened.startRow,
                     assumedCoveredUpTo = opened.assumedCoveredUpTo,
+                    scopeSurahs = opened.scopeSurahs,
+                    scopeJuz = opened.scopeJuz,
                 )
             }
             opened.model.ayahAtOrAfter(opened.startRow)?.let { loadPagesAround(it, it) }
             observeReadState(opened.model.segments)
+            if (route.entry == ReaderEntry.BOOKMARK || route.entry == ReaderEntry.GROUP) observeHeaders(opened.model.segments)
+            if (route.entry == ReaderEntry.KHATM) observeKhatmPosition()
             if (route.entry == ReaderEntry.BROWSE) rememberBrowsePosition()
         }
     }
@@ -224,15 +291,42 @@ class ReaderViewModel @AssistedInject constructor(
         val scopeStarts: List<AyahId>,
         val segmentTitles: List<BookmarkTitle> = emptyList(),
         val assumedCoveredUpTo: Int = 0,
+        val index: QuranIndex,
+        val scopeSurahs: List<SurahInfo> = emptyList(),
+        val scopeJuz: List<Int> = emptyList(),
     )
 
     private suspend fun open(): Opened? {
+        val opened = openRoute() ?: return null
+        val index = opened.index
+        val ranges = opened.model.segments.map { it.range }
+        val surahs = ranges.flatMap { index.ref(it.start).surah..index.ref(it.end).surah }.distinct().map(index::surah)
+        val juz = ranges.flatMap { index.juzOf(it.start)..index.juzOf(it.end) }.distinct()
+        return Opened(
+            opened.model, opened.title, opened.start, opened.startRow, opened.scopeStarts, opened.segmentTitles,
+            opened.assumedCoveredUpTo, index, surahs, juz,
+        )
+    }
+
+    private suspend fun openRoute(): Opened? {
         val index = index.get()
         val requested = AyahId.orNull(route.startAyahId)
-        fun single(segment: Segment, title: ReaderTitle, start: AyahId, scopeStart: AyahId, assumed: Int = 0): Opened {
-            val model = ReaderRowModel.build(listOf(segment), index)
+        fun single(
+            segment: Segment,
+            title: ReaderTitle,
+            start: AyahId,
+            scopeStart: AyahId,
+            assumed: Int = 0,
+            header: BookmarkTitle? = null,
+        ): Opened {
+            // A bookmark's own header (title, description, progress) stands above its first ayah.
+            val model = ReaderRowModel.build(listOf(segment), index, segmentHeaders = header != null)
             val at = start.takeIf { it in segment.range } ?: segment.range.start
-            return Opened(model, title, at, model.indexOf(0, at)!!, listOf(scopeStart), assumedCoveredUpTo = assumed)
+            val row = if (header != null && at == segment.range.start) 0 else model.blockStart(model.indexOf(0, at)!!)
+            return Opened(
+                model, title, at, row, listOf(scopeStart),
+                segmentTitles = listOfNotNull(header), assumedCoveredUpTo = assumed, index = index,
+            )
         }
         return when (route.entry) {
             ReaderEntry.KHATM -> {
@@ -248,11 +342,13 @@ class ReaderViewModel @AssistedInject constructor(
             }
             ReaderEntry.BOOKMARK -> {
                 val state = availability.board().state(route.id) ?: return null
+                val title = BookmarkTitles.of(state.bookmark, index)
                 single(
                     state.segment,
-                    ReaderTitle.OfBookmark(BookmarkTitles.of(state.bookmark, index)),
+                    ReaderTitle.OfBookmark(title),
                     requested ?: state.progress.firstBelowTarget ?: state.bookmark.range.start,
                     state.bookmark.range.start,
+                    header = title,
                 )
             }
             ReaderEntry.GROUP -> {
@@ -268,10 +364,11 @@ class ReaderViewModel @AssistedInject constructor(
                     start = start,
                     // A group opens on the header of its first bookmark that is not done.
                     startRow = (model.indexOf(segment, start)!!).let { row ->
-                        if (start == first.bookmark.range.start) model.rows.indexOfFirst { it.segment == segment } else row
+                        if (start == first.bookmark.range.start) model.rows.indexOfFirst { it.segment == segment } else model.blockStart(row)
                     },
                     scopeStarts = group.segments.map { it.range.start },
                     segmentTitles = group.bookmarks.map { BookmarkTitles.of(it.bookmark, index) },
+                    index = index,
                 )
             }
             ReaderEntry.BROWSE -> {
@@ -298,6 +395,44 @@ class ReaderViewModel @AssistedInject constructor(
         val khatm = segments.singleOrNull()?.context as? ReadContext.Khatm ?: return
         viewModelScope.launch {
             log.observeDistinctAyahs(khatm, AyahRange.ALL).collect { covered -> _state.update { it.copy(covered = covered) } }
+        }
+    }
+
+    /** Bookmark and group readers: each segment's description and today's progress, live. */
+    private fun observeHeaders(segments: List<Segment>) {
+        viewModelScope.launch {
+            availability.observe().collect { board ->
+                val infos = segments.map { segment ->
+                    val id = (segment.context as? ReadContext.Bookmark)?.id ?: return@map null
+                    board.state(id)?.let { state ->
+                        val p = state.progress
+                        SegmentHeaderInfo(
+                            description = state.bookmark.description?.takeIf { it.isNotBlank() },
+                            readings = p.readings,
+                            required = p.required,
+                            fullReadings = p.fullReadings,
+                            repeatTarget = p.repeatTarget,
+                            done = p.done,
+                        )
+                    }
+                }
+                _state.update { it.copy(headers = infos) }
+            }
+        }
+    }
+
+    /** Khatm reader: where the khatm resumes and where its first unread ayah is. */
+    private fun observeKhatmPosition() {
+        viewModelScope.launch {
+            val progress = withContext(io) { khatmProgress.get() }
+            progress.observe(route.id).filterNotNull().collect { snapshot ->
+                _state.update {
+                    it.copy(
+                        resume = snapshot.resume,
+                        firstUnread = snapshot.firstUnread.takeIf { snapshot.firstUnreadDiffersFromResume },
+                    )
+                }
+            }
         }
     }
 
@@ -403,6 +538,106 @@ class ReaderViewModel @AssistedInject constructor(
 
     private fun offerUndo(batch: Batch) {
         if (batch.added > 0) _state.update { it.copy(bulk = batch) }
+    }
+
+    // ---- Mark page, log a full reading ---------------------------------------------------------------
+
+    /** "Mark page": the unread ayahs of [page] that lie in the scope of segment [segment]; offers Undo. */
+    fun onMarkPage(page: Int, segment: Int) = act {
+        val model = model ?: return@act
+        val target = model.segments.getOrNull(segment) ?: return@act
+        val range = bulk.get().page(page, target.range) ?: return@act
+        offerUndo(tracker.markRange(range, target.context, ReadMethod.BULK, RangeMode.FILL))
+    }
+
+    /** "Log a full reading" of one bookmark: one more reading of every ayah of its passage; one Undo. */
+    fun onLogFullReading(segment: Int) = act {
+        val target = model?.segments?.getOrNull(segment) ?: return@act
+        offerUndo(tracker.markRange(target.range, target.context, ReadMethod.BULK, RangeMode.ADD))
+    }
+
+    /** The same for every bookmark of the group at once, as one action with one Undo. */
+    fun onLogGroupReading() = act {
+        val segments = model?.segments ?: return@act
+        offerUndo(tracker.markSegments(segments, ReadMethod.BULK, RangeMode.ADD))
+    }
+
+    // ---- Position sheet --------------------------------------------------------------------------
+
+    fun onSheet(sheet: ReaderSheet?) {
+        _state.update { it.copy(sheet = sheet, jumpText = "", jumpProblem = null) }
+    }
+
+    fun onJumpText(text: String) {
+        _state.update { it.copy(jumpText = text, jumpProblem = null) }
+    }
+
+    /** The sheet's go-to field: `2:255`, `255` in the surah being read, `p300`, `j12`; must lie in the scope. */
+    fun onJumpSubmit() {
+        val index = quran ?: return
+        val model = model ?: return
+        val text = _state.value.jumpText
+        val currentSurah = firstVisible.value?.let { index.ref(it).surah }
+        when (val result = GoToParser.parse(text, currentSurah, index)) {
+            is GoToResult.Invalid -> _state.update { it.copy(jumpProblem = GoToProblem.of(result.reason)) }
+            else -> {
+                // A page or juz may begin before the scope does: land on the first ayah of it that is in scope.
+                val wanted = when (result) {
+                    is GoToResult.Page -> index.pageRange(result.page)
+                    is GoToResult.Juz -> index.juzRange(result.juz)
+                    else -> null
+                }
+                val target = wanted?.let { w -> model.segments.firstNotNullOfOrNull { it.range.intersect(w)?.start } } ?: result.target
+                if (target == null || !scrollToAyah(target)) {
+                    _state.update { it.copy(jumpProblem = GoToProblem.OUTSIDE_SCOPE) }
+                }
+            }
+        }
+    }
+
+    fun onJumpToAyah(ayah: AyahId) {
+        scrollToAyah(ayah)
+    }
+
+    fun onJumpToSurah(number: Int) {
+        val index = quran ?: return
+        val wanted = index.surahRange(number)
+        model?.segments?.firstNotNullOfOrNull { it.range.intersect(wanted)?.start }?.let(::scrollToAyah)
+    }
+
+    fun onJumpToJuz(number: Int) {
+        val index = quran ?: return
+        val wanted = index.juzRange(number)
+        model?.segments?.firstNotNullOfOrNull { it.range.intersect(wanted)?.start }?.let(::scrollToAyah)
+    }
+
+    /** The list has scrolled to the request. */
+    fun onScrollHandled(request: ScrollRequest) {
+        _state.update { if (it.scrollRequest == request) it.copy(scrollRequest = null) else it }
+    }
+
+    private fun scrollToAyah(ayah: AyahId): Boolean {
+        val model = model ?: return false
+        val row = model.find(ayah) ?: return false
+        _state.update { it.copy(scrollRequest = ScrollRequest(model.blockStart(row), ++scrollToken), sheet = null) }
+        return true
+    }
+
+    // ---- "Aa" panel ------------------------------------------------------------------------------
+
+    /** Live while dragging; stored in the preferences, which the reader follows. */
+    fun onFontSize(sp: Int) {
+        val clamped = sp.coerceIn(UserPrefs.MIN_FONT_SP, UserPrefs.MAX_FONT_SP)
+        _state.update { it.copy(fontSp = clamped) }
+        viewModelScope.launch { prefs.update { it.copy(quranFontSp = clamped) } }
+    }
+
+    fun onBreakAtPauseMarks(on: Boolean) {
+        viewModelScope.launch { prefs.update { it.copy(breakAtPauseMarks = on) } }
+    }
+
+    fun onKeepScreenOn(on: Boolean) {
+        viewModelScope.launch { prefs.update { it.copy(keepScreenOn = on) } }
     }
 
     // ---- Star -----------------------------------------------------------------------------------

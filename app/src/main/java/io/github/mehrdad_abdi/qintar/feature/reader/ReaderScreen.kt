@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,12 +18,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -43,6 +49,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -73,11 +82,14 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.PositionBar
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarType
 import io.github.mehrdad_abdi.qintar.ui.designsystem.SetCountDialog
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Sizes
+import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarShapes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
+import io.github.mehrdad_abdi.qintar.ui.designsystem.StackedProgressRow
 import io.github.mehrdad_abdi.qintar.ui.designsystem.SurahHeader
 import io.github.mehrdad_abdi.qintar.ui.designsystem.TodayPill
 import io.github.mehrdad_abdi.qintar.ui.designsystem.formatNumber
 import io.github.mehrdad_abdi.qintar.ui.designsystem.localizeDigits
+import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderEntry
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
 
 /** Test tag of the reader's list. */
@@ -145,11 +157,17 @@ fun ReaderScreen(
                         (visible.firstOrNull()?.index ?: listState.firstVisibleItemIndex) to (visible.lastOrNull()?.index ?: listState.firstVisibleItemIndex)
                     }.collect { (first, last) -> viewModel.onVisibleRows(first, last) }
                 }
+                state.scrollRequest?.let { request ->
+                    LaunchedEffect(request) {
+                        listState.scrollToItem(request.row)
+                        viewModel.onScrollHandled(request)
+                    }
+                }
                 val current by remember(listState, model) {
                     derivedStateOf { model.ayahAtOrAfter(listState.firstVisibleItemIndex) }
                 }
                 Column(Modifier.fillMaxSize()) {
-                    TopBar(readerTitle(state.title, current, viewModelIndex = model), onBack)
+                    TopBar(readerTitle(state.title, current, viewModelIndex = model), onBack, onTextSettings = { viewModel.onSheet(ReaderSheet.TEXT) })
                     current?.let { at ->
                         PositionBar(
                             primary = stringResource(
@@ -159,7 +177,7 @@ fun ReaderScreen(
                                 formatNumber(at.page * 100 / PAGE_COUNT),
                             ),
                             secondary = stringResource(R.string.juz_n, formatNumber(at.juz)),
-                            onClick = {},
+                            onClick = { viewModel.onSheet(ReaderSheet.JUMP) },
                             modifier = Modifier.padding(horizontal = Spacing.screen),
                         )
                     }
@@ -178,6 +196,14 @@ fun ReaderScreen(
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             SnackbarHost(snackbar)
+            state.firstUnread?.let { unread ->
+                AssistChip(
+                    onClick = { viewModel.onJumpToAyah(unread) },
+                    label = { Text(stringResource(R.string.reader_first_unread_chip), style = QintarType.Label) },
+                    leadingIcon = { Icon(Icons.Rounded.ArrowDownward, null, modifier = Modifier.size(Sizes.iconSmall)) },
+                    modifier = Modifier.align(Alignment.CenterHorizontally).heightIn(min = Sizes.touchTarget),
+                )
+            }
             val reached = state.reachedRank
             TodayPill(
                 rank = (reached ?: state.today.rank).number,
@@ -191,6 +217,7 @@ fun ReaderScreen(
     }
 
     ReaderDialogs(state, viewModel)
+    ReaderSheets(state, viewModel)
 }
 
 private const val PAGE_COUNT = 604
@@ -203,7 +230,7 @@ private fun readerTitle(title: ReaderTitle, current: ReaderRow.Ayah?, viewModelI
 }
 
 @Composable
-private fun TopBar(title: String, onBack: () -> Unit) {
+private fun TopBar(title: String, onBack: () -> Unit, onTextSettings: (() -> Unit)? = null) {
     val colors = MaterialTheme.colorScheme
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.xs, vertical = Spacing.xs),
@@ -220,6 +247,13 @@ private fun TopBar(title: String, onBack: () -> Unit) {
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f).padding(horizontal = Spacing.xs),
         )
+        if (onTextSettings != null) {
+            val label = stringResource(R.string.reader_text_settings)
+            TextButton(
+                onClick = onTextSettings,
+                modifier = Modifier.heightIn(min = Sizes.touchTarget).semantics { contentDescription = label },
+            ) { Text("Aa", style = QintarType.Title, color = colors.onSurfaceVariant) }
+        }
     }
 }
 
@@ -238,11 +272,15 @@ private fun ReaderList(
         // Room for the pill, so that the last ayah can be scrolled clear of it.
         contentPadding = PaddingValues(bottom = 112.dp),
     ) {
-        items(model.rows, key = { it.key }, contentType = { it::class }) { row ->
+        itemsIndexed(model.rows, key = { _, row -> row.key }, contentType = { _, row -> row::class }) { rowIndex, row ->
             when (row) {
                 is ReaderRow.SegmentHeader -> SegmentHeaderRow(
-                    state.segmentTitles.getOrNull(row.segment)?.let { bookmarkTitleText(it) }.orEmpty(),
+                    title = state.segmentTitles.getOrNull(row.segment)?.let { bookmarkTitleText(it) }.orEmpty(),
+                    info = state.headers.getOrNull(row.segment),
                     first = row.segment == 0,
+                    groupAction = state.entry == ReaderEntry.GROUP && row.segment == 0,
+                    onLog = { viewModel.onLogFullReading(row.segment) },
+                    onLogGroup = viewModel::onLogGroupReading,
                 )
                 is ReaderRow.SurahHeader -> SurahHeader(surahName(row.surah), subtitle = surahFacts(row.surah))
                 is ReaderRow.Basmala -> BasmalaRow(fontSizeSp = state.fontSp)
@@ -253,6 +291,13 @@ private fun ReaderList(
                         stringResource(R.string.page_divider, formatNumber(row.page), formatNumber(row.juz))
                     },
                     juzLabel = if (row.startsJuz) stringResource(R.string.juz_n, formatNumber(row.juz)) else null,
+                    // The page above this divider: marked read in one tap while it has unread ayahs.
+                    actionLabel = if (state.pageAboveHasUnread(rowIndex)) {
+                        stringResource(R.string.reader_mark_page, formatNumber(row.page - 1))
+                    } else {
+                        null
+                    },
+                    onAction = { viewModel.onMarkPage(row.page - 1, row.segment) },
                 )
                 is ReaderRow.Ayah -> AyahItem(
                     row = row,
@@ -267,21 +312,78 @@ private fun ReaderList(
                 )
             }
         }
+        // The last page of the scope has no divider below it: its "Mark page" stands at the end.
+        val last = model.rows.lastOrNull { it is ReaderRow.Ayah } as? ReaderRow.Ayah
+        if (last != null && state.pageAboveHasUnread(model.rows.size)) {
+            item(key = "footer") {
+                PageDivider(
+                    text = stringResource(R.string.page_divider, formatNumber(last.page), formatNumber(last.juz)),
+                    actionLabel = stringResource(R.string.reader_mark_page, formatNumber(last.page)),
+                    onAction = { viewModel.onMarkPage(last.page, last.segment) },
+                )
+            }
+        }
     }
 }
 
+/**
+ * The header of a bookmark in the reader (§5.4): its title, its description (prominent: it may hold a
+ * narration), today's progress against the repeat target, and "Log a full reading".
+ */
 @Composable
-private fun SegmentHeaderRow(title: String, first: Boolean) {
-    Column(Modifier.fillMaxWidth()) {
+private fun SegmentHeaderRow(
+    title: String,
+    info: SegmentHeaderInfo?,
+    first: Boolean,
+    groupAction: Boolean,
+    onLog: () -> Unit,
+    onLogGroup: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    Column(Modifier.fillMaxWidth().testTag(SEGMENT_HEADER_TAG)) {
         if (!first) Hairline(Modifier.padding(top = Spacing.xl))
+        if (groupAction) {
+            FilledTonalButton(
+                onClick = onLogGroup,
+                modifier = Modifier.padding(horizontal = Spacing.screen, vertical = Spacing.sm).heightIn(min = Sizes.touchTarget),
+            ) { Text(stringResource(R.string.reader_log_group_reading), style = QintarType.Label) }
+        }
         Text(
             title,
             style = QintarType.Headline,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = colors.onSurface,
             modifier = Modifier.padding(horizontal = Spacing.screen, vertical = Spacing.lg),
         )
+        if (info == null) return@Column
+        info.description?.let { description ->
+            Text(
+                description,
+                style = QintarType.Body,
+                color = colors.onSurface,
+                modifier = Modifier
+                    .padding(horizontal = Spacing.screen)
+                    .fillMaxWidth()
+                    .clip(QintarShapes.Inner)
+                    .background(colors.surfaceContainer)
+                    .padding(Spacing.lg),
+            )
+            Spacer(Modifier.height(Spacing.md))
+        }
+        Column(Modifier.padding(horizontal = Spacing.screen), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            val progress = if (info.required == 0) 0f else info.readings.toFloat() / info.required
+            val readings = stringResource(R.string.reader_header_readings, formatNumber(info.fullReadings), formatNumber(info.repeatTarget))
+            StackedProgressRow(label = readings, valueText = stringResource(R.string.percent, formatNumber((progress * 100).toInt())), progress = progress)
+            FilledTonalButton(
+                onClick = onLog,
+                modifier = Modifier.heightIn(min = Sizes.touchTarget),
+            ) { Text(stringResource(R.string.reader_log_full_reading), style = QintarType.Label) }
+        }
+        Spacer(Modifier.height(Spacing.md))
     }
 }
+
+/** Test tag of a bookmark header row. */
+const val SEGMENT_HEADER_TAG = "segment-header"
 
 @Composable
 private fun AyahItem(

@@ -6,6 +6,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -23,9 +24,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 /** The real reader screen, driven by taps, over the in-memory domain. */
 @RunWith(RobolectricTestRunner::class)
+// A phone-sized window: the surah header and basmala stand above the first ayah of a surah.
+@Config(qualifiers = "w412dp-h915dp-xhdpi")
 class ReaderScreenTest {
     @get:Rule
     val compose = createComposeRule()
@@ -48,7 +52,7 @@ class ReaderScreenTest {
     fun `the reader opens at the requested ayah with the surah in the title and the pill at zero`() {
         open(ReaderRoute.browse(app.ayah(2, 1).value))
 
-        compose.onNodeWithText("Surah 2").assertIsDisplayed()
+        compose.onAllNodesWithText("Surah 2").assertCountEquals(2) // the title, and the surah header above ayah 1
         compose.onNodeWithContentDescription("Surah 2, ayah 1, not read today").assertIsDisplayed()
         compose.onNodeWithContentDescription("0 today, 10 ayahs to the first rank").assertIsDisplayed()
         compose.onAllNodesWithContentDescription("Play").assertCountEquals(0)

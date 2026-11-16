@@ -227,7 +227,7 @@ class ReaderViewModelTest {
 
         assertEquals(ReaderPhase.READY, state.phase)
         assertEquals(ReaderTitle.Name("Khatm"), state.title)
-        assertEquals("opens at ayah 21", AyahId(21), (state.rows[state.initialRowIndex] as ReaderRow.Ayah).id)
+        assertEquals("opens at ayah 21", AyahId(21), state.openedAyah())
         assertEquals(AyahCheckState.CoveredEarlier, state.checkState(reader.row(AyahId(20))))
         assertEquals("yesterday's reading is not today's count", 0, reader.countOf(AyahId(20)))
         assertEquals(AyahCheckState.Unread, state.checkState(reader.row(AyahId(21))))
@@ -268,7 +268,7 @@ class ReaderViewModelTest {
         val reader = reader(ReaderRoute.bookmark(ikhlas.id))
         val rows = reader.state.value.rows
 
-        assertTrue(rows[0] is ReaderRow.SurahHeader && rows[1] is ReaderRow.Basmala)
+        assertTrue("the bookmark header, then the surah header and its basmala", rows[0] is ReaderRow.SegmentHeader && rows[1] is ReaderRow.SurahHeader && rows[2] is ReaderRow.Basmala)
         assertEquals(4, rows.count { it is ReaderRow.Ayah })
 
         reader.onMarkUpToHere(reader.row(app.ayah(112, 4)))
@@ -444,7 +444,7 @@ class ReaderViewModelTest {
         val reader = reader(ReaderRoute.browse(start.value))
         val state = reader.state.value
 
-        assertEquals(start, (state.rows[state.initialRowIndex] as ReaderRow.Ayah).id)
+        assertEquals(start, state.openedAyah())
         main.advanceTimeBy(ReaderViewModel.BROWSE_POSITION_DEBOUNCE_MILLIS)
         assertEquals(start, app.prefs.current.lastBrowseAyahId)
 
@@ -461,7 +461,7 @@ class ReaderViewModelTest {
         val reader = reader(ReaderRoute(io.github.mehrdad_abdi.qintar.ui.navigation.ReaderEntry.BROWSE))
         val state = reader.state.value
 
-        assertEquals(app.ayah(36, 1), (state.rows[state.initialRowIndex] as ReaderRow.Ayah).id)
+        assertEquals(app.ayah(36, 1), state.openedAyah())
     }
 
     @Test
@@ -509,4 +509,17 @@ class ReaderViewModelTest {
         assertFalse(state.breakAtPauseMarks)
         assertFalse(state.keepScreenOn)
     }
+}
+
+/**
+ * The ayah the list opens at: the first ayah row at or after [ReaderUiState.initialRowIndex]. Only the
+ * surah header, basmala and page divider that belong to it may stand between (so that the header of a
+ * surah is visible when the reader opens at its first ayah).
+ */
+private fun ReaderUiState.openedAyah(): AyahId {
+    val rest = rows.drop(initialRowIndex)
+    val ayah = rest.filterIsInstance<ReaderRow.Ayah>().first()
+    val above = rest.takeWhile { it !is ReaderRow.Ayah }
+    assertTrue("only headers above the first ayah: $above", above.all { it is ReaderRow.SurahHeader || it is ReaderRow.Basmala || it is ReaderRow.PageDivider || it is ReaderRow.SegmentHeader })
+    return ayah.id
 }

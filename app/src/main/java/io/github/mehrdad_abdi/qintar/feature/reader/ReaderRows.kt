@@ -77,6 +77,17 @@ class ReaderRowModel private constructor(
     /** The first segment that contains [ayah], with its row index. */
     fun find(ayah: AyahId): Int? = segments.indices.firstNotNullOfOrNull { indexOf(it, ayah) }
 
+    /**
+     * Where a view that wants to show the row [rowIndex] should start: the surah header, basmala and
+     * page divider that stand directly above an ayah belong to it, so that opening at the first ayah
+     * of a surah shows its header instead of scrolling it off.
+     */
+    fun blockStart(rowIndex: Int): Int {
+        var i = rowIndex.coerceIn(0, rows.lastIndex)
+        while (i > 0 && rows[i - 1].let { it is ReaderRow.Basmala || it is ReaderRow.SurahHeader || it is ReaderRow.PageDivider }) i--
+        return i
+    }
+
     /** The ayah row at [rowIndex], or the nearest one after it (then before it). */
     fun ayahAtOrAfter(rowIndex: Int): ReaderRow.Ayah? {
         for (i in rowIndex.coerceAtLeast(0) until rows.size) (rows[i] as? ReaderRow.Ayah)?.let { return it }
