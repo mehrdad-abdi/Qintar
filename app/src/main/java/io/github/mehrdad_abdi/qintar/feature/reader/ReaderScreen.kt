@@ -156,8 +156,12 @@ fun ReaderScreen(
     }
     LaunchedEffect(downloadMessage) {
         if (downloadMessage != null) {
-            viewModel.onDownloadNoticeShown()
-            snackbar.showSnackbar(downloadMessage)
+            // Acknowledged only afterwards: doing it first would change the key and cancel the message.
+            try {
+                snackbar.showSnackbar(downloadMessage)
+            } finally {
+                viewModel.onDownloadNoticeShown()
+            }
         }
     }
     val playerViewModel = player?.invoke()
