@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="audio_title_ayah">%1$s %2$s</string>
+    <string name="audio_title_basmala">بسمله · %1$s</string>
+    <string name="audio_title_with_reciter">%1$s · %2$s</string>
+    <string name="audio_needs_connection">پخش صوت به اینترنت نیاز دارد</string>
+    <string name="audio_failed">این صوت پخش نشد</string>
+
+    <string name="player_previous">آیهٔ قبل</string>
+    <string name="player_next">آیهٔ بعد</string>
+    <string name="player_repeat">تکرار</string>
+    <string name="player_repeat_ayah_once">هر آیه یک بار</string>
+    <string name="player_repeat_ayah_times">هر آیه %1$s بار</string>
+    <string name="player_repeat_passage">تکرار همین بخش</string>
+    <string name="player_show_ayah">نمایش آیهٔ در حال پخش</string>
+
+    <string name="reader_audio_menu">صوت</string>
+    <string name="reader_audio_play_from_here">پخش از همین‌جا</string>
+    <string name="reader_audio_download_surah">دانلود این سوره برای حالت آفلاین</string>
+    <string name="reader_audio_download_passage">دانلود این بخش برای حالت آفلاین</string>
+    <string name="audio_download_progress">در حال دانلود صوت: %1$s از %2$s</string>
+    <string name="audio_download_done">صوت برای شنیدن آفلاین ذخیره شد</string>
+    <string name="audio_download_failed">دانلود متوقف شد: %1$s از %2$s ذخیره شد</string>
+    <string name="audio_download_wifi_only">دانلود منتظر وای‌فای می‌ماند. در تنظیمات می‌توانید تغییرش دهید.</string>
+    <string name="audio_download_offline">اتصال برقرار نیست: چیزی دانلود نشد</string>
+
+    <string name="settings_section_audio">صوت</string>
+    <string name="settings_reciter">قاری</string>
+    <string name="settings_audio_quality">کیفیت</string>
+    <string name="settings_audio_quality_value">%1$s کیلوبیت بر ثانیه</string>
+    <string name="settings_playback_speed">سرعت پخش</string>
+    <string name="settings_count_listened">شمردن آیه‌های شنیده‌شده</string>
+    <string name="settings_count_listened_summary">آیه‌ای که تا پایان شنیده شود خوانده‌شده به حساب می‌آید</string>
+    <string name="settings_wifi_only">دانلود فقط با وای‌فای</string>
+    <string name="settings_clear_audio">پاک کردن صوت‌های ذخیره‌شده</string>
+    <string name="settings_clear_audio_size">%1$s روی این دستگاه ذخیره شده است</string>
+    <string name="settings_clear_audio_empty">چیزی ذخیره نشده است</string>
+
+    <string name="reciter_alafasy">مشاری العفاسی</string>
+    <string name="reciter_abdulbasit">عبدالباسط (ترتیل)</string>
+    <string name="reciter_husary">محمود خلیل الحصری</string>
+    <string name="reciter_minshawi">محمد صدیق المنشاوی</string>
+    <string name="reciter_sudais">عبدالرحمن السدیس</string>
+    <string name="reciter_muaiqly">ماهر المعیقلی</string>
+    <string name="reciter_shaatree">ابوبکر الشاطری</string>
+    <string name="reciter_hudhaify">علی الحذیفی</string>
+    <string name="reciter_parhizgar">شهریار پرهیزگار</string>
+</resources>

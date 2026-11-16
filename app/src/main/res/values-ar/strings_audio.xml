@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="audio_title_ayah">%1$s %2$s</string>
+    <string name="audio_title_basmala">البسملة · %1$s</string>
+    <string name="audio_title_with_reciter">%1$s · %2$s</string>
+    <string name="audio_needs_connection">تشغيل الصوت يحتاج إلى اتصال بالإنترنت</string>
+    <string name="audio_failed">تعذّر تشغيل هذا الصوت</string>
+
+    <string name="player_previous">الآية السابقة</string>
+    <string name="player_next">الآية التالية</string>
+    <string name="player_repeat">التكرار</string>
+    <string name="player_repeat_ayah_once">كل آية مرة واحدة</string>
+    <string name="player_repeat_ayah_times">كل آية %1$s مرات</string>
+    <string name="player_repeat_passage">تكرار المقطع</string>
+    <string name="player_show_ayah">عرض الآية التي تُتلى الآن</string>
+
+    <string name="reader_audio_menu">الصوت</string>
+    <string name="reader_audio_play_from_here">التشغيل من هنا</string>
+    <string name="reader_audio_download_surah">تنزيل هذه السورة للاستماع دون اتصال</string>
+    <string name="reader_audio_download_passage">تنزيل هذا المقطع للاستماع دون اتصال</string>
+    <string name="audio_download_progress">جارٍ تنزيل الصوت: %1$s من %2$s</string>
+    <string name="audio_download_done">حُفظ الصوت للاستماع دون اتصال</string>
+    <string name="audio_download_failed">توقّف التنزيل: حُفظ %1$s من %2$s</string>
+    <string name="audio_download_wifi_only">التنزيل ينتظر شبكة Wi-Fi. يمكنك تغيير ذلك من الإعدادات.</string>
+    <string name="audio_download_offline">لا يوجد اتصال: لم يُنزَّل شيء</string>
+
+    <string name="settings_section_audio">الصوت</string>
+    <string name="settings_reciter">القارئ</string>
+    <string name="settings_audio_quality">الجودة</string>
+    <string name="settings_audio_quality_value">%1$s كيلوبت في الثانية</string>
+    <string name="settings_playback_speed">سرعة التشغيل</string>
+    <string name="settings_count_listened">احتساب الآيات المسموعة</string>
+    <string name="settings_count_listened_summary">الآية التي تُسمع إلى آخرها تُحتسب مقروءة</string>
+    <string name="settings_wifi_only">التنزيل عبر Wi-Fi فقط</string>
+    <string name="settings_clear_audio">مسح الصوت المحفوظ</string>
+    <string name="settings_clear_audio_size">%1$s محفوظة على هذا الجهاز</string>
+    <string name="settings_clear_audio_empty">لا يوجد شيء محفوظ</string>
+
+    <string name="reciter_alafasy">مشاري العفاسي</string>
+    <string name="reciter_abdulbasit">عبد الباسط عبد الصمد (مرتل)</string>
+    <string name="reciter_husary">محمود خليل الحصري</string>
+    <string name="reciter_minshawi">محمد صديق المنشاوي</string>
+    <string name="reciter_sudais">عبد الرحمن السديس</string>
+    <string name="reciter_muaiqly">ماهر المعيقلي</string>
+    <string name="reciter_shaatree">أبو بكر الشاطري</string>
+    <string name="reciter_hudhaify">علي الحذيفي</string>
+    <string name="reciter_parhizgar">شهريار برهيزكار</string>
+</resources>

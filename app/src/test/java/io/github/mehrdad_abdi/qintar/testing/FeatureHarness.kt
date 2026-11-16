@@ -20,6 +20,20 @@ import io.github.mehrdad_abdi.qintar.domain.backup.LegacyReport
 import io.github.mehrdad_abdi.qintar.domain.model.LegacyMigrationState
 import io.github.mehrdad_abdi.qintar.domain.testing.FakePrefsStore
 import io.github.mehrdad_abdi.qintar.feature.onboarding.OnboardingViewModel
+import io.github.mehrdad_abdi.qintar.feature.player.PlayerBarViewModel
+import io.github.mehrdad_abdi.qintar.domain.model.AyahRange
+import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
+import io.github.mehrdad_abdi.qintar.domain.testing.QuranFixture
+import io.github.mehrdad_abdi.qintar.playback.AudioDownloads
+import io.github.mehrdad_abdi.qintar.playback.AudioStorage
+import io.github.mehrdad_abdi.qintar.playback.DownloadState
+import io.github.mehrdad_abdi.qintar.playback.NowPlaying
+import io.github.mehrdad_abdi.qintar.playback.PlayRequest
+import io.github.mehrdad_abdi.qintar.playback.PlaybackOrigin
+import io.github.mehrdad_abdi.qintar.playback.PlayerController
+import io.github.mehrdad_abdi.qintar.playback.PlayerState
+import io.github.mehrdad_abdi.qintar.playback.RepeatSettings
+import kotlinx.coroutines.flow.MutableStateFlow
 import io.github.mehrdad_abdi.qintar.feature.settings.BackupViewModel
 import io.github.mehrdad_abdi.qintar.feature.settings.MigrationNoticeViewModel
 import io.github.mehrdad_abdi.qintar.feature.settings.MigrationReports
@@ -74,6 +88,8 @@ fun DomainFixture.readerViewModel(
     route: ReaderRoute,
     io: CoroutineDispatcher,
     text: QuranTextSource = this.text,
+    player: PlayerController = FakePlayerController(),
+    downloads: AudioDownloads = FakeAudioDownloads(),
 ) = ReaderViewModel(
     route = route,
     index = { index },
@@ -87,8 +103,93 @@ fun DomainFixture.readerViewModel(
     availability = availability,
     library = library,
     bulk = { bulk },
+    player = player,
+    downloads = downloads,
     io = io,
 )
+
+/** A player that plays nothing: it records what it was asked and shows the state a test gives it. */
+class FakePlayerController : PlayerController {
+    override val state = MutableStateFlow(PlayerState())
+    val requests = ArrayList<PlayRequest>()
+    val calls = ArrayList<String>()
+    val repeats = ArrayList<RepeatSettings>()
+
+    override fun play(request: PlayRequest) {
+        requests += request
+    }
+
+    override fun togglePlayPause() {
+        calls += "toggle"
+    }
+
+    override fun next() {
+        calls += "next"
+    }
+
+    override fun previous() {
+        calls += "previous"
+    }
+
+    override fun setRepeat(repeat: RepeatSettings) {
+        repeats += repeat
+        state.value = state.value.copy(repeat = repeat)
+    }
+
+    override fun close() {
+        calls += "close"
+        state.value = PlayerState()
+    }
+
+    /** As the service would report it: [ayah] of [segment] of the reader behind [origin] is loaded. */
+    fun nowAt(
+        origin: PlaybackOrigin,
+        segment: Int,
+        ayah: AyahId,
+        context: ReadContext = ReadContext.Browse,
+        playing: Boolean = true,
+        basmala: Boolean = false,
+    ) {
+        state.value = state.value.copy(
+            origin = origin,
+            item = NowPlaying(ayah, QuranFixture.index.ref(ayah).surah, segment, basmala, context),
+            playing = playing,
+        )
+    }
+}
+
+class FakeAudioDownloads : AudioDownloads {
+    override val state = MutableStateFlow<DownloadState>(DownloadState.Idle)
+    val requested = ArrayList<List<AyahRange>>()
+    var cancelled = 0
+
+    override fun download(ranges: List<AyahRange>) {
+        requested += ranges
+    }
+
+    override fun cancel() {
+        cancelled++
+        state.value = DownloadState.Idle
+    }
+
+    override fun acknowledge() {
+        state.value = DownloadState.Idle
+    }
+}
+
+class FakeAudioStorage(var bytes: Long = 0) : AudioStorage {
+    var cleared = 0
+
+    override suspend fun sizeBytes(): Long = bytes
+
+    override suspend fun clear() {
+        cleared++
+        bytes = 0
+    }
+}
+
+fun DomainFixture.playerBarViewModel(player: PlayerController, io: CoroutineDispatcher) =
+    PlayerBarViewModel(player = player, prefs = prefs, index = { index }, io = io)
 
 fun DomainFixture.todayViewModel(
     io: CoroutineDispatcher,
@@ -243,8 +344,11 @@ class FakeLegacyMigration(private val prefs: FakePrefsStore) : LegacyMigration {
     }
 }
 
-fun DomainFixture.settingsViewModel(migration: LegacyMigration = FakeLegacyMigration(prefs), reports: MigrationReports = MigrationReports()) =
-    SettingsViewModel(prefs = prefs, migration = migration, reports = reports)
+fun DomainFixture.settingsViewModel(
+    migration: LegacyMigration = FakeLegacyMigration(prefs),
+    reports: MigrationReports = MigrationReports(),
+    audio: AudioStorage = FakeAudioStorage(),
+) = SettingsViewModel(prefs = prefs, migration = migration, reports = reports, audio = audio)
 
 fun DomainFixture.backupViewModel(io: CoroutineDispatcher) = BackupViewModel(
     backup = backup,

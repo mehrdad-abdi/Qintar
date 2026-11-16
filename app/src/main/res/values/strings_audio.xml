@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Audio (§7.8): what is being played -->
+    <string name="audio_title_ayah">%1$s %2$s</string>
+    <string name="audio_title_basmala">Basmala · %1$s</string>
+    <string name="audio_title_with_reciter">%1$s · %2$s</string>
+    <string name="audio_needs_connection">Audio needs a connection</string>
+    <string name="audio_failed">This audio could not be played</string>
+
+    <!-- The player in the reader -->
+    <string name="player_previous">Previous ayah</string>
+    <string name="player_next">Next ayah</string>
+    <string name="player_repeat">Repeat</string>
+    <string name="player_repeat_ayah_once">Each ayah once</string>
+    <string name="player_repeat_ayah_times">Each ayah %1$s times</string>
+    <string name="player_repeat_passage">Repeat the passage</string>
+    <string name="player_show_ayah">Show the ayah being played</string>
+
+    <!-- The reader's audio menu -->
+    <string name="reader_audio_menu">Audio</string>
+    <string name="reader_audio_play_from_here">Play from here</string>
+    <string name="reader_audio_download_surah">Download this surah for offline</string>
+    <string name="reader_audio_download_passage">Download this passage for offline</string>
+    <string name="audio_download_progress">Downloading audio: %1$s of %2$s</string>
+    <string name="audio_download_done">Audio saved for offline listening</string>
+    <string name="audio_download_failed">Download stopped: %1$s of %2$s saved</string>
+    <string name="audio_download_wifi_only">Downloads wait for Wi-Fi. You can change this in Settings.</string>
+    <string name="audio_download_offline">No connection: nothing was downloaded</string>
+
+    <!-- Settings › Audio -->
+    <string name="settings_section_audio">Audio</string>
+    <string name="settings_reciter">Reciter</string>
+    <string name="settings_audio_quality">Quality</string>
+    <string name="settings_audio_quality_value">%1$s kbps</string>
+    <string name="settings_playback_speed">Playback speed</string>
+    <string name="settings_count_listened">Count listened ayahs</string>
+    <string name="settings_count_listened_summary">An ayah heard to its end counts as read</string>
+    <string name="settings_wifi_only">Download on Wi-Fi only</string>
+    <string name="settings_clear_audio">Clear stored audio</string>
+    <string name="settings_clear_audio_size">%1$s stored on this device</string>
+    <string name="settings_clear_audio_empty">Nothing stored</string>
+
+    <!-- Reciters -->
+    <string name="reciter_alafasy">Mishary Alafasy</string>
+    <string name="reciter_abdulbasit">Abdul Basit (Murattal)</string>
+    <string name="reciter_husary">Mahmoud Khalil Al-Husary</string>
+    <string name="reciter_minshawi">Mohamed Siddiq Al-Minshawi</string>
+    <string name="reciter_sudais">Abdurrahman As-Sudais</string>
+    <string name="reciter_muaiqly">Maher Al-Muaiqly</string>
+    <string name="reciter_shaatree">Abu Bakr Ash-Shaatree</string>
+    <string name="reciter_hudhaify">Ali Al-Hudhaify</string>
+    <string name="reciter_parhizgar">Shahriar Parhizgar</string>
+</resources>

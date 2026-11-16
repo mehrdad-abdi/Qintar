@@ -10,6 +10,9 @@ import io.github.mehrdad_abdi.qintar.domain.model.ThemeMode
 import io.github.mehrdad_abdi.qintar.domain.model.UserPrefs
 import io.github.mehrdad_abdi.qintar.domain.model.WeekStart
 import io.github.mehrdad_abdi.qintar.domain.port.PrefsStore
+import io.github.mehrdad_abdi.qintar.playback.AudioStorage
+import io.github.mehrdad_abdi.qintar.playback.PlaybackService
+import io.github.mehrdad_abdi.qintar.playback.Reciters
 import java.time.LocalTime
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +26,8 @@ data class SettingsUiState(
     val prefs: UserPrefs = UserPrefs(),
     /** True while "Try again" of the v1 migration runs. */
     val retrying: Boolean = false,
+    /** Bytes of stored recitation; null until measured. */
+    val audioBytes: Long? = null,
 )
 
 /**
@@ -34,6 +39,7 @@ class SettingsViewModel @Inject constructor(
     private val prefs: PrefsStore,
     private val migration: LegacyMigration,
     private val reports: MigrationReports,
+    private val audio: AudioStorage,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsUiState())
@@ -43,6 +49,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             prefs.prefs.collect { p -> _state.update { it.copy(loading = false, prefs = p) } }
         }
+        refreshAudioSize()
     }
 
     private fun edit(transform: (UserPrefs) -> UserPrefs) {
@@ -72,8 +79,31 @@ class SettingsViewModel @Inject constructor(
     fun setStreakReminderEnabled(value: Boolean) = edit { it.copy(streakReminderEnabled = value) }
     fun setStreakReminderTime(value: LocalTime) = edit { it.copy(streakReminderTime = value) }
 
-    // ---- AUDIO SECTION (not built here): reciter, quality, speed, count-listened, Wi-Fi only and
-    // ---- storage live in UserPrefs already; the audio feature adds its setters and its section.
+    // ---- Audio (§7.8)
+    /** A reciter of the curated list; the quality moves to the nearest one that reciter has. */
+    fun setReciter(id: String) = edit {
+        val reciter = Reciters.of(id)
+        it.copy(reciterId = reciter.id, audioQuality = reciter.bitrateFor(it.audioQuality))
+    }
+
+    fun setAudioQuality(bitrate: Int) = edit { it.copy(audioQuality = Reciters.of(it.reciterId).bitrateFor(bitrate)) }
+    fun setPlaybackSpeed(speed: Float) = edit { it.copy(playbackSpeed = speed.coerceIn(PlaybackService.MIN_SPEED, PlaybackService.MAX_SPEED)) }
+    fun setCountListened(value: Boolean) = edit { it.copy(countListened = value) }
+    fun setWifiOnlyDownloads(value: Boolean) = edit { it.copy(wifiOnlyDownloads = value) }
+
+    fun clearAudio() {
+        viewModelScope.launch {
+            runCatching { audio.clear() }
+            refreshAudioSize()
+        }
+    }
+
+    private fun refreshAudioSize() {
+        viewModelScope.launch {
+            val bytes = runCatching { audio.sizeBytes() }.getOrNull()
+            _state.update { it.copy(audioBytes = bytes) }
+        }
+    }
 
     // ---- Data
     fun retryMigration(khatmName: String) {

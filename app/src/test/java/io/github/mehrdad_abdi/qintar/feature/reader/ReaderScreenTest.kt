@@ -55,7 +55,7 @@ class ReaderScreenTest {
         compose.onAllNodesWithText("Surah 2").assertCountEquals(2) // the title, and the surah header above ayah 1
         compose.onNodeWithContentDescription("Surah 2, ayah 1, not read today").assertIsDisplayed()
         compose.onNodeWithContentDescription("0 today, 10 ayahs to the first rank").assertIsDisplayed()
-        compose.onAllNodesWithContentDescription("Play").assertCountEquals(0)
+        assertTrue("every ayah offers its recitation", compose.onAllNodesWithContentDescription("Play").fetchSemanticsNodes().isNotEmpty())
 
         compose.onNodeWithContentDescription("Back").performClick()
         assertEquals(1, backs)

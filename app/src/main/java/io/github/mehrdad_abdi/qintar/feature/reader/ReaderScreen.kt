@@ -60,7 +60,13 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.rounded.Headphones
+import io.github.mehrdad_abdi.qintar.feature.player.PlayerBarViewModel
+import io.github.mehrdad_abdi.qintar.feature.player.ReaderPlayerBar
+import io.github.mehrdad_abdi.qintar.playback.DownloadState
+import io.github.mehrdad_abdi.qintar.playback.origin
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.mehrdad_abdi.qintar.R
@@ -102,6 +108,7 @@ const val READER_LIST_TAG = "reader-list"
  * `.bookmark(id)`, `.group(id)`, `.browse(ayahId)`, `.random(first, last)`.
  *
  * @param onNavigate pass a route object from `ui/navigation/Routes.kt`.
+ * @param player the mini player's view model; null leaves the player out (previews, tests of the list).
  */
 @Composable
 fun ReaderScreen(
@@ -109,6 +116,7 @@ fun ReaderScreen(
     onBack: () -> Unit,
     onNavigate: (route: Any) -> Unit,
     viewModel: ReaderViewModel = hiltViewModel<ReaderViewModel, ReaderViewModel.Factory> { it.create(route) },
+    player: (@Composable () -> PlayerBarViewModel)? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val colors = MaterialTheme.colorScheme
@@ -135,6 +143,25 @@ fun ReaderScreen(
             if (result == SnackbarResult.ActionPerformed) viewModel.onUndoBulk() else viewModel.onBulkNoticeShown(bulk)
         }
     }
+
+    // The outcome of "Download for offline" is said once.
+    val download = state.download
+    val downloadMessage = when (download) {
+        is DownloadState.Finished -> stringResource(R.string.audio_download_done)
+        is DownloadState.Failed -> stringResource(R.string.audio_download_failed, formatNumber(download.done), formatNumber(download.total))
+        is DownloadState.Blocked -> stringResource(
+            if (download.reason == DownloadState.Blocked.Reason.WIFI_ONLY) R.string.audio_download_wifi_only else R.string.audio_download_offline,
+        )
+        else -> null
+    }
+    LaunchedEffect(downloadMessage) {
+        if (downloadMessage != null) {
+            viewModel.onDownloadNoticeShown()
+            snackbar.showSnackbar(downloadMessage)
+        }
+    }
+    val playerViewModel = player?.invoke()
+    val playerVisible = playerViewModel?.state?.collectAsStateWithLifecycle()?.value?.visible == true
 
     Box(Modifier.fillMaxSize().background(colors.background).windowInsetsPadding(WindowInsets.safeDrawing)) {
         val model = state.model
@@ -167,7 +194,12 @@ fun ReaderScreen(
                     derivedStateOf { model.ayahAtOrAfter(listState.firstVisibleItemIndex) }
                 }
                 Column(Modifier.fillMaxSize()) {
-                    TopBar(readerTitle(state.title, current, viewModelIndex = model), onBack, onTextSettings = { viewModel.onSheet(ReaderSheet.TEXT) })
+                    TopBar(
+                        readerTitle(state.title, current, viewModelIndex = model),
+                        onBack,
+                        onTextSettings = { viewModel.onSheet(ReaderSheet.TEXT) },
+                        audioMenu = { AudioMenu(state.canDownloadPassage, viewModel) },
+                    )
                     current?.let { at ->
                         PositionBar(
                             primary = stringResource(
@@ -181,7 +213,7 @@ fun ReaderScreen(
                             modifier = Modifier.padding(horizontal = Spacing.screen),
                         )
                     }
-                    ReaderList(state, model, listState, viewModel, onNavigate, Modifier.weight(1f))
+                    ReaderList(state, model, listState, viewModel, onNavigate, Modifier.weight(1f), bottomRoom = if (playerVisible) 224.dp else 112.dp)
                 }
             }
         }
@@ -196,6 +228,16 @@ fun ReaderScreen(
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             SnackbarHost(snackbar)
+            if (download is DownloadState.Running) {
+                DownloadProgress(download, onCancel = viewModel::onDownloadCancel)
+            }
+            if (playerViewModel != null) {
+                ReaderPlayerBar(
+                    playerViewModel,
+                    // This reader's own audio: back to the ayah; another reader's: over to that reader.
+                    onOpen = { target -> if (target.origin() == route.origin()) viewModel.onShowPlaying() else onNavigate(target) },
+                )
+            }
             state.firstUnread?.let { unread ->
                 AssistChip(
                     onClick = { viewModel.onJumpToAyah(unread) },
@@ -230,7 +272,12 @@ private fun readerTitle(title: ReaderTitle, current: ReaderRow.Ayah?, viewModelI
 }
 
 @Composable
-private fun TopBar(title: String, onBack: () -> Unit, onTextSettings: (() -> Unit)? = null) {
+private fun TopBar(
+    title: String,
+    onBack: () -> Unit,
+    onTextSettings: (() -> Unit)? = null,
+    audioMenu: (@Composable () -> Unit)? = null,
+) {
     val colors = MaterialTheme.colorScheme
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.xs, vertical = Spacing.xs),
@@ -247,6 +294,7 @@ private fun TopBar(title: String, onBack: () -> Unit, onTextSettings: (() -> Uni
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f).padding(horizontal = Spacing.xs),
         )
+        audioMenu?.invoke()
         if (onTextSettings != null) {
             val label = stringResource(R.string.reader_text_settings)
             TextButton(
@@ -254,6 +302,50 @@ private fun TopBar(title: String, onBack: () -> Unit, onTextSettings: (() -> Uni
                 modifier = Modifier.heightIn(min = Sizes.touchTarget).semantics { contentDescription = label },
             ) { Text("Aa", style = QintarType.Title, color = colors.onSurfaceVariant) }
         }
+    }
+}
+
+/** The reader's audio menu (§5.4): play from the ayah on screen, and "download for offline". */
+@Composable
+private fun AudioMenu(canDownloadPassage: Boolean, viewModel: ReaderViewModel) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { open = true }, modifier = Modifier.size(Sizes.touchTarget)) {
+            Icon(Icons.Rounded.Headphones, stringResource(R.string.reader_audio_menu), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.reader_audio_play_from_here)) },
+                onClick = { open = false; viewModel.onPlayFromHere() },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.reader_audio_download_surah)) },
+                onClick = { open = false; viewModel.onDownloadSurah() },
+            )
+            if (canDownloadPassage) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.reader_audio_download_passage)) },
+                    onClick = { open = false; viewModel.onDownloadPassage() },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DownloadProgress(download: DownloadState.Running, onCancel: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        Modifier.fillMaxWidth().clip(QintarShapes.Inner).background(colors.surfaceContainer).padding(start = Spacing.lg),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            stringResource(R.string.audio_download_progress, formatNumber(download.done), formatNumber(download.total)),
+            style = QintarType.Label,
+            color = colors.onSurface,
+            modifier = Modifier.weight(1f),
+        )
+        TextButton(onClick = onCancel, modifier = Modifier.heightIn(min = Sizes.touchTarget)) { Text(stringResource(R.string.action_cancel)) }
     }
 }
 
@@ -265,13 +357,14 @@ private fun ReaderList(
     viewModel: ReaderViewModel,
     onNavigate: (Any) -> Unit,
     modifier: Modifier = Modifier,
+    bottomRoom: Dp = 112.dp,
 ) {
     val haptics = LocalHapticFeedback.current
     LazyColumn(
         state = listState,
         modifier = modifier.fillMaxWidth().testTag(READER_LIST_TAG),
-        // Room for the pill, so that the last ayah can be scrolled clear of it.
-        contentPadding = PaddingValues(bottom = 112.dp),
+        // Room for the pill (and the player), so that the last ayah can be scrolled clear of them.
+        contentPadding = PaddingValues(bottom = bottomRoom),
     ) {
         itemsIndexed(model.rows, key = { _, row -> row.key }, contentType = { _, row -> row::class }) { rowIndex, row ->
             when (row) {
@@ -413,7 +506,8 @@ private fun AyahItem(
             fontSizeSp = state.fontSp,
             accessibilityLabel = stringResource(R.string.ayah_label, surahLabel, formatNumber(row.number)),
             onCheck = onCheck,
-            onPlay = null,
+            playing = state.isPlaying(row),
+            onPlay = { viewModel.onPlay(row) },
             onStar = { viewModel.onStar(row) },
             onMenu = { menuOpen = true },
         )

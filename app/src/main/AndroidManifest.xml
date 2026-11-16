@@ -7,6 +7,13 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Sets the reminder alarms again after a restart. Reminders use inexact alarms: no exact-alarm permission. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Audio (§7.8): recitation goes on with the screen off, as a media-playback foreground service. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- Media3 keeps the CPU and the network awake while it plays. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- "Download on Wi-Fi only", and telling "no connection" from other failures. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name=".QintarApp"
@@ -42,6 +49,16 @@
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
+
+        <!-- The player (§7.8). Not exported: lock screen, headset and notification reach it through the system's media session. -->
+        <service
+            android:name=".playback.PlaybackService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
 
         <!-- Lets AppCompat remember the per-app language below Android 13 (§6.6). -->
         <service

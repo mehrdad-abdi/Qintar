@@ -39,7 +39,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import android.text.format.Formatter
 import androidx.compose.ui.platform.LocalContext
+import io.github.mehrdad_abdi.qintar.feature.player.PlayerBarViewModel
+import io.github.mehrdad_abdi.qintar.feature.player.speedLabel
+import io.github.mehrdad_abdi.qintar.playback.Reciters
+import kotlin.math.abs
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -96,6 +101,12 @@ object SettingsTags {
     const val WEEK_START = "setting-week-start"
     const val REMINDER = "setting-reminder"
     const val STREAK_REMINDER = "setting-streak-reminder"
+    const val RECITER = "setting-reciter"
+    const val AUDIO_QUALITY = "setting-audio-quality"
+    const val PLAYBACK_SPEED = "setting-playback-speed"
+    const val COUNT_LISTENED = "setting-count-listened"
+    const val WIFI_ONLY = "setting-wifi-only"
+    const val CLEAR_AUDIO = "setting-clear-audio"
     const val EXPORT = "setting-export"
     const val IMPORT = "setting-import"
     const val MIGRATION_RETRY = "setting-migration-retry"
@@ -135,8 +146,7 @@ fun SettingsScreen(
             ReadingSection(state.prefs, viewModel)
             GoalSection(state.prefs, viewModel)
             RemindersSection(state.prefs, viewModel)
-            // AUDIO SECTION: the audio feature adds "Audio" here (reciter, quality, speed, count listened,
-            // Wi-Fi only, storage), between Reminders and Data as in §5.9.
+            AudioSection(state.prefs, state.audioBytes, viewModel)
             DataSection(state.prefs.legacyMigrationState, state.retrying, viewModel, backupViewModel)
             AboutSection(onOpenLicences = { onNavigate(LicencesRoute) })
         }
@@ -423,6 +433,60 @@ private fun RemindersSection(prefs: UserPrefs, vm: SettingsViewModel) = Section(
             modifier = Modifier.padding(bottom = Spacing.sm),
         )
     }
+}
+
+/** Audio (§5.9, §7.8): who recites, how it sounds, whether listening counts, and what is stored. */
+@Composable
+private fun AudioSection(prefs: UserPrefs, audioBytes: Long?, vm: SettingsViewModel) = Section(stringResource(R.string.settings_section_audio)) {
+    val reciter = Reciters.of(prefs.reciterId)
+    ChoiceSetting(
+        title = stringResource(R.string.settings_reciter),
+        options = Reciters.all.map { it.id },
+        selected = reciter.id,
+        label = { stringResource(Reciters.of(it).name) },
+        tag = SettingsTags.RECITER,
+        onSelect = vm::setReciter,
+    )
+    RowDivider()
+    ChoiceSetting(
+        title = stringResource(R.string.settings_audio_quality),
+        options = reciter.bitrates,
+        selected = reciter.bitrateFor(prefs.audioQuality),
+        label = { stringResource(R.string.settings_audio_quality_value, formatNumber(it)) },
+        tag = SettingsTags.AUDIO_QUALITY,
+        onSelect = vm::setAudioQuality,
+    )
+    RowDivider()
+    ChoiceSetting(
+        title = stringResource(R.string.settings_playback_speed),
+        options = PlayerBarViewModel.SPEEDS,
+        selected = PlayerBarViewModel.SPEEDS.minBy { abs(it - prefs.playbackSpeed) },
+        label = { speedLabel(it) },
+        tag = SettingsTags.PLAYBACK_SPEED,
+        onSelect = vm::setPlaybackSpeed,
+    )
+    RowDivider()
+    SwitchSetting(
+        stringResource(R.string.settings_count_listened),
+        prefs.countListened,
+        SettingsTags.COUNT_LISTENED,
+        summary = stringResource(R.string.settings_count_listened_summary),
+        onChange = vm::setCountListened,
+    )
+    RowDivider()
+    SwitchSetting(stringResource(R.string.settings_wifi_only), prefs.wifiOnlyDownloads, SettingsTags.WIFI_ONLY, onChange = vm::setWifiOnlyDownloads)
+    RowDivider()
+    val context = LocalContext.current
+    ActionRow(
+        title = stringResource(R.string.settings_clear_audio),
+        summary = when {
+            audioBytes == null -> ""
+            audioBytes <= 0L -> stringResource(R.string.settings_clear_audio_empty)
+            else -> stringResource(R.string.settings_clear_audio_size, Formatter.formatShortFileSize(context, audioBytes))
+        },
+        tag = SettingsTags.CLEAR_AUDIO,
+        onClick = vm::clearAudio,
+    )
 }
 
 @Composable

@@ -17,6 +17,7 @@ import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmDetailScreen
 import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmListScreen
 import io.github.mehrdad_abdi.qintar.feature.khatm.NewKhatmScreen
 import io.github.mehrdad_abdi.qintar.feature.onboarding.OnboardingScreen
+import io.github.mehrdad_abdi.qintar.feature.player.PlayerBarViewModel
 import io.github.mehrdad_abdi.qintar.feature.read.ReadScreen
 import io.github.mehrdad_abdi.qintar.feature.reader.ReaderScreen
 import io.github.mehrdad_abdi.qintar.feature.settings.LicencesScreen
@@ -38,6 +39,7 @@ fun QintarNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     startDestination: Any = TodayRoute,
+    player: (@Composable () -> PlayerBarViewModel)? = null,
 ) {
     val onBack: () -> Unit = { navController.popBackStack() }
     // A tab route switches tab (one copy of each tab); anything else is pushed.
@@ -54,7 +56,7 @@ fun QintarNavHost(
 
         // ---- Full-screen destinations (no bottom bar) ---------------------------------------
         composable<ReaderRoute> { entry ->                               // feature/reader
-            ReaderScreen(entry.toRoute<ReaderRoute>(), onBack, onNavigate)
+            ReaderScreen(entry.toRoute<ReaderRoute>(), onBack, onNavigate, player = player)
         }
         composable<KhatmDetailRoute> { entry ->                          // feature/khatm
             KhatmDetailScreen(entry.toRoute<KhatmDetailRoute>(), onBack, onNavigate)

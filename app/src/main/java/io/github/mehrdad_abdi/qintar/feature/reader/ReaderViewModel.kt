@@ -37,6 +37,12 @@ import io.github.mehrdad_abdi.qintar.domain.service.RankProgress
 import io.github.mehrdad_abdi.qintar.domain.service.ReadingTracker
 import io.github.mehrdad_abdi.qintar.domain.service.StarResult
 import io.github.mehrdad_abdi.qintar.domain.time.DayClock
+import io.github.mehrdad_abdi.qintar.playback.AudioDownloads
+import io.github.mehrdad_abdi.qintar.playback.DownloadState
+import io.github.mehrdad_abdi.qintar.playback.PlayRequest
+import io.github.mehrdad_abdi.qintar.playback.PlayerController
+import io.github.mehrdad_abdi.qintar.playback.PlayerState
+import io.github.mehrdad_abdi.qintar.playback.origin
 import io.github.mehrdad_abdi.qintar.ui.common.GoToProblem
 import io.github.mehrdad_abdi.qintar.ui.common.RankReachedDetector
 import io.github.mehrdad_abdi.qintar.ui.designsystem.AyahCheckState
@@ -108,6 +114,9 @@ data class SegmentHeaderInfo(
     val done: Boolean,
 )
 
+/** The ayah of this reader that is loaded in the player. */
+data class AudioPosition(val segment: Int, val ayah: AyahId)
+
 /** Asks the list to scroll to [row]; [token] tells one request from the next. */
 data class ScrollRequest(val row: Int, val token: Int)
 
@@ -150,8 +159,21 @@ data class ReaderUiState(
     val resume: AyahId? = null,
     val firstUnread: AyahId? = null,
     val scrollRequest: ScrollRequest? = null,
+    /** Where the player is in this reader; null when nothing is loaded or the audio is another reader's. */
+    val audioAt: AudioPosition? = null,
+    /** Sound is coming out (or about to) at [audioAt]. */
+    val audioPlaying: Boolean = false,
+    val download: DownloadState = DownloadState.Idle,
 ) {
     val rows: List<ReaderRow> get() = model?.rows.orEmpty()
+
+    /** The row whose ayah is being played: it is highlighted and its button pauses. */
+    fun isPlaying(row: ReaderRow.Ayah): Boolean = audioPlaying && isAudioAt(row)
+
+    fun isAudioAt(row: ReaderRow.Ayah): Boolean = audioAt?.let { it.segment == row.segment && it.ayah == row.id } == true
+
+    /** A passage smaller than the whole Quran can be downloaded as one. */
+    val canDownloadPassage: Boolean get() = entry != ReaderEntry.KHATM && entry != ReaderEntry.BROWSE
 
     /** Readings of this row's ayah today, in this row's context. */
     fun count(row: ReaderRow.Ayah): Int = counts.getOrNull(row.segment)?.get(row.id) ?: 0
@@ -204,6 +226,8 @@ class ReaderViewModel @AssistedInject constructor(
     private val availability: Availability,
     private val library: BookmarkLibrary,
     private val bulk: Provider<BulkRangeResolver>,
+    private val player: PlayerController,
+    private val downloads: AudioDownloads,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) : ViewModel() {
 
@@ -229,6 +253,9 @@ class ReaderViewModel @AssistedInject constructor(
     private val rankReached = RankReachedDetector()
     private var reachedJob: Job? = null
 
+    /** Rows on screen, as the list last reported them. */
+    private var visibleRows = IntRange.EMPTY
+
     init {
         viewModelScope.launch {
             prefs.prefs.collect { p ->
@@ -252,6 +279,9 @@ class ReaderViewModel @AssistedInject constructor(
             library.observeStarred().collect { starred -> _state.update { it.copy(starred = starred) } }
         }
         viewModelScope.launch {
+            downloads.state.collect { download -> _state.update { it.copy(download = download) } }
+        }
+        viewModelScope.launch {
             val opened = withContext(io) { open() }
             if (opened == null) {
                 _state.update { it.copy(phase = ReaderPhase.NOT_FOUND) }
@@ -260,24 +290,28 @@ class ReaderViewModel @AssistedInject constructor(
             model = opened.model
             quran = opened.index
             scopeStarts = opened.scopeStarts
-            firstVisible.value = opened.start
+            // Back from the mini player: the reader opens where the audio is.
+            val audio = audioPosition(player.state.value).takeIf { route.startAyahId == ReaderRoute.UNSET }
+            val audioRow = audio?.let { opened.model.indexOf(it.segment, it.ayah) }
+            firstVisible.value = audio?.ayah ?: opened.start
             _state.update {
                 it.copy(
                     phase = ReaderPhase.READY,
                     title = opened.title,
                     segmentTitles = opened.segmentTitles,
                     model = opened.model,
-                    initialRowIndex = opened.startRow,
+                    initialRowIndex = audioRow?.let(opened.model::blockStart) ?: opened.startRow,
                     assumedCoveredUpTo = opened.assumedCoveredUpTo,
                     scopeSurahs = opened.scopeSurahs,
                     scopeJuz = opened.scopeJuz,
                 )
             }
-            opened.model.ayahAtOrAfter(opened.startRow)?.let { loadPagesAround(it, it) }
+            opened.model.ayahAtOrAfter(audioRow ?: opened.startRow)?.let { loadPagesAround(it, it) }
             observeReadState(opened.model.segments)
             if (route.entry == ReaderEntry.BOOKMARK || route.entry == ReaderEntry.GROUP) observeHeaders(opened.model.segments)
             if (route.entry == ReaderEntry.KHATM) observeKhatmPosition()
             if (route.entry == ReaderEntry.BROWSE) rememberBrowsePosition()
+            player.state.collect(::onPlayerState)
         }
     }
 
@@ -452,6 +486,7 @@ class ReaderViewModel @AssistedInject constructor(
         val first = model.ayahAtOrAfter(firstRow) ?: return
         val last = model.ayahAtOrAfter(lastRow.coerceAtLeast(firstRow)) ?: first
         firstVisible.value = first.id
+        visibleRows = firstRow..lastRow.coerceAtLeast(firstRow)
         loadPagesAround(first, last)
     }
 
@@ -561,6 +596,76 @@ class ReaderViewModel @AssistedInject constructor(
         val segments = model?.segments ?: return@act
         offerUndo(tracker.markSegments(segments, ReadMethod.BULK, RangeMode.ADD))
     }
+
+    // ---- Audio (§7.8) ------------------------------------------------------------------------------
+
+    /** Where the player is, if what it plays was started from this reader. */
+    private fun audioPosition(p: PlayerState): AudioPosition? {
+        val item = p.item ?: return null
+        return if (p.origin == route.origin()) AudioPosition(item.segment, item.ayah) else null
+    }
+
+    /**
+     * The playing ayah is highlighted, and the list follows it while the listener stays with it: the
+     * ayah before it was on screen and the new one is not. Scrolling away stops the following.
+     */
+    private fun onPlayerState(p: PlayerState) {
+        val model = model ?: return
+        val before = _state.value.audioAt
+        val now = audioPosition(p)
+        // The basmala before an ayah is not a row of its own: the ayah it leads to is shown as playing.
+        _state.update { it.copy(audioAt = now, audioPlaying = now != null && (p.playing || p.loading)) }
+        if (now == null || now == before) return
+        val row = model.indexOf(now.segment, now.ayah) ?: return
+        val previousRow = before?.let { model.indexOf(it.segment, it.ayah) } ?: return
+        val shown = visibleRows
+        if (previousRow in shown && (row >= shown.last || row < shown.first)) {
+            _state.update { it.copy(scrollRequest = ScrollRequest(model.blockStart(row), ++scrollToken)) }
+        }
+    }
+
+    /** The play button of a row: pause or resume when it is the ayah in the player, otherwise play from it. */
+    fun onPlay(row: ReaderRow.Ayah) {
+        val model = model ?: return
+        if (_state.value.isAudioAt(row)) {
+            player.togglePlayPause()
+        } else {
+            player.play(PlayRequest(route.origin(), model.segments, row.segment, row.id))
+        }
+    }
+
+    /** The audio menu's "Play from here": from the first ayah on screen. */
+    fun onPlayFromHere() {
+        val model = model ?: return
+        val row = model.ayahAtOrAfter(visibleRows.first.coerceAtLeast(0)) ?: return
+        player.play(PlayRequest(route.origin(), model.segments, row.segment, row.id))
+    }
+
+    /** The player's title was tapped in this reader: back to the ayah being played. */
+    fun onShowPlaying() {
+        val at = _state.value.audioAt ?: return
+        val model = model ?: return
+        val row = model.indexOf(at.segment, at.ayah) ?: return
+        _state.update { it.copy(scrollRequest = ScrollRequest(model.blockStart(row), ++scrollToken)) }
+    }
+
+    /** "Download this surah for offline": the whole surah of the first ayah on screen. */
+    fun onDownloadSurah() {
+        val index = quran ?: return
+        val ayah = firstVisible.value ?: return
+        downloads.download(listOf(index.surahRange(index.ref(ayah).surah)))
+    }
+
+    /** "Download this passage for offline": everything this reader shows. */
+    fun onDownloadPassage() {
+        val model = model ?: return
+        if (_state.value.canDownloadPassage) downloads.download(model.segments.map { it.range })
+    }
+
+    fun onDownloadCancel() = downloads.cancel()
+
+    /** The outcome of a download has been shown. */
+    fun onDownloadNoticeShown() = downloads.acknowledge()
 
     // ---- Position sheet --------------------------------------------------------------------------
 

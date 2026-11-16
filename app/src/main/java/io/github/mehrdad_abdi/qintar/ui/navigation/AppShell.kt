@@ -35,6 +35,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.mehrdad_abdi.qintar.R
+import androidx.compose.foundation.layout.Column
+import io.github.mehrdad_abdi.qintar.feature.player.PlayerBar
+import io.github.mehrdad_abdi.qintar.feature.player.PlayerBarViewModel
+import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarType
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Sizes
 import kotlin.reflect.KClass
@@ -65,6 +69,7 @@ private fun NavDestination?.topLevel(): TopLevelDestination? =
 fun QintarAppShell(
     navController: NavHostController = rememberNavController(),
     startDestination: Any = TodayRoute,
+    player: (@Composable () -> PlayerBarViewModel)? = null,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentTab = backStackEntry?.destination.topLevel()
@@ -73,7 +78,19 @@ fun QintarAppShell(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
-            if (currentTab != null) QintarBottomBar(currentTab) { navController.navigateToTab(it.route) }
+            if (currentTab != null) {
+                Column {
+                    // While something plays, the mini player stands above the tabs; a tap goes back to its reader.
+                    player?.let {
+                        PlayerBar(
+                            it(),
+                            onOpen = { route -> navController.navigate(route) },
+                            modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+                        )
+                    }
+                    QintarBottomBar(currentTab) { navController.navigateToTab(it.route) }
+                }
+            }
         },
     ) { padding ->
         // Content keeps to 640dp, centred, on tablets and in landscape (§6.3).
@@ -81,6 +98,7 @@ fun QintarAppShell(
             QintarNavHost(
                 navController = navController,
                 startDestination = startDestination,
+                player = player,
                 modifier = Modifier.widthIn(max = Sizes.contentMaxWidth).fillMaxSize(),
             )
         }

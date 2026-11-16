@@ -9,6 +9,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.mehrdad_abdi.qintar.domain.model.AppLanguage as LanguagePref
@@ -50,7 +51,7 @@ class MainActivity : AppCompatActivity() {
                 pureBlack = appearance.pureBlack,
             ) {
                 CompositionLocalProvider(LocalNumeralStyle provides appearance.numerals) {
-                    start?.let { QintarAppShell(startDestination = it) }
+                    start?.let { QintarAppShell(startDestination = it, player = { hiltViewModel() }) }
                 }
             }
         }
