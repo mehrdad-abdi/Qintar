@@ -1,0 +1,71 @@
+Terms for the Tanzil files in this directory
+============================================
+
+Retrieved 2026-11-15. Copied verbatim from the pages and files named below.
+
+1. quran-uthmani.xml (Tanzil Quran Text, Uthmani, Version 1.1)
+---------------------------------------------------------------
+
+The file carries its own copyright block, which is kept intact in the file and
+is also reproduced, as comments, in the CREATE TABLE statement of the generated
+data/src/main/assets/quran.db (the terms require it in derived files):
+
+  # PLEASE DO NOT REMOVE OR CHANGE THIS COPYRIGHT BLOCK
+  #====================================================================
+  #
+  #  Tanzil Quran Text (Uthmani, Version 1.1)
+  #  Copyright (C) 2007-2026 Tanzil Project
+  #  License: Creative Commons Attribution 3.0
+  #
+  #  This copy of the Quran text is carefully produced, highly
+  #  verified and continuously monitored by a group of specialists
+  #  at Tanzil Project.
+  #
+  #  TERMS OF USE:
+  #
+  #  - Permission is granted to copy and distribute verbatim copies
+  #    of this text, but CHANGING IT IS NOT ALLOWED.
+  #
+  #  - This Quran text can be used in any website or application,
+  #    provided that its source (Tanzil Project) is clearly indicated,
+  #    and a link is made to tanzil.net to enable users to keep
+  #    track of changes.
+  #
+  #  - This copyright notice shall be included in all verbatim copies
+  #    of the text, and shall be reproduced appropriately in all files
+  #    derived from or containing substantial portion of this text.
+  #
+  #  Please check updates at: http://tanzil.net/updates/
+  #
+  #====================================================================
+
+Terms of Use as stated on https://tanzil.net/download/ :
+
+  Permission is granted to copy and distribute verbatim copies of the Quran
+  text provided here, but changing the text is not allowed. The text can be
+  used in any website or application, provided that its source (Tanzil
+  Project) is clearly indicated, and a link is made to tanzil.net to enable
+  users to keep track of changes.
+
+https://tanzil.net/docs/text_license states the same notice (with
+"Copyright (C) 2007-2021 Tanzil Project") and that it "is applied to, and is
+included in all copies of Tanzil Quran text".
+
+Licence: Creative Commons Attribution 3.0,
+https://creativecommons.org/licenses/by/3.0/
+
+2. quran-data.xml (Tanzil Quran Metadata, version 1.0)
+------------------------------------------------------
+
+No separate terms file is shipped with the metadata. The only statement is the
+root element of the file itself:
+
+  <quran type="metadata" version="1.0" copyright="(C) 2008-2009 Tanzil.info" license="cc-by">
+
+and https://tanzil.net/docs/quran_metadata, which links the file
+(http://tanzil.net/res/text/metadata/quran-data.xml) without further terms.
+Read as: Creative Commons Attribution (version not stated), attribution to
+the Tanzil Project.
+
+Attribution the app must show: "Quran text and metadata: Tanzil Project,
+https://tanzil.net" (CC BY 3.0).
