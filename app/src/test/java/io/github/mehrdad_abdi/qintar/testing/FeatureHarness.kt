@@ -3,6 +3,9 @@ package io.github.mehrdad_abdi.qintar.testing
 import io.github.mehrdad_abdi.qintar.domain.model.AyahId
 import io.github.mehrdad_abdi.qintar.domain.port.QuranTextSource
 import io.github.mehrdad_abdi.qintar.domain.testing.DomainFixture
+import io.github.mehrdad_abdi.qintar.feature.bookmarks.BookmarkEditorViewModel
+import io.github.mehrdad_abdi.qintar.feature.bookmarks.BookmarksViewModel
+import io.github.mehrdad_abdi.qintar.feature.bookmarks.GroupEditorViewModel
 import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmDetailViewModel
 import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmListViewModel
 import io.github.mehrdad_abdi.qintar.feature.khatm.NewKhatmViewModel
@@ -10,6 +13,8 @@ import io.github.mehrdad_abdi.qintar.feature.read.ReadViewModel
 import io.github.mehrdad_abdi.qintar.feature.reader.ReaderRow
 import io.github.mehrdad_abdi.qintar.feature.reader.ReaderViewModel
 import io.github.mehrdad_abdi.qintar.feature.today.TodayViewModel
+import io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute
+import io.github.mehrdad_abdi.qintar.ui.navigation.GroupEditorRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.KhatmDetailRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
 import java.time.DayOfWeek
@@ -114,6 +119,47 @@ fun DomainFixture.khatmDetailViewModel(id: Long, io: CoroutineDispatcher) = Khat
     khatmProgress = { khatmProgress },
     khatms = khatms,
     io = io,
+)
+
+fun DomainFixture.bookmarksViewModel(io: CoroutineDispatcher, ticks: Flow<Unit> = emptyFlow()) = BookmarksViewModel(
+    index = { index },
+    availability = availability,
+    library = library,
+    tracker = tracker,
+    prefs = prefs,
+    clock = clock,
+    io = io,
+    ticks = ticks,
+)
+
+fun DomainFixture.bookmarkEditorViewModel(
+    route: BookmarkEditorRoute,
+    io: CoroutineDispatcher,
+    text: QuranTextSource = this.text,
+    systemFirstDay: DayOfWeek = DayOfWeek.SATURDAY,
+) = BookmarkEditorViewModel(
+    route = route,
+    index = { index },
+    text = text,
+    library = library,
+    availability = availability,
+    prefs = prefs,
+    io = io,
+    systemFirstDay = { systemFirstDay },
+)
+
+fun DomainFixture.groupEditorViewModel(
+    route: GroupEditorRoute,
+    io: CoroutineDispatcher,
+    systemFirstDay: DayOfWeek = DayOfWeek.SATURDAY,
+) = GroupEditorViewModel(
+    route = route,
+    index = { index },
+    library = library,
+    availability = availability,
+    prefs = prefs,
+    io = io,
+    systemFirstDay = { systemFirstDay },
 )
 
 /** The row of [ayah] in the reader's list (in [segment] for a group). */
