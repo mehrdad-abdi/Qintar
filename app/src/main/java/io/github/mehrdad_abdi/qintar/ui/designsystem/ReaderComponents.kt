@@ -88,6 +88,7 @@ enum class AyahCheckState {
  * @param accessibilityLabel "Al-Anfal, ayah 1"; the state is appended for TalkBack.
  * @param sajdaLabel shown on the meta line for a sajda ayah.
  * @param onTextClick opens the ayah sheet (§5.4.3).
+ * @param onPlay null hides the play control (a reader without audio).
  */
 @Composable
 fun AyahRow(
@@ -103,7 +104,7 @@ fun AyahRow(
     fontSizeSp: Int = QuranTextSizeDefaultSp,
     accessibilityLabel: String = reference,
     onTextClick: () -> Unit = {},
-    onPlay: () -> Unit = {},
+    onPlay: (() -> Unit)? = {},
     onStar: () -> Unit = {},
     onMenu: () -> Unit = {},
 ) {
@@ -133,10 +134,10 @@ fun AyahRow(
                 .padding(start = Spacing.screen, end = Spacing.screen, top = Spacing.md)
                 .clearAndSetSemantics {
                     contentDescription = "$accessibilityLabel, $stateText"
-                    customActions = listOf(
+                    customActions = listOfNotNull(
                         CustomAccessibilityAction(markReadLabel) { onCheck(); true },
                         CustomAccessibilityAction(bookmarkLabel) { onStar(); true },
-                        CustomAccessibilityAction(playLabel) { onPlay(); true },
+                        onPlay?.let { play -> CustomAccessibilityAction(playLabel) { play(); true } },
                     )
                 },
         )
@@ -173,7 +174,7 @@ fun AyahRow(
                     tint = if (starred) colors.primary else colors.onSurfaceVariant,
                 )
             }
-            Box(Modifier.size(Sizes.touchTarget), contentAlignment = Alignment.Center) {
+            if (onPlay != null) Box(Modifier.size(Sizes.touchTarget), contentAlignment = Alignment.Center) {
                 if (playing) PlayingRing()
                 IconButton(onClick = onPlay, modifier = Modifier.size(Sizes.touchTarget)) {
                     // The play triangle points along the reading direction of the audio control,

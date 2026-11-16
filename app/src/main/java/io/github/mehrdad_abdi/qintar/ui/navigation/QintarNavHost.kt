@@ -36,7 +36,10 @@ fun QintarNavHost(
     startDestination: Any = TodayRoute,
 ) {
     val onBack: () -> Unit = { navController.popBackStack() }
-    val onNavigate: (Any) -> Unit = { route -> navController.navigate(route) }
+    // A tab route switches tab (one copy of each tab); anything else is pushed.
+    val onNavigate: (Any) -> Unit = { route ->
+        if (TopLevelDestination.entries.any { it.route == route }) navController.navigateToTab(route) else navController.navigate(route)
+    }
 
     NavHost(navController = navController, startDestination = startDestination, modifier = modifier) {
         // ---- Bottom navigation tabs -------------------------------------------------------
