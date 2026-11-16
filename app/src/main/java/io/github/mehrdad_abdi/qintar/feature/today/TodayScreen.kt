@@ -51,6 +51,7 @@ import io.github.mehrdad_abdi.qintar.domain.service.CoverageBar
 import io.github.mehrdad_abdi.qintar.domain.service.GroupState
 import io.github.mehrdad_abdi.qintar.ui.common.bookmarkTitleText
 import io.github.mehrdad_abdi.qintar.ui.common.number
+import io.github.mehrdad_abdi.qintar.ui.common.pagesText
 import io.github.mehrdad_abdi.qintar.ui.common.rankCaption
 import io.github.mehrdad_abdi.qintar.ui.common.rankReachedText
 import io.github.mehrdad_abdi.qintar.ui.common.surahName
@@ -58,7 +59,6 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.BookmarkRow
 import io.github.mehrdad_abdi.qintar.ui.designsystem.EmptyState
 import io.github.mehrdad_abdi.qintar.ui.designsystem.GroupHeader
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Hairline
-import io.github.mehrdad_abdi.qintar.ui.designsystem.ProgressBarRow
 import io.github.mehrdad_abdi.qintar.ui.designsystem.ProgressRing
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QCard
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarTheme
@@ -70,12 +70,14 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.RingCount
 import io.github.mehrdad_abdi.qintar.ui.designsystem.SectionHeader
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Sizes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
+import io.github.mehrdad_abdi.qintar.ui.designsystem.StackedProgressRow
 import io.github.mehrdad_abdi.qintar.ui.designsystem.WeekDayUi
 import io.github.mehrdad_abdi.qintar.ui.designsystem.WeekStrip
 import io.github.mehrdad_abdi.qintar.ui.designsystem.formatNumber
 import io.github.mehrdad_abdi.qintar.ui.designsystem.localizeDigits
 import io.github.mehrdad_abdi.qintar.ui.navigation.BookmarksRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.InsightsRoute
+import io.github.mehrdad_abdi.qintar.ui.navigation.KhatmListRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReadRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.SettingsRoute
@@ -217,15 +219,6 @@ private fun StreakCard(state: TodayUiState, locale: Locale, onClick: () -> Unit)
 private fun percent(bar: CoverageBar): String =
     stringResource(R.string.percent, formatNumber((bar.fraction * 100).toInt()))
 
-/** "2.5" / "4": one decimal, dropped when it is zero. */
-@Composable
-private fun pages(value: Double): String {
-    val latin = String.format(Locale.ROOT, "%.1f", value).removeSuffix(".0")
-    val shown = localizeDigits(latin)
-    // Persian and Arabic digits take the Arabic decimal separator.
-    return if (shown == latin) shown else shown.replace('.', '\u066B')
-}
-
 @Composable
 private fun KhatmSection(state: TodayUiState, onNavigate: (Any) -> Unit, viewModel: TodayViewModel) {
     val colors = MaterialTheme.colorScheme
@@ -243,7 +236,11 @@ private fun KhatmSection(state: TodayUiState, onNavigate: (Any) -> Unit, viewMod
         }
         return
     }
-    SectionHeader(stringResource(R.string.today_continue_khatm))
+    SectionHeader(
+        stringResource(R.string.today_continue_khatm),
+        actionLabel = stringResource(R.string.read_khatms_all),
+        onAction = { onNavigate(KhatmListRoute) },
+    )
     Spacer(Modifier.height(Spacing.sm))
     QCard(Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -252,18 +249,18 @@ private fun KhatmSection(state: TodayUiState, onNavigate: (Any) -> Unit, viewMod
         }
         Spacer(Modifier.height(Spacing.md))
         if (khatm.dailyPages != null) {
-            ProgressBarRow(
+            StackedProgressRow(
                 progress = (khatm.todayGoalFraction ?: 0f).coerceIn(0f, 1f),
-                valueText = stringResource(R.string.khatm_today_pages, pages(khatm.todayPages), pages(khatm.dailyPages.toDouble())),
+                valueText = stringResource(R.string.khatm_today_pages, pagesText(khatm.todayPages), pagesText(khatm.dailyPages.toDouble())),
                 label = stringResource(R.string.today_label),
             )
             Spacer(Modifier.height(Spacing.sm))
         }
-        ProgressBarRow(khatm.surahBar.fraction, percent(khatm.surahBar), label = surahName(khatm.surah))
+        StackedProgressRow(surahName(khatm.surah), percent(khatm.surahBar), khatm.surahBar.fraction)
         Spacer(Modifier.height(Spacing.sm))
-        ProgressBarRow(khatm.juzBar.fraction, percent(khatm.juzBar), label = stringResource(R.string.juz_n, formatNumber(khatm.juz)))
+        StackedProgressRow(stringResource(R.string.juz_n, formatNumber(khatm.juz)), percent(khatm.juzBar), khatm.juzBar.fraction)
         Spacer(Modifier.height(Spacing.sm))
-        ProgressBarRow(khatm.whole.fraction, percent(khatm.whole), label = stringResource(R.string.khatm_whole_quran))
+        StackedProgressRow(stringResource(R.string.khatm_whole_quran), percent(khatm.whole), khatm.whole.fraction)
         Spacer(Modifier.height(Spacing.lg))
         Button(
             onClick = { onNavigate(ReaderRoute.khatm(khatm.id)) },
@@ -274,7 +271,7 @@ private fun KhatmSection(state: TodayUiState, onNavigate: (Any) -> Unit, viewMod
     for (other in state.otherKhatms) {
         Spacer(Modifier.height(Spacing.sm))
         QCard(Modifier.fillMaxWidth(), onClick = { onNavigate(ReaderRoute.khatm(other.id)) }) {
-            ProgressBarRow(other.whole.fraction, percent(other.whole), label = other.name)
+            StackedProgressRow(other.name, percent(other.whole), other.whole.fraction)
         }
     }
 }

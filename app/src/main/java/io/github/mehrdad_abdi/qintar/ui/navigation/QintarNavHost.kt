@@ -13,6 +13,8 @@ import io.github.mehrdad_abdi.qintar.feature.bookmarks.GroupEditorScreen
 import io.github.mehrdad_abdi.qintar.feature.insights.DayDetailScreen
 import io.github.mehrdad_abdi.qintar.feature.insights.InsightsScreen
 import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmDetailScreen
+import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmListScreen
+import io.github.mehrdad_abdi.qintar.feature.khatm.NewKhatmScreen
 import io.github.mehrdad_abdi.qintar.feature.onboarding.OnboardingScreen
 import io.github.mehrdad_abdi.qintar.feature.read.ReadScreen
 import io.github.mehrdad_abdi.qintar.feature.reader.ReaderScreen
@@ -55,6 +57,8 @@ fun QintarNavHost(
         composable<KhatmDetailRoute> { entry ->                          // feature/khatm
             KhatmDetailScreen(entry.toRoute<KhatmDetailRoute>(), onBack, onNavigate)
         }
+        composable<KhatmListRoute> { KhatmListScreen(onBack, onNavigate) }   // feature/khatm
+        composable<NewKhatmRoute> { NewKhatmScreen(onBack, onNavigate) }     // feature/khatm
         composable<BookmarkEditorRoute> { entry ->                       // feature/bookmarks
             BookmarkEditorScreen(entry.toRoute<BookmarkEditorRoute>(), onBack, onNavigate)
         }

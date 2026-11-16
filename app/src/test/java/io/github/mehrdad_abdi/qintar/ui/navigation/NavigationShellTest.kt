@@ -77,7 +77,6 @@ class NavigationShellTest {
     fun `every full-screen destination can be reached`() {
         launch()
         val routes: List<Pair<Any, String>> = listOf(
-            KhatmDetailRoute(3) to "id=3",
             BookmarkEditorRoute() to "id=0",
             BookmarkEditorRoute(bookmarkId = 12) to "id=12",
             GroupEditorRoute(5) to "id=5",
@@ -90,6 +89,21 @@ class NavigationShellTest {
         }
         compose.runOnUiThread { navController.navigate(SettingsRoute) }
         compose.onNodeWithText("Settings").assertIsDisplayed()
+    }
+
+    @Test
+    fun `the khatm screens are reachable through the real graph`() {
+        launch()
+        compose.runOnUiThread { navController.navigate(KhatmListRoute) }
+        compose.waitUntil(WAIT_MILLIS) { compose.onAllNodesWithText("In progress").fetchSemanticsNodes().isNotEmpty() }
+        compose.runOnUiThread { navController.popBackStack() }
+
+        compose.runOnUiThread { navController.navigate(NewKhatmRoute) }
+        compose.waitUntil(WAIT_MILLIS) { compose.onAllNodesWithText("Start khatm").fetchSemanticsNodes().isNotEmpty() }
+        compose.runOnUiThread { navController.popBackStack() }
+
+        compose.runOnUiThread { navController.navigate(KhatmDetailRoute(999)) }
+        compose.waitUntil(WAIT_MILLIS) { compose.onAllNodesWithText("This khatm no longer exists").fetchSemanticsNodes().isNotEmpty() }
     }
 
     @Test

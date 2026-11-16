@@ -82,6 +82,14 @@ data class ReaderRoute(
 @Serializable
 data class KhatmDetailRoute(val khatmId: Long)
 
+/** Every khatm: the ones in progress and the finished ones, with "New khatm". */
+@Serializable
+data object KhatmListRoute
+
+/** The form that starts a khatm. */
+@Serializable
+data object NewKhatmRoute
+
 /**
  * Add or edit a bookmark. With [bookmarkId] == [NEW] the editor starts from a draft: an optional
  * pre-filled passage ([draftFirstAyahId]..[draftLastAyahId], e.g. from the ayah sheet) and an

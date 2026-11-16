@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Read tab -->
+    <string name="read_continue_browsing">Continue browsing</string>
+    <!-- 1: ayah name such as "Al-Anfal 12", 2: page number -->
+    <string name="read_continue_browsing_at">%1$s · page %2$s</string>
+    <string name="read_tab_surah">Surah</string>
+    <string name="read_tab_juz">Juz</string>
+    <string name="read_tab_page">Page</string>
+    <string name="read_goto_label">Go to…</string>
+    <string name="read_goto_hint">2:255, p300, j12</string>
+    <string name="read_goto_action">Go</string>
+    <string name="read_goto_surah_label">Bare ayah numbers refer to</string>
+    <string name="read_goto_surah_none">No surah chosen</string>
+    <string name="goto_error_empty">Type a place to go to.</string>
+    <string name="goto_error_unrecognized">Try 2:255, p300 or j12.</string>
+    <string name="goto_error_needs_surah">Choose a surah first, or type surah:ayah.</string>
+    <string name="goto_error_surah">There are 114 surahs.</string>
+    <string name="goto_error_ayah">That surah has no such ayah.</string>
+    <string name="goto_error_page">Pages go from 1 to 604.</string>
+    <string name="goto_error_juz">Juz goes from 1 to 30.</string>
+    <string name="goto_error_outside">That is outside this reading.</string>
+    <string name="read_random_ayah">Random ayah</string>
+    <string name="read_random_page">Random page</string>
+    <string name="read_khatms_header">Khatms</string>
+    <string name="read_khatms_all">All khatms</string>
+    <string name="read_new_khatm">New khatm</string>
+    <string name="read_filter_label">Filter surahs</string>
+    <string name="read_no_match">No surah matches.</string>
+    <string name="juz_starts_at">Starts at %1$s</string>
+    <string name="surah_coverage_description">%1$s of the surah read</string>
+
+    <!-- Khatm list, new khatm, detail -->
+    <string name="khatm_list_title">Khatms</string>
+    <string name="khatm_section_active">In progress</string>
+    <string name="khatm_section_completed">Completed</string>
+    <string name="khatm_none_message">No khatm in progress. Start one to keep your place in the Quran.</string>
+    <!-- 1: pages per day -->
+    <string name="khatm_goal_pages_per_day">%1$s pages a day</string>
+    <string name="khatm_no_goal">No daily goal</string>
+    <!-- 1: completion date, 2: number of days -->
+    <string name="khatm_completed_row">Completed %1$s · %2$s days</string>
+    <string name="khatm_default_name_n">Khatm %1$s</string>
+    <string name="khatm_new_title">New khatm</string>
+    <string name="khatm_name_label">Name</string>
+    <string name="khatm_name_required">Give the khatm a name.</string>
+    <string name="khatm_start_from_label">Start from (optional)</string>
+    <string name="khatm_start_from_hint">The beginning, or 2:255, p300, j12</string>
+    <!-- 1: ayah name -->
+    <string name="khatm_start_from_resolved">Starts at %1$s</string>
+    <string name="khatm_daily_label">Pages per day (optional)</string>
+    <string name="khatm_daily_invalid">Enter a number above zero, or leave it empty.</string>
+    <!-- 1: date -->
+    <string name="khatm_projected_finish">Projected finish: %1$s</string>
+    <string name="khatm_start_action">Start khatm</string>
+    <!-- 1: page number -->
+    <string name="khatm_position_page">Position: page %1$s</string>
+    <string name="khatm_started_label">Started</string>
+    <string name="khatm_pages_left">Pages left</string>
+    <string name="khatm_projected_finish_label">Projected finish</string>
+    <string name="khatm_daily_goal_label">Daily goal</string>
+    <string name="khatm_juz_coverage">Coverage by juz</string>
+    <!-- 1: juz covered completely, 2: 30 -->
+    <string name="khatm_juz_strip_description">%1$s of %2$s juz fully covered</string>
+    <string name="khatm_recent_days">Recent days</string>
+    <!-- 1: ayahs, 2: pages -->
+    <string name="khatm_day_row">%1$s ayahs · %2$s pages</string>
+    <string name="khatm_no_days">No reading in this khatm yet.</string>
+    <string name="khatm_action_rename">Rename</string>
+    <string name="khatm_action_change_goal">Change daily goal</string>
+    <string name="khatm_action_delete">Delete</string>
+    <string name="khatm_action_more">More actions</string>
+    <string name="khatm_action_first_unread">First unread</string>
+    <string name="khatm_delete_title">Delete this khatm?</string>
+    <string name="khatm_delete_message">The khatm is removed. Your readings stay in your history and in every day\'s count.</string>
+    <string name="khatm_goal_dialog_title">Pages per day</string>
+    <string name="khatm_goal_dialog_message">A guide only: it never blocks reading. Leave it empty for no goal.</string>
+    <string name="khatm_complete_title">Khatm complete</string>
+    <!-- 1: number of days -->
+    <string name="khatm_complete_days">Completed in %1$s days</string>
+    <!-- 1: start date, 2: end date -->
+    <string name="khatm_complete_dates">%1$s – %2$s</string>
+    <!-- 1: average ayahs a day -->
+    <string name="khatm_complete_average">%1$s ayahs a day on average</string>
+    <string name="khatm_start_new">Start a new khatm</string>
+    <string name="khatm_not_found_title">This khatm no longer exists</string>
+
+    <!-- Reader additions -->
+    <string name="reader_text_settings">Text settings</string>
+    <string name="reader_font_size">Quran font size</string>
+    <string name="reader_break_lines">Break lines at pause marks</string>
+    <string name="reader_keep_screen_on">Keep screen on</string>
+    <string name="reader_jump_title">Jump to</string>
+    <string name="reader_jump_surah">Surah</string>
+    <string name="reader_jump_juz">Juz</string>
+    <string name="reader_jump_resume">Resume position</string>
+    <string name="reader_first_unread_chip">First unread</string>
+    <!-- 1: page number -->
+    <string name="reader_mark_page">Mark page %1$s read</string>
+    <string name="reader_log_full_reading">Log a full reading</string>
+    <string name="reader_log_group_reading">Log a full reading of the group</string>
+    <!-- 1: full readings today, 2: repeat target -->
+    <string name="reader_header_readings">%1$s / %2$s today</string>
+</resources>

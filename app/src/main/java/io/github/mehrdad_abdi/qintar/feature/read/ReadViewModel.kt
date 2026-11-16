@@ -1,0 +1,183 @@
+package io.github.mehrdad_abdi.qintar.feature.read
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.mehrdad_abdi.qintar.di.IoDispatcher
+import io.github.mehrdad_abdi.qintar.domain.model.AyahId
+import io.github.mehrdad_abdi.qintar.domain.model.AyahRange
+import io.github.mehrdad_abdi.qintar.domain.model.AyahRef
+import io.github.mehrdad_abdi.qintar.domain.model.Quran
+import io.github.mehrdad_abdi.qintar.domain.model.SurahInfo
+import io.github.mehrdad_abdi.qintar.domain.port.PrefsStore
+import io.github.mehrdad_abdi.qintar.domain.quran.QuranIndex
+import io.github.mehrdad_abdi.qintar.domain.service.GoToParser
+import io.github.mehrdad_abdi.qintar.domain.service.GoToResult
+import io.github.mehrdad_abdi.qintar.domain.service.KhatmProgress
+import io.github.mehrdad_abdi.qintar.domain.service.RevisitRanker
+import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmListItem
+import io.github.mehrdad_abdi.qintar.feature.khatm.toListItem
+import io.github.mehrdad_abdi.qintar.ui.common.GoToProblem
+import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
+import javax.inject.Inject
+import javax.inject.Provider
+import kotlin.random.Random
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+enum class ReadTab { SURAH, JUZ, PAGE }
+
+/** A surah in the index with the share of its ayahs ever read. */
+data class SurahRowState(val surah: SurahInfo, val coverage: Float)
+
+/** A juz in the index with the ayah it starts at. */
+data class JuzRowState(val juz: Int, val startSurah: SurahInfo, val start: AyahRef)
+
+/** "Continue browsing": where the last Browse reading was. */
+data class ContinueBrowsing(val ayahId: AyahId, val surah: SurahInfo, val ayah: Int, val page: Int)
+
+data class ReadUiState(
+    val loading: Boolean = true,
+    val continueBrowsing: ContinueBrowsing? = null,
+    val tab: ReadTab = ReadTab.SURAH,
+    val filter: String = "",
+    val surahs: List<SurahRowState> = emptyList(),
+    val juz: List<JuzRowState> = emptyList(),
+    val goToInput: String = "",
+    /** The surah a bare ayah number refers to; null = none chosen. */
+    val goToSurah: SurahInfo? = null,
+    val goToProblem: GoToProblem? = null,
+    /** Khatms in progress, most recent activity first. */
+    val khatms: List<KhatmListItem> = emptyList(),
+) {
+    /** Surahs matching [filter] by number, Arabic name or transliteration. */
+    val visibleSurahs: List<SurahRowState>
+        get() {
+            val query = normalize(filter)
+            if (query.isEmpty()) return surahs
+            return surahs.filter { row ->
+                val s = row.surah
+                s.number.toString() == query ||
+                    s.nameLatin.lowercase().contains(query) ||
+                    s.nameEn.lowercase().contains(query) ||
+                    s.nameAr.contains(query)
+            }
+        }
+
+    private fun normalize(text: String): String = buildString {
+        for (ch in text.trim()) {
+            val digit = Character.digit(ch, 10)
+            append(if (digit >= 0) ('0' + digit) else ch.lowercaseChar())
+        }
+    }
+}
+
+/**
+ * The Read tab (§5.3): where to continue, the surah / juz / page indexes, "Go to…", random picks, and
+ * the khatms in progress. Everything it opens is a [ReaderRoute] the screen hands to `onNavigate`.
+ */
+@HiltViewModel
+class ReadViewModel(
+    private val index: Provider<QuranIndex>,
+    private val prefs: PrefsStore,
+    private val revisit: Provider<RevisitRanker>,
+    private val khatmProgress: Provider<KhatmProgress>,
+    private val io: CoroutineDispatcher,
+    private val random: Random,
+) : ViewModel() {
+
+    @Inject
+    constructor(
+        index: Provider<QuranIndex>,
+        prefs: PrefsStore,
+        revisit: Provider<RevisitRanker>,
+        khatmProgress: Provider<KhatmProgress>,
+        @IoDispatcher io: CoroutineDispatcher,
+    ) : this(index, prefs, revisit, khatmProgress, io, Random.Default)
+
+    private val _state = MutableStateFlow(ReadUiState())
+    val state: StateFlow<ReadUiState> = _state.asStateFlow()
+
+    private var quran: QuranIndex? = null
+
+    init {
+        viewModelScope.launch {
+            val (idx, ranker, progress) = withContext(io) { Triple(index.get(), revisit.get(), khatmProgress.get()) }
+            quran = idx
+            val juz = (1..Quran.JUZ_COUNT).map { n ->
+                val start = idx.juzRange(n).start
+                val ref = idx.ref(start)
+                JuzRowState(n, idx.surah(ref.surah), ref)
+            }
+            combine(ranker.observeSurahCoverage(), prefs.prefs, progress.observeActive()) { coverage, p, active ->
+                Triple(coverage, p.lastBrowseAyahId, active)
+            }.collect { (coverage, last, active) ->
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        juz = juz,
+                        surahs = idx.surahs.map { s -> SurahRowState(s, coverage[s.number] ?: 0f) },
+                        continueBrowsing = last?.let { id ->
+                            val ref = idx.ref(id)
+                            ContinueBrowsing(id, idx.surah(ref.surah), ref.ayah, idx.pageOf(id))
+                        },
+                        khatms = active.map { snapshot -> snapshot.toListItem(idx) },
+                    )
+                }
+            }
+        }
+    }
+
+    fun onTab(tab: ReadTab) = _state.update { it.copy(tab = tab) }
+
+    fun onFilter(text: String) = _state.update { it.copy(filter = text) }
+
+    fun onGoToInput(text: String) = _state.update { it.copy(goToInput = text, goToProblem = null) }
+
+    /** The surah a bare ayah number refers to ("255" → 2:255 when surah 2 is chosen); null clears it. */
+    fun onGoToSurah(number: Int?) {
+        val surah = number?.let { n -> quran?.takeIf { n in 1..Quran.SURAH_COUNT }?.surah(n) }
+        _state.update { it.copy(goToSurah = surah, goToProblem = null) }
+    }
+
+    /** Parses the field. Returns the reader to open, or null with [ReadUiState.goToProblem] set. */
+    fun submitGoTo(): ReaderRoute? {
+        val idx = quran ?: return null
+        val current = _state.value
+        return when (val result = GoToParser.parse(current.goToInput, current.goToSurah?.number, idx)) {
+            is GoToResult.Invalid -> {
+                _state.update { it.copy(goToProblem = GoToProblem.of(result.reason)) }
+                null
+            }
+            else -> ReaderRoute.browse(checkNotNull(result.target).value)
+        }
+    }
+
+    /** A random ayah, uniform over all 6,236 (or over the chosen surah's ayahs). */
+    fun randomAyah(): ReaderRoute? {
+        val idx = quran ?: return null
+        val range = _state.value.goToSurah?.let { idx.surahRange(it.number) } ?: AyahRange.ALL
+        return ReaderRoute.random(random.nextInt(range.start.value, range.end.value + 1))
+    }
+
+    /** A random page, uniform over the 604; the reader's scope is that page. */
+    fun randomPage(): ReaderRoute? {
+        val idx = quran ?: return null
+        val range = idx.pageRange(random.nextInt(1, Quran.PAGE_COUNT + 1))
+        return ReaderRoute.random(range.start.value, range.end.value)
+    }
+
+    fun surahRoute(number: Int): ReaderRoute? = quran?.let { ReaderRoute.browse(it.surahRange(number).start.value) }
+
+    fun juzRoute(number: Int): ReaderRoute? = quran?.let { ReaderRoute.browse(it.juzRange(number).start.value) }
+
+    fun pageRoute(number: Int): ReaderRoute? = quran?.let { ReaderRoute.browse(it.pageRange(number).start.value) }
+
+    fun continueRoute(): ReaderRoute? = _state.value.continueBrowsing?.let { ReaderRoute.browse(it.ayahId.value) }
+}
