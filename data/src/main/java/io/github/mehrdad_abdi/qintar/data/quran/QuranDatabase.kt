@@ -25,7 +25,13 @@ abstract class QuranDatabase : RoomDatabase() {
     companion object {
         const val VERSION = 1
         const val ASSET_PATH = "quran.db"
-        const val FILE_NAME = "quran.db"
+
+        /**
+         * The copy in the app's database directory. Not "quran.db": v1 kept its own Room database
+         * under that name (also version 1, another schema), and on a device upgraded in place Room
+         * would open that file and refuse it instead of copying the asset.
+         */
+        const val FILE_NAME = "quran-text.db"
 
         fun create(context: Context): QuranDatabase =
             Room.databaseBuilder(context, QuranDatabase::class.java, FILE_NAME)
