@@ -37,6 +37,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Lets a debug build sit next to an installed release (and next to v1).
+            applicationIdSuffix = ".debug"
+        }
         release {
             signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
