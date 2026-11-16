@@ -1,0 +1,165 @@
+package io.github.mehrdad_abdi.qintar.feature.bookmarks
+
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import io.github.mehrdad_abdi.qintar.domain.model.Schedule
+import io.github.mehrdad_abdi.qintar.domain.model.TimeWindow
+import io.github.mehrdad_abdi.qintar.domain.service.BookmarkDrafts
+import io.github.mehrdad_abdi.qintar.domain.testing.DomainFixture
+import io.github.mehrdad_abdi.qintar.testing.bookmarkEditorViewModel
+import io.github.mehrdad_abdi.qintar.testing.bookmarksViewModel
+import io.github.mehrdad_abdi.qintar.testing.groupEditorViewModel
+import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarTheme
+import io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute
+import io.github.mehrdad_abdi.qintar.ui.navigation.GroupEditorRoute
+import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
+import java.time.LocalTime
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+/** The real bookmark screens, driven by taps and typing, over the in-memory domain. */
+@RunWith(RobolectricTestRunner::class)
+class BookmarksScreensTest {
+    @get:Rule
+    val compose = createComposeRule()
+
+    private val app = DomainFixture()
+    private val navigated = ArrayList<Any>()
+    private var backs = 0
+
+    private fun openTab() {
+        val vm = app.bookmarksViewModel(Dispatchers.Unconfined)
+        compose.setContent { QintarTheme { BookmarksScreen(onNavigate = { navigated += it }, viewModel = vm) } }
+    }
+
+    private fun seedMorning() = runBlocking {
+        val group = app.library.createGroup("Morning", schedule = Schedule.daily(TimeWindow(LocalTime.of(8, 0), LocalTime.of(12, 0))))
+        app.library.create(
+            BookmarkDrafts.ayah(app.ayah(2, 255)).copy(groupId = group.id, description = "Read after every prayer", repeatTarget = 3),
+        )
+    }
+
+    @Test
+    fun `the empty tab offers to add a bookmark`() {
+        openTab()
+        compose.onNodeWithText("No bookmarks yet").assertIsDisplayed()
+        compose.onNodeWithText("Add bookmark").performClick()
+        assertEquals(BookmarkEditorRoute(), navigated.single())
+    }
+
+    @Test
+    fun `Now lists what is open, shows its description and opens the reader`() {
+        seedMorning()
+        val group = runBlocking { app.bookmarkStore.bookmarks().single() }
+        openTab()
+        compose.onNodeWithText("Morning").assertIsDisplayed()
+        compose.onNodeWithText("Read after every prayer").assertIsDisplayed()
+        compose.onNodeWithText("Read after every prayer").performClick()
+        assertEquals(ReaderRoute.bookmark(group.id), navigated.single())
+    }
+
+    @Test
+    fun `Groups has Read for the group and the add actions`() {
+        seedMorning()
+        openTab()
+        compose.onNodeWithText("Groups").performClick()
+        compose.onNodeWithText("0 of 1 done").assertIsDisplayed()
+        compose.onNodeWithText("Read").performClick()
+        val groupId = runBlocking { app.bookmarkStore.groups().single().id }
+        assertEquals(ReaderRoute.group(groupId), navigated.single())
+    }
+
+    @Test
+    fun `logging a full reading shows the repeat progress and Undo takes it back`() {
+        seedMorning()
+        openTab()
+        compose.onAllNodesWithContentDescription("Bookmark actions")[0].performClick()
+        compose.onNodeWithText("Log a full reading").performClick()
+        compose.onNodeWithText("1 / 3").assertIsDisplayed()
+        compose.onNodeWithText("Logged a full reading").assertIsDisplayed()
+        compose.onNodeWithText("Undo").performClick()
+        compose.waitForIdle()
+        assertEquals(0, runBlocking { app.log.allEvents().size })
+    }
+
+    @Test
+    fun `Edit opens the editor and Delete offers Undo`() {
+        seedMorning()
+        openTab()
+        compose.onAllNodesWithContentDescription("Bookmark actions")[0].performClick()
+        compose.onNodeWithText("Edit").performClick()
+        assertTrue(navigated.single() is BookmarkEditorRoute)
+
+        compose.onAllNodesWithContentDescription("Bookmark actions")[0].performClick()
+        compose.onNodeWithText("Delete").performClick()
+        compose.onNodeWithText("Bookmark deleted").assertIsDisplayed()
+        compose.onNodeWithText("Undo").performClick()
+        compose.waitForIdle()
+        assertEquals(1, runBlocking { app.bookmarkStore.bookmarks().size })
+    }
+
+    @Test
+    fun `All sorts and remembers the mode`() {
+        seedMorning()
+        openTab()
+        compose.onNodeWithText("All").performClick()
+        compose.onNodeWithText("Recent").performClick()
+        compose.waitForIdle()
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort.RECENT, app.prefs.current.bookmarkSort)
+    }
+
+    @Test
+    fun `the editor previews the text and saves`() {
+        val vm = app.bookmarkEditorViewModel(BookmarkEditorRoute.forAyah(app.ayah(2, 255).value), Dispatchers.Unconfined)
+        compose.setContent {
+            QintarTheme { BookmarkEditorScreen(BookmarkEditorRoute(), onBack = { backs++ }, onNavigate = { navigated += it }, viewModel = vm) }
+        }
+        compose.onNodeWithTag(EDITOR_PREVIEW_TAG).assertIsDisplayed()
+        compose.onNodeWithText("ayah 2:255", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Description").performTextInput("Why I read it")
+        compose.onNodeWithTag(EDITOR_SAVE_TAG).performClick()
+        compose.waitForIdle()
+        assertEquals(1, backs)
+        assertEquals("Why I read it", runBlocking { app.bookmarkStore.bookmarks().single().description })
+    }
+
+    @Test
+    fun `the editor shows an error on the ayah field`() {
+        val vm = app.bookmarkEditorViewModel(BookmarkEditorRoute(), Dispatchers.Unconfined)
+        compose.setContent {
+            QintarTheme { BookmarkEditorScreen(BookmarkEditorRoute(), onBack = { backs++ }, onNavigate = {}, viewModel = vm) }
+        }
+        vm.onAyahText("9")
+        compose.waitForIdle()
+        compose.onNodeWithText("That surah has no such ayah.").assertIsDisplayed()
+        compose.onNodeWithTag(EDITOR_SAVE_TAG).performClick()
+        assertEquals(0, backs)
+    }
+
+    @Test
+    fun `the group editor saves a named group`() {
+        val vm = app.groupEditorViewModel(GroupEditorRoute(), Dispatchers.Unconfined)
+        compose.setContent {
+            QintarTheme { GroupEditorScreen(GroupEditorRoute(), onBack = { backs++ }, onNavigate = {}, viewModel = vm) }
+        }
+        compose.onNodeWithTag(GROUP_SAVE_TAG).performClick()
+        compose.onNodeWithText("Give the group a name.").assertIsDisplayed()
+        compose.onNodeWithText("Name").performTextInput("Friday")
+        compose.onNodeWithTag(GROUP_SAVE_TAG).performClick()
+        compose.waitForIdle()
+        assertEquals(1, backs)
+        assertEquals("Friday", runBlocking { app.bookmarkStore.groups().single().name })
+    }
+}
