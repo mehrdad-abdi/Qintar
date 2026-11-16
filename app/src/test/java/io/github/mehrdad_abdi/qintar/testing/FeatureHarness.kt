@@ -12,6 +12,18 @@ import io.github.mehrdad_abdi.qintar.feature.insights.LogReadingViewModel
 import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmDetailViewModel
 import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmListViewModel
 import io.github.mehrdad_abdi.qintar.feature.khatm.NewKhatmViewModel
+import io.github.mehrdad_abdi.qintar.data.backup.BackupCodec
+import io.github.mehrdad_abdi.qintar.data.legacy.LegacyMigration
+import io.github.mehrdad_abdi.qintar.data.legacy.LegacyMigrationOutcome
+import io.github.mehrdad_abdi.qintar.domain.backup.ImportResult
+import io.github.mehrdad_abdi.qintar.domain.backup.LegacyReport
+import io.github.mehrdad_abdi.qintar.domain.model.LegacyMigrationState
+import io.github.mehrdad_abdi.qintar.domain.testing.FakePrefsStore
+import io.github.mehrdad_abdi.qintar.feature.onboarding.OnboardingViewModel
+import io.github.mehrdad_abdi.qintar.feature.settings.BackupViewModel
+import io.github.mehrdad_abdi.qintar.feature.settings.MigrationNoticeViewModel
+import io.github.mehrdad_abdi.qintar.feature.settings.MigrationReports
+import io.github.mehrdad_abdi.qintar.feature.settings.SettingsViewModel
 import io.github.mehrdad_abdi.qintar.feature.read.ReadViewModel
 import io.github.mehrdad_abdi.qintar.feature.reader.ReaderRow
 import io.github.mehrdad_abdi.qintar.feature.reader.ReaderViewModel
@@ -204,3 +216,45 @@ fun ReaderViewModel.row(ayah: AyahId, segment: Int = 0): ReaderRow.Ayah {
 
 /** Today's count shown on [ayah]'s row. */
 fun ReaderViewModel.countOf(ayah: AyahId, segment: Int = 0): Int = state.value.count(row(ayah, segment))
+
+
+/**
+ * A stand-in for the v1 migration: a retry of a `FAILED` migration succeeds when [succeedOnRetry] is
+ * set, and records `MIGRATED` the way the real one does.
+ */
+class FakeLegacyMigration(private val prefs: FakePrefsStore) : LegacyMigration {
+    var succeedOnRetry = true
+    var calls = 0
+    var retryCalls = 0
+
+    val report = LegacyReport(
+        bookmarks = 4, groups = 2, events = 9, talliedAyahs = 60, days = 3,
+        khatmCarried = true, skippedAyahIds = 2, skippedBookmarks = 0, skippedDays = 0,
+    )
+
+    override suspend fun migrate(khatmName: String, retryFailed: Boolean): LegacyMigrationOutcome {
+        calls++
+        val state = prefs.current.legacyMigrationState
+        if (state != LegacyMigrationState.FAILED || !retryFailed) return LegacyMigrationOutcome.AlreadyHandled(state)
+        retryCalls++
+        if (!succeedOnRetry) return LegacyMigrationOutcome.Failed(IllegalStateException("still broken"))
+        prefs.update { it.copy(legacyMigrationState = LegacyMigrationState.MIGRATED) }
+        return LegacyMigrationOutcome.Migrated(report, ImportResult(9, 0, 1, 0, 4, 2, 1))
+    }
+}
+
+fun DomainFixture.settingsViewModel(migration: LegacyMigration = FakeLegacyMigration(prefs), reports: MigrationReports = MigrationReports()) =
+    SettingsViewModel(prefs = prefs, migration = migration, reports = reports)
+
+fun DomainFixture.backupViewModel(io: CoroutineDispatcher) = BackupViewModel(
+    backup = backup,
+    codec = BackupCodec(),
+    index = { index },
+    clock = clock,
+    io = io,
+)
+
+fun DomainFixture.migrationNoticeViewModel(migration: LegacyMigration = FakeLegacyMigration(prefs), reports: MigrationReports = MigrationReports()) =
+    MigrationNoticeViewModel(prefs = prefs, migration = migration, reports = reports)
+
+fun DomainFixture.onboardingViewModel() = OnboardingViewModel(prefs = prefs)
