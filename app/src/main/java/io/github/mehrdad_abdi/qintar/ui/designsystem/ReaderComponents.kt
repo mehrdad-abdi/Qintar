@@ -47,7 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
@@ -153,7 +153,7 @@ fun AyahRow(
             if (sajdaLabel != null) {
                 Spacer(Modifier.width(Spacing.sm))
                 Text(
-                    text = "۩ $sajdaLabel",
+                    text = sajdaLabel,
                     style = QintarType.Caption,
                     color = colors.onSurfaceVariant,
                     modifier = Modifier
@@ -240,7 +240,6 @@ private fun AyahCheck(state: AyahCheckState, readCount: Int, stateText: String, 
                 text = stringResource(R.string.times_n, formatNumber(readCount)),
                 style = QintarType.Numeric,
                 color = colors.primary,
-                modifier = Modifier.clearAndSetSemantics { },
             )
         }
     }
@@ -286,7 +285,10 @@ fun SurahHeader(
     }
 }
 
-/** The basmala as its own centred row. Not an ayah: no check, never counted (§5.4.2). */
+/**
+ * The basmala as its own centred row. Not an ayah: no check, never counted (§5.4.2). The gap
+ * beneath it is part of the row: two lines of text at the reader's font size.
+ */
 @Composable
 fun BasmalaRow(
     modifier: Modifier = Modifier,
@@ -301,7 +303,7 @@ fun BasmalaRow(
         softWrap = false,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = Spacing.screen)
+            .padding(start = Spacing.screen, end = Spacing.screen, bottom = with(LocalDensity.current) { (style.fontSize * 2).toDp() })
             .semantics { contentDescription = BASMALA_PLAIN },
     )
 }

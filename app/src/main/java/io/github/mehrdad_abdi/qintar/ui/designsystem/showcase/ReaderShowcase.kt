@@ -140,7 +140,6 @@ fun ReaderShowcase(
 private fun AnfalRows(t: ShowcaseText) {
     SurahHeader(t.anfal, subtitle = t.anfalFacts)
     BasmalaRow()
-    Spacer(Modifier.height(Spacing.sm))
     AyahRow(
         text = displayText(SampleAyahs.ANFAL_1, 1),
         reference = localizeDigits("8:1"),
@@ -187,7 +186,9 @@ private fun KursiRows(t: ShowcaseText) {
  * ۖ ۗ ۘ ۚ, then the ayah-end marker. The stored text itself is not altered.
  */
 internal fun displayText(ayah: String, number: Int, breakAtPauseMarks: Boolean = true): String {
-    val body = if (breakAtPauseMarks) ayah.replace(Regex("([ۖۗۘۚ]) "), "$1\n") else ayah
+    // A pause mark must never start a line on its own, so it is tied to the word before it.
+    val tied = ayah.replace(Regex(" ([\u06D6-\u06DB])"), "\u00A0$1")
+    val body = if (breakAtPauseMarks) tied.replace(Regex("([\u06D6\u06D7\u06D8\u06DA]) "), "$1\n") else tied
     return body + " " + Numerals.ayahEndMarker(number)
 }
 

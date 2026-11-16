@@ -177,8 +177,8 @@ fun ComponentGalleryB(modifier: Modifier = Modifier) {
             MiniPlayer(t.playerTitle, isPlaying = false, speedLabel = t.speed, onPlayPause = {}, onSpeed = {}, onClose = {})
             CountField(3, {}, Modifier.align(Alignment.CenterHorizontally))
             WeekdayChips(t.weekdays, setOf(0, 6), {}, contentDescriptions = t.weekdayNames)
-            QCard(Modifier.fillMaxWidth()) { DayBarChart(previewBars) }
-            QCard(Modifier.fillMaxWidth()) { MonthGrid(t.weekdays, leadingBlanks = 2, days = previewMonth) }
+            QCard(Modifier.fillMaxWidth()) { DayBarChart(previewBars.map { it.copy(label = localizeDigits(it.label)) }) }
+            QCard(Modifier.fillMaxWidth()) { MonthGrid(t.weekdays, leadingBlanks = 2, days = previewMonth.map { it.copy(dayLabel = localizeDigits(it.dayLabel)) }) }
         }
     }
 }

@@ -67,8 +67,8 @@ import io.github.mehrdad_abdi.qintar.R
 fun ProgressRing(
     progress: Float,
     modifier: Modifier = Modifier,
-    size: Dp = 232.dp,
-    strokeWidth: Dp = 14.dp,
+    size: Dp = 224.dp,
+    strokeWidth: Dp = 12.dp,
     contentDescription: String? = null,
     content: @Composable BoxScope.() -> Unit = {},
 ) {
@@ -193,7 +193,7 @@ fun WeekStrip(
                                 .widthIn(min = 32.dp)
                                 .clip(QintarShapes.Pill)
                                 .background(MaterialTheme.colorScheme.primaryContainer)
-                                .padding(horizontal = Spacing.sm),
+                                .padding(horizontal = Spacing.xs),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
@@ -201,6 +201,7 @@ fun WeekStrip(
                                 style = QintarType.Numeric,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 maxLines = 1,
+                                softWrap = false,
                             )
                         }
 
@@ -289,13 +290,15 @@ fun TodayPill(
                             append(todayText)
                         } else {
                             append(todayText.substring(0, start))
-                            withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = colors.onSurface)) { append(countText) }
+                            withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, fontSize = QintarType.Body.fontSize, color = colors.onSurface)) { append(countText) }
                             append(todayText.substring(start + countText.length))
                         }
-                        append("  ·  ")
-                        append(caption)
+                        if (caption.isNotEmpty()) {
+                            append("  ·  ")
+                            append(caption)
+                        }
                     },
-                    style = QintarType.Body.copy(fontFeatureSettings = "tnum"),
+                    style = QintarType.Label.copy(fontFeatureSettings = "tnum", lineHeight = QintarType.Body.lineHeight),
                     color = colors.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -304,7 +307,7 @@ fun TodayPill(
             }
             QProgressBar(
                 progress = if (rankReached) 1f else progress,
-                modifier = Modifier.width(56.dp),
+                modifier = Modifier.width(48.dp),
                 color = extended.gold,
                 trackColor = colors.outlineVariant,
             )

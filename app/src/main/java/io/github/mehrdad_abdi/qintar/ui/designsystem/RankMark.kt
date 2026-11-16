@@ -104,8 +104,8 @@ fun RankMark(
         tint != Color.Unspecified -> tint
         rank <= 0 -> MaterialTheme.colorScheme.outlineVariant
         state == RankMarkState.Reached -> QintarTheme.extendedColors.gold
-        // §6.4 says outlineVariant; that hairline tone vanished at 16dp on paper, so the
-        // unreached outline is drawn half-way toward the quiet ink.
+        // §6.4 says outlineVariant, but that hairline tone is about 1.3:1 on paper: too faint
+        // for a figure whose shape matters. The outline is drawn part-way toward the quiet ink.
         else -> androidx.compose.ui.graphics.lerp(
             MaterialTheme.colorScheme.outlineVariant,
             MaterialTheme.colorScheme.onSurfaceVariant,

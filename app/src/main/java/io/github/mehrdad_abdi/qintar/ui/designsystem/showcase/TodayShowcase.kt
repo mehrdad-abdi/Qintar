@@ -1,5 +1,6 @@
 package io.github.mehrdad_abdi.qintar.ui.designsystem.showcase
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -144,7 +145,11 @@ fun TodayShowcase(modifier: Modifier = Modifier) {
             }
 
             Spacer(Modifier.height(Spacing.xl))
-            OutlinedButton(onClick = {}, modifier = Modifier.fillMaxWidth().heightIn(min = Sizes.touchTarget)) {
+            OutlinedButton(
+                onClick = {},
+                modifier = Modifier.fillMaxWidth().heightIn(min = Sizes.touchTarget),
+                border = BorderStroke(Sizes.hairline, colors.outlineVariant),
+            ) {
                 Icon(Icons.Rounded.Add, null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(Spacing.sm))
                 Text(t.logReading, style = QintarType.Label)

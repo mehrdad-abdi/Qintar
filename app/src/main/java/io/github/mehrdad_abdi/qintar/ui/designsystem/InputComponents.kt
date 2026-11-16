@@ -134,8 +134,9 @@ fun WeekdayChips(
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         labels.forEachIndexed { index, label ->
             val isSelected = index in selected
-            // 48dp target with a 40dp visual so that seven fit a 320dp screen.
-            Box(Modifier.size(Sizes.touchTarget), contentAlignment = Alignment.Center) {
+            // Seven equal cells, 48dp tall, with a 40dp visual. On a 360dp screen a cell is about
+            // 46dp wide: seven full 48dp targets do not fit beside the screen margins.
+            Box(Modifier.weight(1f).height(Sizes.touchTarget), contentAlignment = Alignment.Center) {
                 Surface(
                     checked = isSelected,
                     onCheckedChange = { onToggle(index) },

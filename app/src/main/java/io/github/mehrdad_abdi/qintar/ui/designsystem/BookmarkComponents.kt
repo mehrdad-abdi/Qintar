@@ -211,10 +211,14 @@ fun BookmarkRow(
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         ReadStateIndicator(state, progress = progress)
-        Text(title, style = QintarType.Body, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = schedule == null))
-        if (schedule != null) {
-            ScheduleChip(schedule, icon = null)
-            Spacer(Modifier.weight(1f))
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            // The title gives way before the chip does, but only when the row is really full.
+            Text(title, style = QintarType.Body, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+            if (schedule != null) ScheduleChip(schedule, icon = null)
         }
         if (trailing != null) {
             Text(trailing, style = QintarType.Numeric, color = colors.onSurfaceVariant, maxLines = 1)
