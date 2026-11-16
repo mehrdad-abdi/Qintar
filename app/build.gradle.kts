@@ -22,8 +22,23 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // The release key comes from the environment (CI secrets, see docs/v2/RELEASING.md).
+    // Without it the release build is left unsigned so that it can still be compiled and checked.
+    val keystoreFile = System.getenv("QINTAR_KEYSTORE_FILE")
+    signingConfigs {
+        if (keystoreFile != null) {
+            create("release") {
+                storeFile = file(keystoreFile)
+                storePassword = System.getenv("QINTAR_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("QINTAR_KEY_ALIAS")
+                keyPassword = System.getenv("QINTAR_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

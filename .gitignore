@@ -20,3 +20,6 @@ local.properties
 # Build output captured by contributors
 /build-logs/
 **/build/
+
+# Agent worktrees
+/.claude/worktrees/
