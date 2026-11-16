@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">قنطار</string>
+
+    <string name="tab_today">اليوم</string>
+    <string name="tab_read">القراءة</string>
+    <string name="tab_bookmarks">العلامات</string>
+    <string name="tab_insights">الإحصاءات</string>
+
+    <string name="screen_reader">القراءة</string>
+    <string name="screen_khatm_detail">الختمة</string>
+    <string name="screen_bookmark_editor">علامة</string>
+    <string name="screen_group_editor">مجموعة</string>
+    <string name="screen_day_detail">اليوم</string>
+    <string name="screen_settings">الإعدادات</string>
+    <string name="screen_onboarding">مرحبًا</string>
+    <string name="placeholder_message">هذه الصفحة قيد الإعداد.</string>
+
+    <string name="rank_name_not_heedless">غير الغافلين</string>
+    <string name="rank_name_dhakir">الذاكرين</string>
+    <string name="rank_name_qanit">القانتين</string>
+    <string name="rank_name_khashi">الخاشعين</string>
+    <string name="rank_name_faiz">الفائزين</string>
+    <string name="rank_name_mujtahid">المجتهدين</string>
+    <string name="rank_name_qintar">القنطار</string>
+    <string name="rank_short_not_heedless">غير الغافلين</string>
+    <string name="rank_short_dhakir">الذاكرين</string>
+    <string name="rank_short_qanit">القانتين</string>
+    <string name="rank_short_khashi">الخاشعين</string>
+    <string name="rank_short_faiz">الفائزين</string>
+    <string name="rank_short_mujtahid">المجتهدين</string>
+    <string name="rank_short_qintar">القنطار</string>
+    <string name="rank_distance">%1$s إلى %2$s</string>
+    <string name="rank_reached">بلغت منزلة %1$s</string>
+    <string name="rank_ladder_description">المنزلة %1$s من %2$s: %3$s</string>
+    <string name="rank_ladder_none_description">لم تبلغ أي منزلة بعد</string>
+
+    <string name="today_pill_count">%1$s اليوم</string>
+
+    <string name="action_read">اقرأ</string>
+    <string name="action_save">حفظ</string>
+    <string name="action_cancel">إلغاء</string>
+    <string name="action_back">رجوع</string>
+    <string name="state_expanded">موسّع</string>
+    <string name="state_collapsed">مطوي</string>
+
+    <string name="read_state_not_read">لم يُقرأ اليوم</string>
+    <string name="read_state_partial">قُرئ جزء منه اليوم</string>
+    <string name="read_state_done">قُرئ اليوم</string>
+
+    <string name="set_count_title">تحديد العدد</string>
+    <string name="count_field_label">العدد</string>
+    <string name="count_field_decrease">إنقاص</string>
+    <string name="count_field_increase">زيادة</string>
+    <string name="times_n">×%1$s</string>
+
+    <string name="ayah_state_unread">لم تُقرأ اليوم</string>
+    <string name="ayah_state_read_today">قُرئت اليوم</string>
+    <string name="ayah_state_read_times">قُرئت %1$s مرات اليوم</string>
+    <string name="ayah_state_covered_earlier">قُرئت في يوم سابق</string>
+    <string name="ayah_action_mark_read">تعليم كمقروءة</string>
+    <string name="ayah_action_bookmark">إضافة علامة</string>
+    <string name="ayah_bookmarked">عليها علامة</string>
+    <string name="ayah_action_play">تشغيل</string>
+    <string name="ayah_action_pause">إيقاف مؤقت</string>
+    <string name="ayah_action_more">إجراءات أخرى</string>
+    <string name="ayah_action_details">تفاصيل الآية</string>
+
+    <string name="position_bar_open">تغيير الموضع</string>
+    <string name="player_play">تشغيل الصوت</string>
+    <string name="player_pause">إيقاف الصوت مؤقتًا</string>
+    <string name="player_close">إغلاق المشغّل</string>
+    <string name="player_speed">سرعة التشغيل %1$s</string>
+</resources>
