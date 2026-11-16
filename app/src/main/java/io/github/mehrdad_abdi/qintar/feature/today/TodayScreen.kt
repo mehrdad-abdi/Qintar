@@ -3,6 +3,7 @@ package io.github.mehrdad_abdi.qintar.feature.today
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.AutoStories
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.EventRepeat
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Settings
@@ -32,10 +34,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -47,6 +56,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.mehrdad_abdi.qintar.R
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkState
+import io.github.mehrdad_abdi.qintar.feature.insights.LogReadingSheet
+import io.github.mehrdad_abdi.qintar.feature.insights.LogReadingViewModel
+import io.github.mehrdad_abdi.qintar.feature.insights.LogResult
 import io.github.mehrdad_abdi.qintar.domain.service.CoverageBar
 import io.github.mehrdad_abdi.qintar.domain.service.GroupState
 import io.github.mehrdad_abdi.qintar.ui.common.bookmarkTitleText
@@ -88,6 +100,9 @@ import java.util.Locale
 /** Test tag of Today's scrolling column. */
 const val TODAY_CONTENT_TAG = "today-content"
 
+/** Test tag of the "Log reading" button. */
+const val TODAY_LOG_TAG = "today-log-reading"
+
 /**
  * Today (§5.2): the day's count and rank, the streak, the khatm to continue and the bookmarks that
  * are due now.
@@ -95,17 +110,33 @@ const val TODAY_CONTENT_TAG = "today-content"
  * @param onNavigate pass a route object from `ui/navigation/Routes.kt`.
  */
 @Composable
-fun TodayScreen(onNavigate: (route: Any) -> Unit, viewModel: TodayViewModel = hiltViewModel()) {
+fun TodayScreen(
+    onNavigate: (route: Any) -> Unit,
+    viewModel: TodayViewModel = hiltViewModel(),
+    /** The manual log's view model; only asked for when the "Log reading" sheet opens. */
+    logViewModel: @Composable () -> LogReadingViewModel = { hiltViewModel() },
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val colors = MaterialTheme.colorScheme
     val haptics = LocalHapticFeedback.current
+    var logging by rememberSaveable { mutableStateOf(false) }
+    var logged by remember { mutableStateOf<Pair<LogResult, LogReadingViewModel>?>(null) }
+    val snackbar = remember { SnackbarHostState() }
+    val undoLabel = stringResource(R.string.action_undo)
+    val loggedMessage = logged?.first?.let { stringResource(R.string.log_snack_added_today, formatNumber(it.count)) }
+    LaunchedEffect(logged) {
+        val (result, logViewModel) = logged ?: return@LaunchedEffect
+        val outcome = snackbar.showSnackbar(loggedMessage.orEmpty(), actionLabel = undoLabel)
+        if (outcome == SnackbarResult.ActionPerformed) logViewModel.onUndo(result)
+        logged = null
+    }
     LaunchedEffect(state.reachedRank) {
         if (state.reachedRank != null) haptics.performHapticFeedback(HapticFeedbackType.LongPress)
     }
+    Box(Modifier.fillMaxSize().background(colors.background)) {
     Column(
         Modifier
             .fillMaxSize()
-            .background(colors.background)
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
             .verticalScroll(rememberScrollState())
             .testTag(TODAY_CONTENT_TAG),
@@ -148,8 +179,29 @@ fun TodayScreen(onNavigate: (route: Any) -> Unit, viewModel: TodayViewModel = hi
                 Spacer(Modifier.size(Spacing.sm))
                 Text(stringResource(R.string.today_browse_quran), style = QintarType.Label)
             }
+            Spacer(Modifier.height(Spacing.sm))
+            OutlinedButton(
+                onClick = { logging = true },
+                modifier = Modifier.fillMaxWidth().heightIn(min = Sizes.touchTarget).testTag(TODAY_LOG_TAG),
+                border = BorderStroke(Sizes.hairline, colors.outlineVariant),
+            ) {
+                Icon(Icons.Outlined.EditNote, null, modifier = Modifier.size(Sizes.iconSmall))
+                Spacer(Modifier.size(Spacing.sm))
+                Text(stringResource(R.string.today_log_reading), style = QintarType.Label)
+            }
             Spacer(Modifier.height(Spacing.xl))
         }
+    }
+    SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
+    }
+    if (logging) {
+        val log = logViewModel()
+        LogReadingSheet(
+            viewModel = log,
+            day = null,
+            onDismiss = { logging = false },
+            onLogged = { logged = it to log },
+        )
     }
 }
 

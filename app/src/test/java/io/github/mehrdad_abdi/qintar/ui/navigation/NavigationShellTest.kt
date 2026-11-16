@@ -80,7 +80,7 @@ class NavigationShellTest {
             BookmarkEditorRoute() to "New bookmark",
             BookmarkEditorRoute(bookmarkId = 12) to "This bookmark no longer exists.",
             GroupEditorRoute(5) to "This group no longer exists.",
-            DayDetailRoute("2026-11-15") to "2026-11-15",
+            DayDetailRoute("2026-11-15") to "Sunday 15 November 2026",
         )
         for ((route, shown) in routes) {
             compose.runOnUiThread { navController.navigate(route) }

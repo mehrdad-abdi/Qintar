@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Log reading -->
+    <string name="today_log_reading">ثبت قرائت</string>
+    <string name="log_title">ثبت قرائت</string>
+    <string name="log_day">روز</string>
+    <string name="log_today">امروز</string>
+    <string name="log_yesterday">دیروز</string>
+    <string name="log_pick_date">انتخاب تاریخ</string>
+    <string name="log_pick_confirm">انتخاب</string>
+    <string name="log_what">چه چیزی</string>
+    <string name="log_mode_passage">بخشی از متن</string>
+    <string name="log_mode_surah">سوره</string>
+    <string name="log_mode_pages">صفحه‌ها</string>
+    <string name="log_mode_juz">جزء</string>
+    <string name="log_mode_number">فقط یک عدد</string>
+    <string name="log_from">از</string>
+    <string name="log_to">تا</string>
+    <string name="log_to_page">تا صفحه (۱ تا ۶۰۴)</string>
+    <string name="log_number_label">تعداد آیه‌ها</string>
+    <string name="log_note">یادداشت (اختیاری)</string>
+    <string name="log_summary">%1$s آیه · صفحه‌های %2$s تا %3$s</string>
+    <string name="log_summary_page">%1$s آیه · صفحه %2$s</string>
+    <string name="log_add">افزودن</string>
+    <string name="log_add_n">افزودن %1$s آیه</string>
+    <string name="log_err_count">عددی از ۱ تا ۱۰۰٬۰۰۰ وارد کنید.</string>
+    <string name="log_refusal_future">این روز هنوز نرسیده است. قرائت را فقط می‌توان به امروز یا روزهای گذشته افزود.</string>
+    <string name="log_snack_added_today">%1$s آیه به امروز افزوده شد</string>
+    <string name="log_snack_added_day">%1$s آیه به %2$s افزوده شد</string>
+
+    <!-- Day detail -->
+    <string name="day_refusal_future">این روز هنوز نرسیده است و تغییر نمی‌کند.</string>
+    <string name="day_snack_count_set">تعداد تغییر کرد</string>
+    <string name="day_snack_deleted">مورد حذف شد</string>
+    <string name="day_snack_tally_changed">مورد تغییر کرد</string>
+    <string name="day_snack_tally_deleted">مورد حذف شد</string>
+    <string name="day_add_reading">افزودن قرائت</string>
+    <string name="day_invalid_title">این روز را نمی‌توان نشان داد</string>
+    <string name="day_set_count_title">تعیین تعداد</string>
+    <string name="day_future_title">این روز هنوز نرسیده است</string>
+    <string name="day_future_message">برای روزی در آینده نمی‌توان قرائتی ثبت کرد.</string>
+    <string name="day_empty_title">در این روز چیزی خوانده نشده</string>
+    <string name="day_empty_message">شمردن را فراموش کردید؟ آنچه خواندید را بیفزایید تا رتبه و رشته روزها به‌روز شود.</string>
+    <string name="day_total_label">آیه خوانده‌شده</string>
+    <string name="day_counts_for_streak">این روز در رشته روزهای شما حساب می‌شود.</string>
+    <string name="day_not_for_streak">کمتر از ۱۰ آیه: این روز در رشته روزها حساب نمی‌شود.</string>
+    <string name="day_deleted_khatm">ختم حذف‌شده</string>
+    <string name="day_deleted_bookmark">نشان حذف‌شده</string>
+    <string name="day_delete_group">حذف همه موارد %1$s</string>
+    <string name="day_run_times">×%1$s</string>
+    <string name="day_delete_entry">حذف %1$s</string>
+    <string name="day_tallies_title">ثبت با عدد</string>
+    <string name="day_tally_no_note">آیه‌های ثبت‌شده با عدد</string>
+    <string name="day_edit_tally">تغییر مورد</string>
+    <string name="day_delete_tally">حذف %1$s</string>
+    <!-- Where readings came from -->
+    <string name="source_khatm">ختم</string>
+    <string name="source_bookmark">نشان‌ها</string>
+    <string name="source_browse">مرور</string>
+    <string name="source_random">تصادفی</string>
+    <string name="source_manual">ثبت دستی</string>
+    <string name="method_tapped">با لمس</string>
+    <string name="method_bulk">گروهی</string>
+    <string name="method_listened">شنیدن</string>
+    <string name="method_manual">ثبت دستی</string>
+    <string name="method_imported">واردشده</string>
+
+    <!-- Insights -->
+    <string name="insights_empty_title">هنوز چیزی خوانده نشده</string>
+    <string name="insights_empty_message">مجموع روزانه، رشته روزها و تقویم شما پس از خواندن یا ثبت قرائت اینجا نمایش داده می‌شود.</string>
+    <string name="insights_empty_action">شروع قرائت</string>
+    <string name="insights_period_week">۷ روز</string>
+    <string name="insights_period_month">۳۰ روز</string>
+    <string name="insights_period_year">سال</string>
+    <string name="insights_period_all">همه</string>
+    <string name="insights_period_label">بازه</string>
+    <string name="insights_total">مجموع آیه‌ها</string>
+    <string name="insights_active_days">روزهای فعال</string>
+    <string name="insights_average">میانگین در هر روز فعال</string>
+    <string name="insights_best_day">بهترین روز</string>
+    <string name="insights_best_day_on">بهترین روز · %1$s</string>
+    <string name="insights_streak_current">رشته فعلی (روز)</string>
+    <string name="insights_streak_longest">طولانی‌ترین رشته (روز)</string>
+    <string name="insights_goal_value">%1$s از %2$s</string>
+    <string name="insights_goal_met">روزهای %1$s یا بالاتر</string>
+    <string name="insights_bar_description">%1$s، %2$s آیه</string>
+    <string name="insights_bar_description_rank">%1$s، %2$s آیه، %3$s</string>
+    <string name="insights_rank_days_title">روزها در هر رتبه</string>
+    <string name="insights_below_first_rank">پایین‌تر از رتبه نخست</string>
+    <string name="insights_rank_days_note">هر روز به بالاترین رتبه‌ای که به آن رسیده حساب می‌شود.</string>
+    <string name="insights_rank_days_row">%1$s: %2$s روز</string>
+    <string name="insights_sources_title">از کجا آمده</string>
+    <string name="insights_sources_none">در این بازه چیزی خوانده نشده است.</string>
+    <string name="insights_calendar_title">تقویم</string>
+    <string name="insights_previous_month">ماه قبل</string>
+    <string name="insights_next_month">ماه بعد</string>
+    <string name="insights_revisit_title">مرور دوباره</string>
+    <string name="insights_revisit_long_ago">صفحه‌هایی که مدت‌ها پیش خوانده‌اید</string>
+    <string name="insights_revisit_not_yet">صفحه‌های خوانده‌نشده</string>
+    <string name="insights_never_read">%1$s از %2$s آیه هرگز خوانده نشده</string>
+    <string name="insights_last_read">آخرین قرائت %1$s</string>
+    <string name="insights_show_more">نمایش بیشتر</string>
+    <string name="insights_show_less">نمایش کمتر</string>
+</resources>

@@ -6,6 +6,9 @@ import io.github.mehrdad_abdi.qintar.domain.testing.DomainFixture
 import io.github.mehrdad_abdi.qintar.feature.bookmarks.BookmarkEditorViewModel
 import io.github.mehrdad_abdi.qintar.feature.bookmarks.BookmarksViewModel
 import io.github.mehrdad_abdi.qintar.feature.bookmarks.GroupEditorViewModel
+import io.github.mehrdad_abdi.qintar.feature.insights.DayDetailViewModel
+import io.github.mehrdad_abdi.qintar.feature.insights.InsightsViewModel
+import io.github.mehrdad_abdi.qintar.feature.insights.LogReadingViewModel
 import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmDetailViewModel
 import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmListViewModel
 import io.github.mehrdad_abdi.qintar.feature.khatm.NewKhatmViewModel
@@ -14,6 +17,7 @@ import io.github.mehrdad_abdi.qintar.feature.reader.ReaderRow
 import io.github.mehrdad_abdi.qintar.feature.reader.ReaderViewModel
 import io.github.mehrdad_abdi.qintar.feature.today.TodayViewModel
 import io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute
+import io.github.mehrdad_abdi.qintar.ui.navigation.DayDetailRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.GroupEditorRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.KhatmDetailRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
@@ -158,6 +162,35 @@ fun DomainFixture.groupEditorViewModel(
     library = library,
     availability = availability,
     prefs = prefs,
+    io = io,
+    systemFirstDay = { systemFirstDay },
+)
+
+fun DomainFixture.logReadingViewModel(io: CoroutineDispatcher) = LogReadingViewModel(
+    index = { index },
+    tracker = tracker,
+    clock = clock,
+    io = io,
+)
+
+fun DomainFixture.dayDetailViewModel(isoDate: String, io: CoroutineDispatcher) = DayDetailViewModel(
+    route = DayDetailRoute(isoDate),
+    index = { index },
+    log = log,
+    totals = totals,
+    khatmStore = khatmStore,
+    bookmarkStore = bookmarkStore,
+    tracker = tracker,
+    clock = clock,
+    io = io,
+)
+
+fun DomainFixture.insightsViewModel(io: CoroutineDispatcher, systemFirstDay: DayOfWeek = DayOfWeek.SATURDAY) = InsightsViewModel(
+    index = { index },
+    revisit = { revisit },
+    totals = totals,
+    prefs = prefs,
+    clock = clock,
     io = io,
     systemFirstDay = { systemFirstDay },
 )

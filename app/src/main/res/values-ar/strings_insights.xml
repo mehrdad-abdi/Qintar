@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Log reading -->
+    <string name="today_log_reading">تسجيل قراءة</string>
+    <string name="log_title">تسجيل قراءة</string>
+    <string name="log_day">اليوم</string>
+    <string name="log_today">اليوم</string>
+    <string name="log_yesterday">أمس</string>
+    <string name="log_pick_date">اختيار تاريخ</string>
+    <string name="log_pick_confirm">اختيار</string>
+    <string name="log_what">ماذا</string>
+    <string name="log_mode_passage">مقطع</string>
+    <string name="log_mode_surah">سورة</string>
+    <string name="log_mode_pages">صفحات</string>
+    <string name="log_mode_juz">جزء</string>
+    <string name="log_mode_number">رقم فقط</string>
+    <string name="log_from">من</string>
+    <string name="log_to">إلى</string>
+    <string name="log_to_page">إلى صفحة (١–٦٠٤)</string>
+    <string name="log_number_label">عدد الآيات</string>
+    <string name="log_note">ملاحظة (اختياري)</string>
+    <string name="log_summary">%1$s آية · الصفحات %2$s–%3$s</string>
+    <string name="log_summary_page">%1$s آية · الصفحة %2$s</string>
+    <string name="log_add">إضافة</string>
+    <string name="log_add_n">إضافة %1$s آية</string>
+    <string name="log_err_count">اختر رقمًا من ١ إلى ١٠٠٬٠٠٠.</string>
+    <string name="log_refusal_future">لم يأتِ هذا اليوم بعد. يمكن إضافة القراءة إلى اليوم أو إلى يوم سابق فقط.</string>
+    <string name="log_snack_added_today">أُضيفت %1$s آية إلى اليوم</string>
+    <string name="log_snack_added_day">أُضيفت %1$s آية إلى %2$s</string>
+
+    <!-- Day detail -->
+    <string name="day_refusal_future">لم يأتِ هذا اليوم بعد، فلا يمكن تعديله.</string>
+    <string name="day_snack_count_set">تغيّر العدد</string>
+    <string name="day_snack_deleted">حُذف الإدخال</string>
+    <string name="day_snack_tally_changed">تغيّر الإدخال</string>
+    <string name="day_snack_tally_deleted">حُذف الإدخال</string>
+    <string name="day_add_reading">إضافة قراءة</string>
+    <string name="day_invalid_title">تعذّر عرض هذا اليوم</string>
+    <string name="day_set_count_title">تحديد العدد</string>
+    <string name="day_future_title">لم يأتِ هذا اليوم بعد</string>
+    <string name="day_future_message">لا يمكن تسجيل قراءة ليوم في المستقبل.</string>
+    <string name="day_empty_title">لم تُقرأ آيات في هذا اليوم</string>
+    <string name="day_empty_message">نسيت العدّ؟ أضف ما قرأته وسيتبعه المستوى والسلسلة.</string>
+    <string name="day_total_label">آية مقروءة</string>
+    <string name="day_counts_for_streak">يُحتسب هذا اليوم في سلسلتك.</string>
+    <string name="day_not_for_streak">أقل من ١٠ آيات: لا يُحتسب هذا اليوم في السلسلة.</string>
+    <string name="day_deleted_khatm">ختمة محذوفة</string>
+    <string name="day_deleted_bookmark">علامة محذوفة</string>
+    <string name="day_delete_group">حذف كل ما من %1$s</string>
+    <string name="day_run_times">×%1$s</string>
+    <string name="day_delete_entry">حذف %1$s</string>
+    <string name="day_tallies_title">المسجّل بالعدد</string>
+    <string name="day_tally_no_note">آيات مسجّلة بالعدد</string>
+    <string name="day_edit_tally">تعديل الإدخال</string>
+    <string name="day_delete_tally">حذف %1$s</string>
+    <!-- Where readings came from -->
+    <string name="source_khatm">ختمة</string>
+    <string name="source_bookmark">العلامات</string>
+    <string name="source_browse">التصفح</string>
+    <string name="source_random">عشوائي</string>
+    <string name="source_manual">تسجيل يدوي</string>
+    <string name="method_tapped">باللمس</string>
+    <string name="method_bulk">دفعة واحدة</string>
+    <string name="method_listened">استماع</string>
+    <string name="method_manual">تسجيل يدوي</string>
+    <string name="method_imported">مستورد</string>
+
+    <!-- Insights -->
+    <string name="insights_empty_title">لم تُقرأ آيات بعد</string>
+    <string name="insights_empty_message">تظهر هنا مجاميعك اليومية وسلسلتك وتقويمك بعد أن تقرأ أو تسجّل شيئًا.</string>
+    <string name="insights_empty_action">ابدأ القراءة</string>
+    <string name="insights_period_week">٧ أيام</string>
+    <string name="insights_period_month">٣٠ يومًا</string>
+    <string name="insights_period_year">سنة</string>
+    <string name="insights_period_all">الكل</string>
+    <string name="insights_period_label">الفترة</string>
+    <string name="insights_total">مجموع الآيات</string>
+    <string name="insights_active_days">الأيام النشطة</string>
+    <string name="insights_average">المتوسط لكل يوم نشط</string>
+    <string name="insights_best_day">أفضل يوم</string>
+    <string name="insights_best_day_on">أفضل يوم · %1$s</string>
+    <string name="insights_streak_current">السلسلة الحالية (أيام)</string>
+    <string name="insights_streak_longest">أطول سلسلة (أيام)</string>
+    <string name="insights_goal_value">%1$s من %2$s</string>
+    <string name="insights_goal_met">أيام بمستوى %1$s أو أعلى</string>
+    <string name="insights_bar_description">%1$s، %2$s آية</string>
+    <string name="insights_bar_description_rank">%1$s، %2$s آية، %3$s</string>
+    <string name="insights_rank_days_title">الأيام عند كل مستوى</string>
+    <string name="insights_below_first_rank">دون المستوى الأول</string>
+    <string name="insights_rank_days_note">يُحتسب كل يوم عند أعلى مستوى بلغه.</string>
+    <string name="insights_rank_days_row">%1$s: %2$s يومًا</string>
+    <string name="insights_sources_title">من أين جاءت</string>
+    <string name="insights_sources_none">لم تُقرأ آيات في هذه الفترة.</string>
+    <string name="insights_calendar_title">التقويم</string>
+    <string name="insights_previous_month">الشهر السابق</string>
+    <string name="insights_next_month">الشهر التالي</string>
+    <string name="insights_revisit_title">للمراجعة</string>
+    <string name="insights_revisit_long_ago">صفحات قُرئت منذ أطول وقت</string>
+    <string name="insights_revisit_not_yet">صفحات لم تُقرأ بعد</string>
+    <string name="insights_never_read">%1$s من %2$s آية لم تُقرأ قط</string>
+    <string name="insights_last_read">آخر قراءة %1$s</string>
+    <string name="insights_show_more">عرض المزيد</string>
+    <string name="insights_show_less">عرض أقل</string>
+</resources>

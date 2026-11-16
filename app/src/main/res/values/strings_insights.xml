@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Log reading -->
+    <string name="today_log_reading">Log reading</string>
+    <string name="log_title">Log reading</string>
+    <string name="log_day">Day</string>
+    <string name="log_today">Today</string>
+    <string name="log_yesterday">Yesterday</string>
+    <string name="log_pick_date">Pick a date</string>
+    <string name="log_pick_confirm">Choose</string>
+    <string name="log_what">What</string>
+    <string name="log_mode_passage">Passage</string>
+    <string name="log_mode_surah">Surah</string>
+    <string name="log_mode_pages">Pages</string>
+    <string name="log_mode_juz">Juz</string>
+    <string name="log_mode_number">Just a number</string>
+    <string name="log_from">From</string>
+    <string name="log_to">To</string>
+    <string name="log_to_page">To page (1–604)</string>
+    <string name="log_number_label">Number of ayahs</string>
+    <string name="log_note">Note (optional)</string>
+    <!-- 1: ayahs, 2: first page, 3: last page -->
+    <string name="log_summary">%1$s ayahs · pages %2$s–%3$s</string>
+    <string name="log_summary_page">%1$s ayahs · page %2$s</string>
+    <string name="log_add">Add</string>
+    <string name="log_add_n">Add %1$s ayahs</string>
+    <string name="log_err_count">Choose a number from 1 to 100,000.</string>
+    <string name="log_refusal_future">That day has not come yet. Readings can only be added to today or an earlier day.</string>
+    <string name="log_snack_added_today">%1$s ayahs added to today</string>
+    <string name="log_snack_added_day">%1$s ayahs added to %2$s</string>
+
+    <!-- Day detail -->
+    <string name="day_refusal_future">That day has not come yet, so it cannot be changed.</string>
+    <string name="day_snack_count_set">Count changed</string>
+    <string name="day_snack_deleted">Entry deleted</string>
+    <string name="day_snack_tally_changed">Entry changed</string>
+    <string name="day_snack_tally_deleted">Entry deleted</string>
+    <string name="day_add_reading">Add reading</string>
+    <string name="day_invalid_title">This day cannot be shown</string>
+    <string name="day_set_count_title">Set count</string>
+    <string name="day_future_title">This day has not come yet</string>
+    <string name="day_future_message">Nothing can be read or logged for a day in the future.</string>
+    <string name="day_empty_title">Nothing read on this day</string>
+    <string name="day_empty_message">Forgot to count? Add what you read and the rank and streak follow.</string>
+    <string name="day_total_label">ayahs read</string>
+    <string name="day_counts_for_streak">This day counts toward your streak.</string>
+    <string name="day_not_for_streak">Below 10 ayahs: this day does not count toward a streak.</string>
+    <string name="day_deleted_khatm">Deleted khatm</string>
+    <string name="day_deleted_bookmark">Deleted bookmark</string>
+    <string name="day_delete_group">Delete everything from %1$s</string>
+    <string name="day_run_times">×%1$s</string>
+    <string name="day_delete_entry">Delete %1$s</string>
+    <string name="day_tallies_title">Logged by number</string>
+    <string name="day_tally_no_note">Ayahs logged by number</string>
+    <string name="day_edit_tally">Change entry</string>
+    <string name="day_delete_tally">Delete %1$s</string>
+    <!-- Where readings came from -->
+    <string name="source_khatm">Khatm</string>
+    <string name="source_bookmark">Bookmarks</string>
+    <string name="source_browse">Browsing</string>
+    <string name="source_random">Random</string>
+    <string name="source_manual">Manual log</string>
+    <string name="method_tapped">Tapped</string>
+    <string name="method_bulk">Marked in bulk</string>
+    <string name="method_listened">Listened</string>
+    <string name="method_manual">Logged by hand</string>
+    <string name="method_imported">Imported</string>
+
+    <!-- Insights -->
+    <string name="insights_empty_title">Nothing read yet</string>
+    <string name="insights_empty_message">Your daily totals, streak and calendar appear here once you read or log something.</string>
+    <string name="insights_empty_action">Start reading</string>
+    <string name="insights_period_week">7 days</string>
+    <string name="insights_period_month">30 days</string>
+    <string name="insights_period_year">Year</string>
+    <string name="insights_period_all">All</string>
+    <string name="insights_period_label">Period</string>
+    <string name="insights_total">Total ayahs</string>
+    <string name="insights_active_days">Active days</string>
+    <string name="insights_average">Average per active day</string>
+    <string name="insights_best_day">Best day</string>
+    <string name="insights_best_day_on">Best day · %1$s</string>
+    <string name="insights_streak_current">Current streak (days)</string>
+    <string name="insights_streak_longest">Longest streak (days)</string>
+    <!-- 1: days the goal was met, 2: days in the period -->
+    <string name="insights_goal_value">%1$s of %2$s</string>
+    <string name="insights_goal_met">Days at %1$s or above</string>
+    <!-- 1: day or month, 2: ayahs, 3: rank name -->
+    <string name="insights_bar_description">%1$s, %2$s ayahs</string>
+    <string name="insights_bar_description_rank">%1$s, %2$s ayahs, %3$s</string>
+    <string name="insights_rank_days_title">Days at each rank</string>
+    <string name="insights_below_first_rank">Below the first rank</string>
+    <string name="insights_rank_days_note">A day counts for the highest rank it reached.</string>
+    <string name="insights_rank_days_row">%1$s: %2$s days</string>
+    <string name="insights_sources_title">Where it came from</string>
+    <string name="insights_sources_none">Nothing was read in this period.</string>
+    <string name="insights_calendar_title">Calendar</string>
+    <string name="insights_previous_month">Previous month</string>
+    <string name="insights_next_month">Next month</string>
+    <string name="insights_revisit_title">Revisit</string>
+    <string name="insights_revisit_long_ago">Pages read longest ago</string>
+    <string name="insights_revisit_not_yet">Pages not read yet</string>
+    <string name="insights_never_read">%1$s of %2$s ayahs never read</string>
+    <string name="insights_last_read">last read %1$s</string>
+    <string name="insights_show_more">Show more</string>
+    <string name="insights_show_less">Show less</string>
+</resources>
