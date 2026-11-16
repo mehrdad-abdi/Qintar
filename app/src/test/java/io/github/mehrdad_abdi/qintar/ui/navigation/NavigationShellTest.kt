@@ -139,7 +139,9 @@ class NavigationShellTest {
             QintarTheme { QintarAppShell(navController, startDestination = OnboardingRoute) }
         }
         compose.onNodeWithText("Welcome").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Skip").performClick()
+        // Leaving waits for the choice to be saved (the real preferences), so it is not instant.
+        compose.waitUntil(WAIT_MILLIS) { compose.onAllNodesWithText("Today").fetchSemanticsNodes().isNotEmpty() }
         tab("Today").assertIsSelected()
         compose.runOnUiThread { check(!navController.popBackStack()) { "onboarding is still on the back stack" } }
     }
