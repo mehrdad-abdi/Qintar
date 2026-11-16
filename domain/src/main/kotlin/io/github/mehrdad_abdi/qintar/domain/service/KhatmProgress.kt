@@ -138,6 +138,15 @@ class KhatmProgress @Inject constructor(
         /** Days of reading the pace is averaged over when the khatm has no daily goal. */
         const val PACE_WINDOW_DAYS = 7
 
+        /** Σ over pages of (ayah readings on the page ÷ ayahs on the page): §4.6's deterministic "pages". */
+        private fun pagesOf(ayahsPerPage: IntArray, index: QuranIndex): Double {
+            var pages = 0.0
+            for (page in 1..Quran.PAGE_COUNT) {
+                if (ayahsPerPage[page] != 0) pages += ayahsPerPage[page].toDouble() / index.ayahsOnPage(page)
+            }
+            return pages
+        }
+
         /**
          * The derivation itself.
          *
@@ -159,15 +168,18 @@ class KhatmProgress @Inject constructor(
 
             var coveredCount = 0
             var firstUnread = 0
-            var remainingPages = 0.0
+            val uncoveredOnPage = IntArray(Quran.PAGE_COUNT + 1)
             for (id in 1..Quran.AYAH_COUNT) {
                 if (covered[id]) {
                     coveredCount++
                 } else {
                     if (firstUnread == 0) firstUnread = id
-                    remainingPages += 1.0 / index.ayahsOnPage(index.pageOf(AyahId(id)))
+                    uncoveredOnPage[index.pageOf(AyahId(id))]++
                 }
             }
+            // Summed per page rather than per ayah, so that a whole page is exactly 1.0 and day counts
+            // derived from it ("151 days left") do not wobble on floating-point dust.
+            val remainingPages = pagesOf(uncoveredOnPage, index)
             val complete = coveredCount == Quran.AYAH_COUNT
             val firstUnreadId = AyahId.orNull(firstUnread)
 
@@ -184,11 +196,9 @@ class KhatmProgress @Inject constructor(
             fun bar(range: AyahRange) = CoverageBar(range.ids.count { covered[it] }, range.size)
 
             val days = dayCounts.groupBy { it.day }.map { (day, rows) ->
-                KhatmDay(
-                    day = day,
-                    ayahs = rows.sumOf { it.count },
-                    pages = rows.sumOf { it.count.toDouble() / index.ayahsOnPage(index.pageOf(it.ayahId)) },
-                )
+                val readOnPage = IntArray(Quran.PAGE_COUNT + 1)
+                for (row in rows) readOnPage[index.pageOf(row.ayahId)] += row.count
+                KhatmDay(day = day, ayahs = rows.sumOf { it.count }, pages = pagesOf(readOnPage, index))
             }.sortedBy { it.day }
 
             val pagesPerDay: Double? = khatm.dailyPages?.toDouble()
