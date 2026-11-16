@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bookmarks tab -->
+    <string name="bm_view_now">Now</string>
+    <string name="bm_view_groups">Groups</string>
+    <string name="bm_view_all">All</string>
+    <string name="bm_views_label">Bookmark views</string>
+    <string name="bm_add">Add</string>
+    <string name="bm_add_bookmark">Add bookmark</string>
+    <string name="bm_add_group">Add group</string>
+    <string name="bm_now_empty_title">Nothing is scheduled for now</string>
+    <string name="bm_now_empty_message">Bookmarks whose schedule is open at this moment appear here. Everything else is one tap away.</string>
+    <string name="bm_show_groups">Show groups</string>
+    <string name="bm_show_all">Show all bookmarks</string>
+    <string name="bm_none_title">No bookmarks yet</string>
+    <string name="bm_none_message">Keep a passage you want to come back to, with a note on why it matters to you.</string>
+    <string name="bm_later_today">Later today</string>
+    <string name="bm_earlier_today">Earlier today</string>
+    <string name="bm_done_today">Done</string>
+    <string name="bm_ungrouped">Ungrouped</string>
+    <string name="bm_group_empty">No bookmarks in this group yet.</string>
+    <string name="bm_groups_empty_title">No groups yet</string>
+    <string name="bm_groups_empty_message">A group gathers bookmarks that you read together, such as Morning or Friday.</string>
+    <string name="bm_sort_mushaf">Mushaf order</string>
+    <string name="bm_sort_custom">Custom</string>
+    <string name="bm_sort_recent">Recent</string>
+    <!-- 1: bookmarks read to the target, 2: bookmarks in the group -->
+    <string name="bm_group_progress">%1$s of %2$s done</string>
+    <string name="bm_menu_more">Bookmark actions</string>
+    <string name="bm_group_menu_more">Group actions</string>
+    <string name="bm_menu_edit">Edit</string>
+    <string name="bm_menu_log">Log a full reading</string>
+    <string name="bm_menu_set_count">Set count…</string>
+    <string name="bm_menu_move">Move to group</string>
+    <string name="bm_menu_duplicate">Duplicate to another group</string>
+    <string name="bm_menu_delete">Delete</string>
+    <string name="bm_group_menu_log">Log a full reading of the group</string>
+    <string name="bm_group_menu_delete">Delete group</string>
+    <string name="bm_snack_logged">Logged a full reading</string>
+    <string name="bm_snack_group_logged">Logged a full reading of the group</string>
+    <string name="bm_snack_count_set">Count set</string>
+    <string name="bm_snack_deleted">Bookmark deleted</string>
+    <string name="bm_move_title">Move to group</string>
+    <string name="bm_duplicate_title">Duplicate to</string>
+    <string name="bm_no_group">No group</string>
+    <!-- 1: group name -->
+    <string name="bm_delete_group_title">Delete %1$s?</string>
+    <!-- 1: number of bookmarks -->
+    <string name="bm_delete_group_message">Its %1$s bookmarks can stay, without a group, or be deleted with it. Your readings are kept either way.</string>
+    <string name="bm_delete_group_keep">Keep the bookmarks</string>
+    <string name="bm_delete_group_all">Delete them too</string>
+    <string name="bm_set_count_support">Readings today</string>
+
+    <!-- Bookmark editor -->
+    <string name="bm_editor_new">New bookmark</string>
+    <string name="bm_editor_edit">Edit bookmark</string>
+    <string name="bm_not_found">This bookmark no longer exists.</string>
+    <string name="bm_kind_label">What to keep</string>
+    <string name="bm_kind_ayah">Ayah</string>
+    <string name="bm_kind_range">Range</string>
+    <string name="bm_kind_surah">Surah</string>
+    <string name="bm_kind_page">Page</string>
+    <string name="bm_kind_juz">Juz</string>
+    <string name="bm_surah">Surah</string>
+    <string name="bm_surah_entry">%1$s · %2$s</string>
+    <string name="ayah_menu_add_bookmark">Add bookmark…</string>
+    <string name="bm_pick_surah">Choose a surah</string>
+    <string name="bm_ayah_number">Ayah</string>
+    <string name="bm_range_from">From</string>
+    <string name="bm_range_to">To</string>
+    <string name="bm_page_number">Page (1–604)</string>
+    <string name="bm_juz_number">Juz (1–30)</string>
+    <!-- 1: ayah count, 2: first page, 3: last page -->
+    <string name="bm_summary_pages">%1$s ayahs · pages %2$s–%3$s</string>
+    <!-- 1: ayah count, 2: page -->
+    <string name="bm_summary_page">%1$s ayahs · page %2$s</string>
+    <!-- 1: number of ayahs not shown -->
+    <string name="bm_preview_more">… %1$s more</string>
+    <string name="bm_preview_label">The text you are about to keep</string>
+    <string name="bm_err_ayah">That surah has no such ayah.</string>
+    <string name="bm_err_end_before_start">The end comes before the start.</string>
+    <string name="bm_err_page">Pages go from 1 to 604.</string>
+    <string name="bm_err_juz">Juz goes from 1 to 30.</string>
+    <string name="bm_err_number">Enter a number.</string>
+    <!-- 1: the longest allowed text -->
+    <string name="bm_err_description">At most %1$s characters.</string>
+    <string name="bm_err_repeat">Choose a number from 1 to 9999.</string>
+    <string name="bm_err_schedule_days">Choose at least one day.</string>
+    <string name="bm_err_window">The window needs two different times.</string>
+    <string name="bm_err_schedule">This schedule cannot be used.</string>
+    <string name="bm_err_name">Give the group a name.</string>
+    <string name="bm_label">Name (optional)</string>
+    <string name="bm_label_hint">Ayat al-Kursi</string>
+    <string name="bm_description">Description</string>
+    <string name="bm_description_hint">Why you read this, or a narration about it</string>
+    <!-- 1: characters typed, 2: most allowed -->
+    <string name="bm_char_count">%1$s / %2$s</string>
+    <string name="bm_repeat_label">Readings a day</string>
+    <string name="bm_repeat_help">How many times to read it each day for it to count as done.</string>
+    <string name="bm_group_label">Group</string>
+
+    <!-- Schedule editor and chip text -->
+    <string name="sched_title">Schedule</string>
+    <string name="sched_inherit">Same as the group</string>
+    <!-- 1: the group's schedule -->
+    <string name="sched_inherit_with">Same as the group · %1$s</string>
+    <string name="sched_none">No schedule</string>
+    <string name="sched_own">Choose days</string>
+    <string name="sched_days">Days</string>
+    <string name="sched_once">Only until read once</string>
+    <string name="sched_window">Only between</string>
+    <string name="sched_from">From</string>
+    <string name="sched_to">To</string>
+    <string name="sched_daily">Daily</string>
+    <string name="sched_once_chip">Once</string>
+    <!-- 1: first time, 2: second time. "08:00–12:00" -->
+    <string name="sched_window_range">%1$s–%2$s</string>
+    <!-- 1: days, 2: time window. "Daily 08:00–12:00" -->
+    <string name="sched_days_window">%1$s %2$s</string>
+    <string name="sched_time_ok">OK</string>
+
+    <!-- Group editor -->
+    <string name="grp_editor_new">New group</string>
+    <string name="grp_editor_edit">Edit group</string>
+    <string name="grp_not_found">This group no longer exists.</string>
+    <string name="grp_name">Name</string>
+    <string name="grp_name_hint">Morning</string>
+    <string name="grp_description">Description (optional)</string>
+    <string name="grp_members">Bookmarks in this group</string>
+    <string name="grp_members_empty">No bookmarks yet. Choose a group when you add or edit a bookmark.</string>
+    <string name="grp_move_up">Move up</string>
+    <string name="grp_move_down">Move down</string>
+    <string name="grp_remove">Remove from group</string>
+</resources>

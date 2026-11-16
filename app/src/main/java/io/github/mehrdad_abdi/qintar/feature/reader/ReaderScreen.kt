@@ -107,7 +107,7 @@ const val READER_LIST_TAG = "reader-list"
 fun ReaderScreen(
     route: ReaderRoute,
     onBack: () -> Unit,
-    @Suppress("UNUSED_PARAMETER") onNavigate: (route: Any) -> Unit,
+    onNavigate: (route: Any) -> Unit,
     viewModel: ReaderViewModel = hiltViewModel<ReaderViewModel, ReaderViewModel.Factory> { it.create(route) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -181,7 +181,7 @@ fun ReaderScreen(
                             modifier = Modifier.padding(horizontal = Spacing.screen),
                         )
                     }
-                    ReaderList(state, model, listState, viewModel, Modifier.weight(1f))
+                    ReaderList(state, model, listState, viewModel, onNavigate, Modifier.weight(1f))
                 }
             }
         }
@@ -263,6 +263,7 @@ private fun ReaderList(
     model: ReaderRowModel,
     listState: LazyListState,
     viewModel: ReaderViewModel,
+    onNavigate: (Any) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHapticFeedback.current
@@ -309,6 +310,7 @@ private fun ReaderList(
                         viewModel.onCheck(row)
                     },
                     viewModel = viewModel,
+                    onAddBookmark = { onNavigate(io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute.forAyah(row.id.value)) },
                 )
             }
         }
@@ -393,6 +395,7 @@ private fun AyahItem(
     surahLabel: String,
     onCheck: () -> Unit,
     viewModel: ReaderViewModel,
+    onAddBookmark: () -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     // A row whose text has not arrived keeps its place and its controls.
@@ -419,6 +422,10 @@ private fun AyahItem(
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.ayah_menu_set_count)) },
                     onClick = { menuOpen = false; viewModel.onSetCountRequested(row) },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.ayah_menu_add_bookmark)) },
+                    onClick = { menuOpen = false; onAddBookmark() },
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.ayah_menu_mark_up_to_here)) },

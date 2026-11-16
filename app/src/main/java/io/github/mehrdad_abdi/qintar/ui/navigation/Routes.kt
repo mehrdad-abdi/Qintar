@@ -101,9 +101,14 @@ data class BookmarkEditorRoute(
     val draftFirstAyahId: Int = 0,
     val draftLastAyahId: Int = 0,
     val draftGroupId: Long = NEW,
+    /** `BookmarkKind.name` of the pre-filled passage; empty = decided from the passage (one ayah or a range). */
+    val draftKind: String = "",
 ) {
     companion object {
         const val NEW = 0L
+
+        /** The editor, pre-filled with one ayah (the reader's ayah menu). */
+        fun forAyah(ayahId: Int) = BookmarkEditorRoute(draftFirstAyahId = ayahId, draftLastAyahId = ayahId, draftKind = "AYAH")
     }
 }
 
