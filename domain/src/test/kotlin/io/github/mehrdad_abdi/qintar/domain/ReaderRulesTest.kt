@@ -64,7 +64,7 @@ class ReaderRulesTest {
     fun `a pause mark at the very end of an ayah adds no break`() {
         val text = "alpha beta $sala"
         assertEquals(text, AyahTextFormatter.withPauseBreaks(text))
-        assertEquals("the end marker stays on the last line", "$text ۝١", AyahTextFormatter.format(text, 1, breakAtPauseMarks = true))
+        assertEquals("the end marker stays on the last line", "alpha beta\u00A0$sala ۝١", AyahTextFormatter.format(text, 1, breakAtPauseMarks = true))
     }
 
     @Test
@@ -81,7 +81,7 @@ class ReaderRulesTest {
     @Test
     fun `with the setting off no break is inserted`() {
         val text = "alpha $sala beta"
-        assertEquals("$text ۝٥", AyahTextFormatter.format(text, 5, breakAtPauseMarks = false))
+        assertEquals("alpha\u00A0$sala beta ۝٥", AyahTextFormatter.format(text, 5, breakAtPauseMarks = false))
     }
 
     @Test
@@ -98,8 +98,27 @@ class ReaderRulesTest {
             val broken = AyahTextFormatter.withPauseBreaks(text)
             assertEquals("same length", text.length, broken.length)
             assertEquals("restoring the spaces gives back the source", text, broken.replace('\n', ' '))
-            assertTrue(AyahTextFormatter.format(text, 7, true).startsWith(broken))
+            assertTrue(AyahTextFormatter.format(text, 7, true).replace('\u00A0', ' ').startsWith(broken))
         }
+    }
+
+    @Test
+    fun `every pause mark is tied to the word before it by a no-break space`() {
+        val text = "one $sala two $la three $threeDots four $jim five"
+
+        val tied = AyahTextFormatter.tiePauseMarks(text)
+
+        assertEquals("one\u00A0$sala two\u00A0$la three\u00A0$threeDots four\u00A0$jim five", tied)
+        assertEquals("only spaces changed", text, tied.replace('\u00A0', ' '))
+        assertSame("nothing to tie", "alpha beta", AyahTextFormatter.tiePauseMarks("alpha beta"))
+    }
+
+    @Test
+    fun `the display string ties marks and still breaks after the breaking ones`() {
+        val shown = AyahTextFormatter.format("one $sala two $la three", 3, breakAtPauseMarks = true)
+
+        assertEquals("one\u00A0$sala\ntwo\u00A0$la three ۝٣", shown)
+        for (line in shown.lines()) assertFalse("no line starts with a mark", line.first() in '\u06D6'..'\u06DC')
     }
 
     @Test
