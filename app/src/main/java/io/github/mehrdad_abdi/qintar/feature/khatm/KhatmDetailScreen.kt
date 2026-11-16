@@ -256,8 +256,7 @@ private fun DetailContent(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.betweenCards)) {
             StatTile(
-                value = state.dailyPages?.let { stringResource(R.string.khatm_goal_pages_per_day, pagesText(it.toDouble())) }
-                    ?: stringResource(R.string.khatm_no_goal),
+                value = state.dailyPages?.let { pagesText(it.toDouble()) } ?: "—",
                 label = stringResource(R.string.khatm_daily_goal_label),
                 modifier = Modifier.weight(1f),
             )

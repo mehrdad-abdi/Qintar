@@ -21,12 +21,19 @@ import io.github.mehrdad_abdi.qintar.domain.model.TimeWindow
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkDrafts
 import io.github.mehrdad_abdi.qintar.domain.testing.DomainFixture
 import io.github.mehrdad_abdi.qintar.domain.testing.FakeQuranTextSource
+import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmDetailScreen
+import io.github.mehrdad_abdi.qintar.feature.khatm.NewKhatmScreen
+import io.github.mehrdad_abdi.qintar.feature.read.ReadScreen
 import io.github.mehrdad_abdi.qintar.feature.reader.ReaderScreen
 import io.github.mehrdad_abdi.qintar.feature.today.TodayScreen
+import io.github.mehrdad_abdi.qintar.testing.khatmDetailViewModel
+import io.github.mehrdad_abdi.qintar.testing.newKhatmViewModel
+import io.github.mehrdad_abdi.qintar.testing.readViewModel
 import io.github.mehrdad_abdi.qintar.testing.readerViewModel
 import io.github.mehrdad_abdi.qintar.testing.todayViewModel
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarTheme
 import io.github.mehrdad_abdi.qintar.ui.designsystem.showcase.SampleAyahs
+import io.github.mehrdad_abdi.qintar.ui.navigation.KhatmDetailRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
 import java.time.LocalTime
 import kotlinx.coroutines.Dispatchers
@@ -111,6 +118,65 @@ class FeatureScreenshotTest(private val language: String, private val dark: Bool
         }
         val viewModel = app.readerViewModel(route, Dispatchers.Unconfined, text)
         shot("feature_reader") { ReaderScreen(route, onBack = {}, onNavigate = {}, viewModel = viewModel) }
+    }
+
+    @Test
+    fun readTab() {
+        runBlocking {
+            app.tracker.markRange(app.index.surahRange(112), ReadContext.Browse, ReadMethod.BULK, RangeMode.FILL)
+            app.tracker.markRange(AyahRange.of(1, 140), ReadContext.Browse, ReadMethod.BULK, RangeMode.FILL)
+            app.prefs.update { it.copy(lastBrowseAyahId = app.ayah(18, 10)) }
+            val ramadan = app.khatms.start("Ramadan khatm", dailyPages = 4f)
+            app.tracker.markRange(AyahRange.of(1, 420), ReadContext.Khatm(ramadan.id), ReadMethod.BULK, RangeMode.FILL)
+            app.clock.advanceMinutes(5)
+            app.khatms.start("Personal khatm", startFrom = app.ayah(18, 1))
+        }
+        val viewModel = app.readViewModel(Dispatchers.Unconfined)
+        shot("feature_read") { ReadScreen(onNavigate = {}, viewModel = viewModel) }
+    }
+
+    @Test
+    fun khatmDetail() {
+        val khatm = runBlocking {
+            val khatm = app.khatms.start("Ramadan khatm", dailyPages = 4f)
+            val context = ReadContext.Khatm(khatm.id)
+            app.tracker.markRange(AyahRange.of(1, 900), context, ReadMethod.BULK, RangeMode.FILL)
+            app.clock.advanceDays(1)
+            app.tracker.markRange(AyahRange.of(901, 1400), context, ReadMethod.BULK, RangeMode.FILL)
+            app.clock.advanceDays(1)
+            app.tracker.markRange(AyahRange.of(1401, 1650), context, ReadMethod.BULK, RangeMode.FILL)
+            app.tracker.markRange(AyahRange.of(3000, 3100), context, ReadMethod.BULK, RangeMode.FILL)
+            khatm
+        }
+        val viewModel = app.khatmDetailViewModel(khatm.id, Dispatchers.Unconfined)
+        shot("feature_khatm_detail") { KhatmDetailScreen(KhatmDetailRoute(khatm.id), onBack = {}, onNavigate = {}, viewModel = viewModel) }
+    }
+
+    @Test
+    fun newKhatmForm() {
+        runBlocking { app.khatms.start("Ramadan khatm") }
+        val viewModel = app.newKhatmViewModel(Dispatchers.Unconfined)
+        viewModel.onStartText("2:255")
+        viewModel.onDailyText("4")
+        shot("feature_new_khatm") { NewKhatmScreen(onBack = {}, onNavigate = {}, viewModel = viewModel) }
+    }
+
+    @Test
+    fun readerBookmark() {
+        val text = FakeQuranTextSource(app.index, mapOf(app.ayah(112, 1) to SampleAyahs.ANFAL_1, app.ayah(112, 2) to SampleAyahs.ANFAL_2))
+        val route = runBlocking {
+            val bookmark = app.library.create(
+                BookmarkDrafts.surah(112, app.index).copy(
+                    label = "Surat al-Ikhlas",
+                    description = "Narrated: it is equal to a third of the Quran.",
+                    repeatTarget = 3,
+                ),
+            )
+            app.tracker.markRange(app.index.surahRange(112), ReadContext.Bookmark(bookmark.id), ReadMethod.BULK, RangeMode.ADD)
+            ReaderRoute.bookmark(bookmark.id)
+        }
+        val viewModel = app.readerViewModel(route, Dispatchers.Unconfined, text)
+        shot("feature_reader_bookmark") { ReaderScreen(route, onBack = {}, onNavigate = {}, viewModel = viewModel) }
     }
 
     companion object {

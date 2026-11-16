@@ -58,7 +58,7 @@
     <string name="khatm_started_label">Started</string>
     <string name="khatm_pages_left">Pages left</string>
     <string name="khatm_projected_finish_label">Projected finish</string>
-    <string name="khatm_daily_goal_label">Daily goal</string>
+    <string name="khatm_daily_goal_label">Daily goal (pages)</string>
     <string name="khatm_juz_coverage">Coverage by juz</string>
     <!-- 1: juz covered completely, 2: 30 -->
     <string name="khatm_juz_strip_description">%1$s of %2$s juz fully covered</string>

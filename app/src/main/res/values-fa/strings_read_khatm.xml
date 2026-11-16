@@ -50,7 +50,7 @@
     <string name="khatm_started_label">آغاز</string>
     <string name="khatm_pages_left">صفحهٔ مانده</string>
     <string name="khatm_projected_finish_label">پایان پیش‌بینی‌شده</string>
-    <string name="khatm_daily_goal_label">هدف روزانه</string>
+    <string name="khatm_daily_goal_label">هدف روزانه (صفحه)</string>
     <string name="khatm_juz_coverage">پوشش به تفکیک جزء</string>
     <string name="khatm_juz_strip_description">%1$s جزء از %2$s جزء کامل خوانده شده</string>
     <string name="khatm_recent_days">روزهای اخیر</string>
