@@ -36,6 +36,13 @@ enum class LegacyMigrationState {
     /** Carried over and the card was shown once. */
     ACKNOWLEDGED,
     FAILED,
+
+    /**
+     * v1 data is being written. Set before the import and replaced by [MIGRATED] after it, so that a
+     * process that died in between is recognised at the next start: the import may have committed
+     * without the state having been recorded, and running it again must not duplicate anything.
+     */
+    IN_PROGRESS,
 }
 
 /** The one typed preferences object (§7.5). */

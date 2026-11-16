@@ -392,6 +392,50 @@ class LegacyMigrationTest {
         assertEquals(events, stores.log.allEvents())
     }
 
+    /** The process dies after the import committed but before `MIGRATED` was written. */
+    private class Crash : Error("process died")
+
+    private class DyingPrefs(private val inner: FakePrefsStore) : io.github.mehrdad_abdi.qintar.domain.port.PrefsStore by inner {
+        var armed = true
+        override suspend fun update(transform: (UserPrefs) -> UserPrefs): UserPrefs {
+            val next = transform(inner.current)
+            if (armed && next.legacyMigrationState == LegacyMigrationState.MIGRATED) {
+                armed = false
+                throw Crash()
+            }
+            return inner.update(transform)
+        }
+    }
+
+    @Test
+    fun aCrashAfterTheImportDoesNotDuplicateAnythingAtTheNextStart() = runTest {
+        createTypicalV1Database()
+        val dying = DyingPrefs(prefs)
+        val backup = BackupManager(stores.log, stores.khatms, stores.bookmarks, dying, DefaultReadingTracker(stores.log, stores.khatms, clock, stores.tx), clock, stores.tx)
+        val first = LegacyMigrator(dying, LegacyV1Reader(context), Provider { index }, backup, clock)
+
+        try {
+            first.migrate("Khatm")
+            org.junit.Assert.fail("the simulated crash must escape")
+        } catch (_: Crash) {
+        }
+        // What the dead process left behind: the data is in, the state still says "in progress".
+        assertEquals(LegacyMigrationState.IN_PROGRESS, prefs.current.legacyMigrationState)
+        assertEquals(4, stores.bookmarks.bookmarks().size)
+
+        // The next launch.
+        val outcome = migrator.migrate("Khatm")
+
+        assertTrue(outcome is LegacyMigrationOutcome.Migrated)
+        assertEquals(LegacyMigrationState.MIGRATED, prefs.current.legacyMigrationState)
+        assertEquals(4, stores.bookmarks.bookmarks().size)
+        assertEquals(2, stores.bookmarks.groups().size)
+        assertEquals(1, stores.khatms.khatms().size)
+        assertEquals(mapOf(day1 to 5, day2 to 60, day3 to 4), totals.totals(null, null))
+        assertEquals(9, stores.log.allEvents().size)
+        assertEquals(2, stores.log.allTallies().size)
+    }
+
     @Test
     fun readingDoneInV2BeforeTheMigrationIsKept() = runTest {
         createTypicalV1Database()

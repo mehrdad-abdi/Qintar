@@ -95,5 +95,8 @@ abstract class StorageBindings {
     abstract fun transactionRunner(runner: RoomTransactionRunner): TransactionRunner
 
     @Binds
+    abstract fun legacyMigration(migrator: io.github.mehrdad_abdi.qintar.data.legacy.LegacyMigrator): io.github.mehrdad_abdi.qintar.data.legacy.LegacyMigration
+
+    @Binds
     abstract fun quranTextSource(source: AssetQuranTextSource): QuranTextSource
 }

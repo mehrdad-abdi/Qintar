@@ -28,6 +28,11 @@ sealed interface LegacyMigrationOutcome {
     data class Failed(val cause: Exception) : LegacyMigrationOutcome
 }
 
+/** What the app needs from the migration; lets screens be tested without a v1 database. */
+interface LegacyMigration {
+    suspend fun migrate(khatmName: String, retryFailed: Boolean = false): LegacyMigrationOutcome
+}
+
 /**
  * The in-place upgrade from v1 (§7.11), run once at first launch of v2.
  *
@@ -42,14 +47,18 @@ class LegacyMigrator @Inject constructor(
     private val index: Provider<QuranIndex>,
     private val backup: BackupManager,
     private val clock: DayClock,
-) {
+) : LegacyMigration {
     /**
      * @param khatmName the localized name for the khatm carried over from v1's "last page read".
      * @param retryFailed also run when an earlier attempt ended in `FAILED`.
      */
-    suspend fun migrate(khatmName: String, retryFailed: Boolean = false): LegacyMigrationOutcome {
-        val state = prefs.prefs.first().legacyMigrationState
-        val due = state == LegacyMigrationState.PENDING || (retryFailed && state == LegacyMigrationState.FAILED)
+    override suspend fun migrate(khatmName: String, retryFailed: Boolean): LegacyMigrationOutcome {
+        val before = prefs.prefs.first()
+        val state = before.legacyMigrationState
+        // IN_PROGRESS: an earlier run died after writing the marker. Its import may have committed.
+        val interrupted = state == LegacyMigrationState.IN_PROGRESS
+        val due = state == LegacyMigrationState.PENDING || interrupted ||
+            (retryFailed && state == LegacyMigrationState.FAILED)
         if (!due) return LegacyMigrationOutcome.AlreadyHandled(state)
 
         return try {
@@ -58,7 +67,7 @@ class LegacyMigrator @Inject constructor(
                     setState(LegacyMigrationState.NOT_NEEDED)
                     LegacyMigrationOutcome.NotNeeded
                 }
-                is LegacyReadResult.Unreadable -> fail(read.cause)
+                is LegacyReadResult.Unreadable -> fail(read.cause, interrupted)
                 is LegacyReadResult.Found -> {
                     val conversion = LegacyV1Converter.convert(
                         v1 = read.data,
@@ -68,12 +77,20 @@ class LegacyMigrator @Inject constructor(
                         now = clock.now(),
                         khatmName = khatmName,
                     )
-                    val result = backup.import(conversion.data, ImportMode.MERGE)
-                    // A merge leaves preferences alone, so v1's settings are applied here, together
-                    // with the state: one atomic preferences write.
+                    // The marker goes first: the import is one transaction but the state is a separate
+                    // write, and a crash between them would otherwise import everything twice.
+                    setState(LegacyMigrationState.IN_PROGRESS)
+                    // After an interruption the earlier import may be on disk. Migration runs at
+                    // start-up, before the user can have added anything, so what is there is that
+                    // import: replacing it (rather than merging into it) cannot duplicate anything.
+                    val result = backup.import(conversion.data, if (interrupted) ImportMode.REPLACE else ImportMode.MERGE)
+                    // The import leaves preferences alone (a replace writes the file's, which are
+                    // not wanted here), so v1's settings are applied to what was there before,
+                    // together with the state: one atomic preferences write.
                     val carried = conversion.data.prefs
                     prefs.update { current ->
-                        (if (carried != null) current.withV1Settings(carried) else current)
+                        val base = if (interrupted) before else current
+                        (if (carried != null) base.withV1Settings(carried) else base)
                             .copy(legacyMigrationState = LegacyMigrationState.MIGRATED)
                     }
                     LegacyMigrationOutcome.Migrated(conversion.report, result)
@@ -82,12 +99,16 @@ class LegacyMigrator @Inject constructor(
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (failure: Exception) {
-            fail(failure)
+            fail(failure, interrupted)
         }
     }
 
-    private suspend fun fail(cause: Exception): LegacyMigrationOutcome {
-        setState(LegacyMigrationState.FAILED)
+    /**
+     * After an interrupted run the marker stays: the earlier import may be on disk, and only the
+     * replace done under the marker is safe to retry (the next start tries again).
+     */
+    private suspend fun fail(cause: Exception, keepMarker: Boolean): LegacyMigrationOutcome {
+        if (!keepMarker) setState(LegacyMigrationState.FAILED)
         return LegacyMigrationOutcome.Failed(cause)
     }
 
