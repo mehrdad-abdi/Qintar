@@ -77,13 +77,14 @@ class NavigationShellTest {
     fun `every full-screen destination can be reached`() {
         launch()
         val routes: List<Pair<Any, String>> = listOf(
-            BookmarkEditorRoute() to "id=0",
-            BookmarkEditorRoute(bookmarkId = 12) to "id=12",
-            GroupEditorRoute(5) to "id=5",
+            BookmarkEditorRoute() to "New bookmark",
+            BookmarkEditorRoute(bookmarkId = 12) to "This bookmark no longer exists.",
+            GroupEditorRoute(5) to "This group no longer exists.",
             DayDetailRoute("2026-11-15") to "2026-11-15",
         )
         for ((route, shown) in routes) {
             compose.runOnUiThread { navController.navigate(route) }
+            compose.waitUntil(WAIT_MILLIS) { compose.onAllNodesWithText(shown).fetchSemanticsNodes().isNotEmpty() }
             compose.onNodeWithText(shown).assertIsDisplayed()
             compose.runOnUiThread { navController.popBackStack() }
         }
