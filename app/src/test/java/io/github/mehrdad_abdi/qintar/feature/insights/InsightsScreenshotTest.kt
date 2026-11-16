@@ -93,9 +93,10 @@ class InsightsScreenshotTest(private val language: String, private val dark: Boo
     fun insightsCalendar() {
         seedMonth()
         val vm = app.insightsViewModel(Dispatchers.Unconfined)
+        val calendar = vm.state.value.calendar!!
         shot("feature_insights_calendar") {
             Box(Modifier.background(MaterialTheme.colorScheme.background).padding(Spacing.screen)) {
-                CalendarSection(vm.state.value.calendar!!, onPrevious = {}, onNext = {}, onDay = {})
+                CalendarSection(calendar, onPrevious = {}, onNext = {}, onDay = {})
             }
         }
     }
