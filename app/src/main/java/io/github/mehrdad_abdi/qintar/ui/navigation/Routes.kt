@@ -129,3 +129,7 @@ data object SettingsRoute
 
 @Serializable
 data object OnboardingRoute
+
+/** Open-source licences and the Tanzil attribution, reached from Settings → About. */
+@Serializable
+data object LicencesRoute

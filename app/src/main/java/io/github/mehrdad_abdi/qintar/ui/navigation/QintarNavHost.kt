@@ -2,6 +2,7 @@ package io.github.mehrdad_abdi.qintar.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -18,6 +19,7 @@ import io.github.mehrdad_abdi.qintar.feature.khatm.NewKhatmScreen
 import io.github.mehrdad_abdi.qintar.feature.onboarding.OnboardingScreen
 import io.github.mehrdad_abdi.qintar.feature.read.ReadScreen
 import io.github.mehrdad_abdi.qintar.feature.reader.ReaderScreen
+import io.github.mehrdad_abdi.qintar.feature.settings.LicencesScreen
 import io.github.mehrdad_abdi.qintar.feature.settings.SettingsScreen
 import io.github.mehrdad_abdi.qintar.feature.today.TodayScreen
 
@@ -45,7 +47,7 @@ fun QintarNavHost(
 
     NavHost(navController = navController, startDestination = startDestination, modifier = modifier) {
         // ---- Bottom navigation tabs -------------------------------------------------------
-        composable<TodayRoute> { TodayScreen(onNavigate) }               // feature/today
+        composable<TodayRoute> { TodayScreen(onNavigate, migrationNotice = { hiltViewModel() }) } // feature/today
         composable<ReadRoute> { ReadScreen(onNavigate) }                 // feature/read
         composable<BookmarksRoute> { BookmarksScreen(onNavigate) }       // feature/bookmarks
         composable<InsightsRoute> { InsightsScreen(onNavigate) }         // feature/insights
@@ -69,6 +71,7 @@ fun QintarNavHost(
             DayDetailScreen(entry.toRoute<DayDetailRoute>(), onBack, onNavigate)
         }
         composable<SettingsRoute> { SettingsScreen(onBack, onNavigate) } // feature/settings
+        composable<LicencesRoute> { LicencesScreen(onBack) }             // feature/settings
         composable<OnboardingRoute> {                                    // feature/onboarding
             OnboardingScreen(
                 onFinished = {

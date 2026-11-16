@@ -92,6 +92,8 @@ import io.github.mehrdad_abdi.qintar.ui.navigation.InsightsRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.KhatmListRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReadRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
+import io.github.mehrdad_abdi.qintar.feature.settings.MigrationNoticeCard
+import io.github.mehrdad_abdi.qintar.feature.settings.MigrationNoticeViewModel
 import io.github.mehrdad_abdi.qintar.ui.navigation.SettingsRoute
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -115,6 +117,8 @@ fun TodayScreen(
     viewModel: TodayViewModel = hiltViewModel(),
     /** The manual log's view model; only asked for when the "Log reading" sheet opens. */
     logViewModel: @Composable () -> LogReadingViewModel = { hiltViewModel() },
+    /** The "carried over from the previous version" card's view model; null (the default) shows no card. */
+    migrationNotice: @Composable () -> MigrationNoticeViewModel? = { null },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val colors = MaterialTheme.colorScheme
@@ -161,6 +165,10 @@ fun TodayScreen(
             modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.screen),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            migrationNotice()?.let { notice ->
+                Spacer(Modifier.height(Spacing.md))
+                MigrationNoticeCard(notice)
+            }
             Spacer(Modifier.height(Spacing.lg))
             RankSummary(state)
             Spacer(Modifier.height(Spacing.xl))

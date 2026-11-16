@@ -6,6 +6,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import dagger.Lazy
 import io.github.mehrdad_abdi.qintar.data.legacy.LegacyMigrator
+import io.github.mehrdad_abdi.qintar.domain.port.PrefsStore
+import io.github.mehrdad_abdi.qintar.feature.settings.MigrationReports
+import io.github.mehrdad_abdi.qintar.reminders.ReminderScheduler
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import io.github.mehrdad_abdi.qintar.di.ApplicationScope
 import io.github.mehrdad_abdi.qintar.di.IoDispatcher
 import io.github.mehrdad_abdi.qintar.domain.quran.QuranIndex
@@ -22,6 +27,7 @@ import kotlinx.coroutines.launch
  * The work done once per process, none of it on the main thread:
  *  - load the Quran index, so that the first screen does not pay for it;
  *  - carry over v1 data (a no-op after the first run);
+ *  - keep the reminder alarms in step with the settings;
  *  - clear "once" schedules of earlier days now and at every day boundary.
  */
 @Singleton
@@ -30,13 +36,23 @@ class AppStartup @Inject constructor(
     private val migrator: LegacyMigrator,
     private val availability: Availability,
     private val clock: SystemDayClock,
+    private val prefs: PrefsStore,
+    private val reminders: ReminderScheduler,
+    private val reports: MigrationReports,
     @ApplicationScope private val scope: CoroutineScope,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) {
     /** @param migratedKhatmName the name given to the khatm that v1's reading position becomes. */
     fun start(migratedKhatmName: String): Job = scope.launch(io) {
+        // The alarms follow the reminder settings: set now, and again whenever one of them changes.
+        launch {
+            prefs.prefs
+                .map { listOf(it.reminderEnabled, it.reminderTime, it.streakReminderEnabled, it.streakReminderTime, it.dayStartMinutes) }
+                .distinctUntilChanged()
+                .collect { runCatching { reminders.reschedule() } }
+        }
         index.get()
-        runCatching { migrator.migrate(migratedKhatmName) }
+        runCatching { migrator.migrate(migratedKhatmName) }.onSuccess(reports::record)
         // The first value is today, so this runs at start and then once per new reading day.
         clock.todayFlow.collect { runCatching { availability.rollOverOnce() } }
     }
