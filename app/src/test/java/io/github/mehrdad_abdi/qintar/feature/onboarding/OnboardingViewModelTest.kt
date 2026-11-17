@@ -113,4 +113,15 @@ class OnboardingViewModelTest {
         val done = DomainFixture(initialPrefs = UserPrefs(onboardingDone = true, legacyMigrationState = LegacyMigrationState.PENDING))
         assertEquals(TodayRoute, startDestinationOf(done.prefs))
     }
+
+    @Test
+    fun `without a v1 database the start does not wait for the migration`() = runTest {
+        // Still PENDING and never settled: with the wait this would take the whole timeout.
+        val fresh = DomainFixture(initialPrefs = UserPrefs(legacyMigrationState = LegacyMigrationState.PENDING))
+        assertEquals(OnboardingRoute, startDestinationOf(fresh.prefs, legacyDataPresent = false))
+        assertEquals(0L, testScheduler.currentTime)
+
+        val done = DomainFixture(initialPrefs = UserPrefs(onboardingDone = true, legacyMigrationState = LegacyMigrationState.PENDING))
+        assertEquals(TodayRoute, startDestinationOf(done.prefs, legacyDataPresent = false))
+    }
 }

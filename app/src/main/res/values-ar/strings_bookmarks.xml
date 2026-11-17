@@ -65,8 +65,8 @@
     <string name="bm_range_to">إلى</string>
     <string name="bm_page_number">الصفحة (١–٦٠٤)</string>
     <string name="bm_juz_number">الجزء (١–٣٠)</string>
-    <string name="bm_summary_pages">%1$s آية · الصفحات %2$s–%3$s</string>
-    <string name="bm_summary_page">%1$s آية · الصفحة %2$s</string>
+    <string name="bm_summary_pages">%1$s · الصفحات %2$s–%3$s</string>
+    <string name="bm_summary_page">%1$s · الصفحة %2$s</string>
     <string name="bm_preview_more">… و%1$s أخرى</string>
     <string name="bm_preview_label">النص الذي ستحفظه</string>
     <string name="bm_err_ayah">ليس في هذه السورة آية بهذا الرقم.</string>

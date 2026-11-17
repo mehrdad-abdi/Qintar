@@ -203,6 +203,51 @@ class BackupTest {
     }
 
     @Test
+    fun `merging the same file twice adds its khatms, groups and bookmarks once`() = runTest {
+        populate(source)
+        val data = source.backup.export()
+        val target = DomainFixture()
+
+        val first = target.backup.import(data, ImportMode.MERGE)
+        val bookmarksAfterFirst = target.bookmarkStore.bookmarks()
+        val groupsAfterFirst = target.bookmarkStore.groups()
+        val khatmsAfterFirst = target.khatmStore.khatms()
+        assertEquals(0, first.itemsSkipped)
+        val second = target.backup.import(data, ImportMode.MERGE)
+
+        assertEquals(0, second.bookmarksAdded)
+        assertEquals(0, second.groupsAdded)
+        assertEquals(0, second.khatmsAdded)
+        assertEquals(data.bookmarks.size + data.groups.size + data.khatms.size, second.itemsSkipped)
+        assertEquals(bookmarksAfterFirst, target.bookmarkStore.bookmarks())
+        assertEquals(groupsAfterFirst, target.bookmarkStore.groups())
+        assertEquals(khatmsAfterFirst, target.khatmStore.khatms())
+    }
+
+    @Test
+    fun `a merge still adds a bookmark that differs from the device's, and readings new to the device attach to the one already there`() = runTest {
+        val ids = populate(source)
+        val data = source.backup.export()
+        val target = DomainFixture()
+        target.backup.import(data, ImportMode.MERGE)
+        val ikhlas = target.bookmarkStore.bookmarks().single { it.range == target.index.surahRange(112) }
+        val readingsBefore = target.log.events.count { it.context == ReadContext.Bookmark(ikhlas.id) }
+
+        // The same file again, with one bookmark edited and one new reading of an unchanged bookmark.
+        val edited = data.bookmarks.first { it.id != ids.ikhlas }
+        val again = data.copy(
+            bookmarks = data.bookmarks.map { if (it.id == edited.id) it.copy(description = "edited elsewhere") else it },
+            events = data.events + data.events.first { it.context == ReadContext.Bookmark(ids.ikhlas) }.let { it.copy(readAt = it.readAt.plusSeconds(1)) },
+        )
+        val result = target.backup.import(again, ImportMode.MERGE)
+
+        assertEquals(1, result.bookmarksAdded)
+        assertEquals(1, result.eventsAdded)
+        assertEquals(data.bookmarks.size + 1, target.bookmarkStore.bookmarks().size)
+        assertEquals(readingsBefore + 1, target.log.events.count { it.context == ReadContext.Bookmark(ikhlas.id) })
+    }
+
+    @Test
     fun `merge keeps repeated readings that share a moment, such as three full readings logged at once`() = runTest {
         populate(source)
         val data = source.backup.export()

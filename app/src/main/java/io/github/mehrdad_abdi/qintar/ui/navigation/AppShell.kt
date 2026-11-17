@@ -24,16 +24,22 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import io.github.mehrdad_abdi.qintar.playback.origin
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import io.github.mehrdad_abdi.qintar.R
 import androidx.compose.foundation.layout.Column
 import io.github.mehrdad_abdi.qintar.feature.player.PlayerBar
@@ -70,9 +76,20 @@ fun QintarAppShell(
     navController: NavHostController = rememberNavController(),
     startDestination: Any = TodayRoute,
     player: (@Composable () -> PlayerBarViewModel)? = null,
+    openPlayerRequest: Int = 0,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentTab = backStackEntry?.destination.topLevel()
+
+    // The playback notification was tapped: go to the reader the audio came from, unless it is the one on screen.
+    if (player != null && openPlayerRequest > 0) {
+        val playerViewModel = player()
+        LaunchedEffect(openPlayerRequest) {
+            val playing = withTimeoutOrNull(OPEN_PLAYER_WAIT_MILLIS) { playerViewModel.state.first { it.visible } } ?: return@LaunchedEffect
+            val target = playing.returnRoute ?: return@LaunchedEffect
+            if (!showsReaderOf(navController.currentBackStackEntry, target)) navController.navigate(target) { launchSingleTop = true }
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -104,6 +121,13 @@ fun QintarAppShell(
         }
     }
 }
+
+/** How long a tap on the notification waits for the player to report what it plays (a cold start). */
+private const val OPEN_PLAYER_WAIT_MILLIS = 3_000L
+
+/** Whether [entry] is the reader that [target] would open (the same scope, wherever it is scrolled to). */
+internal fun showsReaderOf(entry: NavBackStackEntry?, target: ReaderRoute): Boolean =
+    entry?.destination?.hasRoute(ReaderRoute::class) == true && entry.toRoute<ReaderRoute>().origin() == target.origin()
 
 @Composable
 fun QintarBottomBar(

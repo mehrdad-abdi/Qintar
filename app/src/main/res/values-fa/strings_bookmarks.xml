@@ -65,8 +65,8 @@
     <string name="bm_range_to">تا</string>
     <string name="bm_page_number">صفحه (۱ تا ۶۰۴)</string>
     <string name="bm_juz_number">جزء (۱ تا ۳۰)</string>
-    <string name="bm_summary_pages">%1$s آیه · صفحه‌های %2$s تا %3$s</string>
-    <string name="bm_summary_page">%1$s آیه · صفحه‌ی %2$s</string>
+    <string name="bm_summary_pages">%1$s · صفحه‌های %2$s تا %3$s</string>
+    <string name="bm_summary_page">%1$s · صفحه‌ی %2$s</string>
     <string name="bm_preview_more">… %1$s آیه‌ی دیگر</string>
     <string name="bm_preview_label">متنی که نگه می‌دارید</string>
     <string name="bm_err_ayah">این سوره چنین آیه‌ای ندارد.</string>

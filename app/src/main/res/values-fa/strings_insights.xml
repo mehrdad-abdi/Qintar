@@ -19,14 +19,14 @@
     <string name="log_to_page">تا صفحه (۱ تا ۶۰۴)</string>
     <string name="log_number_label">تعداد آیه‌ها</string>
     <string name="log_note">یادداشت (اختیاری)</string>
-    <string name="log_summary">%1$s آیه · صفحه‌های %2$s تا %3$s</string>
-    <string name="log_summary_page">%1$s آیه · صفحه %2$s</string>
+    <string name="log_summary">%1$s · صفحه‌های %2$s تا %3$s</string>
+    <string name="log_summary_page">%1$s · صفحه %2$s</string>
     <string name="log_add">افزودن</string>
-    <string name="log_add_n">افزودن %1$s آیه</string>
+    <string name="log_add_n">افزودن %1$s</string>
     <string name="log_err_count">عددی از ۱ تا ۱۰۰٬۰۰۰ وارد کنید.</string>
     <string name="log_refusal_future">این روز هنوز نرسیده است. قرائت را فقط می‌توان به امروز یا روزهای گذشته افزود.</string>
-    <string name="log_snack_added_today">%1$s آیه به امروز افزوده شد</string>
-    <string name="log_snack_added_day">%1$s آیه به %2$s افزوده شد</string>
+    <string name="log_snack_added_today">%1$s به امروز افزوده شد</string>
+    <string name="log_snack_added_day">%1$s به %2$s افزوده شد</string>
 
     <!-- Day detail -->
     <string name="day_refusal_future">این روز هنوز نرسیده است و تغییر نمی‌کند.</string>

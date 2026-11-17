@@ -1,3 +1,8 @@
 <resources>
-    <style name="Theme.Qintar" parent="Theme.AppCompat.DayNight.NoActionBar" />
+    <!-- The window background is the app's own background (design tokens, §6.1), so that the moment
+         before the first frame is not a white or grey flash. -->
+    <color name="window_background">#FAF7F0</color>
+    <style name="Theme.Qintar" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
 </resources>

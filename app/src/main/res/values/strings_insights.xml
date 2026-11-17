@@ -20,14 +20,14 @@
     <string name="log_number_label">Number of ayahs</string>
     <string name="log_note">Note (optional)</string>
     <!-- 1: ayahs, 2: first page, 3: last page -->
-    <string name="log_summary">%1$s ayahs · pages %2$s–%3$s</string>
-    <string name="log_summary_page">%1$s ayahs · page %2$s</string>
+    <string name="log_summary">%1$s · pages %2$s–%3$s</string>
+    <string name="log_summary_page">%1$s · page %2$s</string>
     <string name="log_add">Add</string>
-    <string name="log_add_n">Add %1$s ayahs</string>
+    <string name="log_add_n">Add %1$s</string>
     <string name="log_err_count">Choose a number from 1 to 100,000.</string>
     <string name="log_refusal_future">That day has not come yet. Readings can only be added to today or an earlier day.</string>
-    <string name="log_snack_added_today">%1$s ayahs added to today</string>
-    <string name="log_snack_added_day">%1$s ayahs added to %2$s</string>
+    <string name="log_snack_added_today">%1$s added to today</string>
+    <string name="log_snack_added_day">%1$s added to %2$s</string>
 
     <!-- Day detail -->
     <string name="day_refusal_future">That day has not come yet, so it cannot be changed.</string>

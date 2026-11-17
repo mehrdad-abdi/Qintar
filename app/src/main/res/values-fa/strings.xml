@@ -124,6 +124,9 @@
     <string name="today_no_routine_message">به یک نشانک یا گروه برنامه بدهید تا روال روزانه بسازید.</string>
     <string name="today_open_bookmarks">بازکردن نشانک‌ها</string>
     <string name="today_browse_quran">مرور قرآن</string>
-    <string name="ayahs_n">%1$s آیه</string>
+    <plurals name="ayahs_n">
+        <item quantity="one">%1$s آیه</item>
+        <item quantity="other">%1$s آیه</item>
+    </plurals>
     <string name="progress_of">%1$s / %2$s</string>
 </resources>

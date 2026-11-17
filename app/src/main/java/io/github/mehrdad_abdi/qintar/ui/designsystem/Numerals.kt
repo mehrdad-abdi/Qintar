@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.pluralStringResource
+import io.github.mehrdad_abdi.qintar.R
 
 /** The "Numerals" setting of §5.9 / §6.6. Provided by the app shell from user settings. */
 enum class NumeralStyle { FollowLanguage, Latin }
@@ -52,6 +54,11 @@ private fun numeralLanguage(): String =
 @Composable
 @ReadOnlyComposable
 fun formatNumber(number: Int): String = Numerals.format(number, numeralLanguage())
+
+/** "1 ayah", "7 ayahs": a count of ayahs with the noun in the form the language asks for. */
+@Composable
+@ReadOnlyComposable
+fun ayahCount(count: Int): String = pluralStringResource(R.plurals.ayahs_n, count, formatNumber(count))
 
 /** Any text containing ASCII digits ("08:00–12:00", "2.5", "33%") in the display numerals. */
 @Composable

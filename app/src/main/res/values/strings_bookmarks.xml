@@ -71,9 +71,9 @@
     <string name="bm_page_number">Page (1–604)</string>
     <string name="bm_juz_number">Juz (1–30)</string>
     <!-- 1: ayah count, 2: first page, 3: last page -->
-    <string name="bm_summary_pages">%1$s ayahs · pages %2$s–%3$s</string>
+    <string name="bm_summary_pages">%1$s · pages %2$s–%3$s</string>
     <!-- 1: ayah count, 2: page -->
-    <string name="bm_summary_page">%1$s ayahs · page %2$s</string>
+    <string name="bm_summary_page">%1$s · page %2$s</string>
     <!-- 1: number of ayahs not shown -->
     <string name="bm_preview_more">… %1$s more</string>
     <string name="bm_preview_label">The text you are about to keep</string>

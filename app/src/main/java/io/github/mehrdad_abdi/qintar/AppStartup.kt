@@ -51,8 +51,9 @@ class AppStartup @Inject constructor(
                 .distinctUntilChanged()
                 .collect { runCatching { reminders.reschedule() } }
         }
-        index.get()
+        // The migration goes first: the first screen waits for it, and it loads the index itself if it needs it.
         runCatching { migrator.migrate(migratedKhatmName) }.onSuccess(reports::record)
+        index.get()
         // The first value is today, so this runs at start and then once per new reading day.
         clock.todayFlow.collect { runCatching { availability.rollOverOnce() } }
     }

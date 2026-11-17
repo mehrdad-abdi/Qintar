@@ -92,4 +92,6 @@ data class ImportResult(
     val bookmarksAdded: Int,
     val groupsAdded: Int,
     val khatmsAdded: Int,
+    /** Khatms, groups and bookmarks left out by a merge because the device already had the same ones. */
+    val itemsSkipped: Int = 0,
 )

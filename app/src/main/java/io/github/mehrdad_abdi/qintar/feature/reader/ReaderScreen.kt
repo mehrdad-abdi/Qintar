@@ -511,6 +511,7 @@ private fun AyahItem(
             accessibilityLabel = stringResource(R.string.ayah_label, surahLabel, formatNumber(row.number)),
             onCheck = onCheck,
             playing = state.isPlaying(row),
+            highlighted = state.isAudioAt(row),
             onPlay = { viewModel.onPlay(row) },
             onStar = { viewModel.onStar(row) },
             onMenu = { menuOpen = true },

@@ -123,6 +123,8 @@ class ReaderAudioViewModelTest {
         // Paused: the row is not shown as playing, and its button resumes.
         player.nowAt(browseRoute.origin(), 0, ayah, playing = false)
         assertFalse(reader.state.value.isPlaying(reader.row(ayah)))
+        assertTrue("a paused ayah keeps its highlight", reader.state.value.isAudioAt(reader.row(ayah)))
+        assertFalse(reader.state.value.isAudioAt(reader.row(other)))
         reader.onPlay(reader.row(ayah))
         assertEquals(listOf("toggle", "toggle"), player.calls)
 

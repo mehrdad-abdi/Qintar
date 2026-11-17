@@ -45,6 +45,7 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarShapes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarType
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Sizes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
+import io.github.mehrdad_abdi.qintar.ui.designsystem.ayahCount
 import io.github.mehrdad_abdi.qintar.ui.designsystem.formatNumber
 import java.time.Instant
 import java.time.LocalDate
@@ -140,9 +141,9 @@ fun LogReadingContent(state: LogReadingUiState, viewModel: LogReadingViewModel, 
         if (state.mode != LogMode.NUMBER && summary != null) {
             Text(
                 if (summary.firstPage == summary.lastPage) {
-                    stringResource(R.string.log_summary_page, formatNumber(summary.ayahCount), formatNumber(summary.firstPage))
+                    stringResource(R.string.log_summary_page, ayahCount(summary.ayahCount), formatNumber(summary.firstPage))
                 } else {
-                    stringResource(R.string.log_summary, formatNumber(summary.ayahCount), formatNumber(summary.firstPage), formatNumber(summary.lastPage))
+                    stringResource(R.string.log_summary, ayahCount(summary.ayahCount), formatNumber(summary.firstPage), formatNumber(summary.lastPage))
                 },
                 style = QintarType.Body,
                 color = colors.onSurfaceVariant,
@@ -156,7 +157,7 @@ fun LogReadingContent(state: LogReadingUiState, viewModel: LogReadingViewModel, 
             modifier = Modifier.fillMaxWidth().heightIn(min = Sizes.touchTarget),
         ) {
             Text(
-                if (state.addCount > 0) stringResource(R.string.log_add_n, formatNumber(state.addCount)) else stringResource(R.string.log_add),
+                if (state.addCount > 0) stringResource(R.string.log_add_n, ayahCount(state.addCount)) else stringResource(R.string.log_add),
                 style = QintarType.Label,
             )
         }

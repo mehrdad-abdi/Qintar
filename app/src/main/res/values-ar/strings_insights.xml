@@ -19,14 +19,14 @@
     <string name="log_to_page">إلى صفحة (١–٦٠٤)</string>
     <string name="log_number_label">عدد الآيات</string>
     <string name="log_note">ملاحظة (اختياري)</string>
-    <string name="log_summary">%1$s آية · الصفحات %2$s–%3$s</string>
-    <string name="log_summary_page">%1$s آية · الصفحة %2$s</string>
+    <string name="log_summary">%1$s · الصفحات %2$s–%3$s</string>
+    <string name="log_summary_page">%1$s · الصفحة %2$s</string>
     <string name="log_add">إضافة</string>
-    <string name="log_add_n">إضافة %1$s آية</string>
+    <string name="log_add_n">إضافة %1$s</string>
     <string name="log_err_count">اختر رقمًا من ١ إلى ١٠٠٬٠٠٠.</string>
     <string name="log_refusal_future">لم يأتِ هذا اليوم بعد. يمكن إضافة القراءة إلى اليوم أو إلى يوم سابق فقط.</string>
-    <string name="log_snack_added_today">أُضيفت %1$s آية إلى اليوم</string>
-    <string name="log_snack_added_day">أُضيفت %1$s آية إلى %2$s</string>
+    <string name="log_snack_added_today">أُضيفت %1$s إلى اليوم</string>
+    <string name="log_snack_added_day">أُضيفت %1$s إلى %2$s</string>
 
     <!-- Day detail -->
     <string name="day_refusal_future">لم يأتِ هذا اليوم بعد، فلا يمكن تعديله.</string>

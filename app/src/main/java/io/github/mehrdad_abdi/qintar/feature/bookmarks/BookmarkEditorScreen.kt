@@ -49,6 +49,7 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarShapes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarType
 import io.github.mehrdad_abdi.qintar.ui.designsystem.SectionHeader
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
+import io.github.mehrdad_abdi.qintar.ui.designsystem.ayahCount
 import io.github.mehrdad_abdi.qintar.ui.designsystem.formatNumber
 import io.github.mehrdad_abdi.qintar.ui.designsystem.quranTextStyle
 import io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute
@@ -143,9 +144,9 @@ private fun EditorForm(state: BookmarkEditorUiState, vm: BookmarkEditorViewModel
         // Summary and the text itself
         state.summary?.let { summary ->
             val text = if (summary.firstPage == summary.lastPage) {
-                stringResource(R.string.bm_summary_page, formatNumber(summary.ayahCount), formatNumber(summary.firstPage))
+                stringResource(R.string.bm_summary_page, ayahCount(summary.ayahCount), formatNumber(summary.firstPage))
             } else {
-                stringResource(R.string.bm_summary_pages, formatNumber(summary.ayahCount), formatNumber(summary.firstPage), formatNumber(summary.lastPage))
+                stringResource(R.string.bm_summary_pages, ayahCount(summary.ayahCount), formatNumber(summary.firstPage), formatNumber(summary.lastPage))
             }
             Text(text, style = QintarType.Label, color = colors.onSurfaceVariant)
         }

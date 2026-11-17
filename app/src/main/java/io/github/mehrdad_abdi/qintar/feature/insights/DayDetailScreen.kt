@@ -72,6 +72,7 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.SectionHeader
 import io.github.mehrdad_abdi.qintar.ui.designsystem.SetCountDialog
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Sizes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
+import io.github.mehrdad_abdi.qintar.ui.designsystem.ayahCount
 import io.github.mehrdad_abdi.qintar.ui.designsystem.formatNumber
 import io.github.mehrdad_abdi.qintar.ui.designsystem.localizeDigits
 import io.github.mehrdad_abdi.qintar.ui.navigation.DayDetailRoute
@@ -125,7 +126,7 @@ fun DayDetailScreen(
             if (result == SnackbarResult.ActionPerformed) viewModel.onUndo() else viewModel.onNoticeShown(notice.id)
         }
     }
-    val loggedMessage = logged?.let { stringResource(R.string.log_snack_added_day, formatNumber(it.count), dateText(it.day)) }
+    val loggedMessage = logged?.let { stringResource(R.string.log_snack_added_day, ayahCount(it.count), dateText(it.day)) }
     LaunchedEffect(logged) {
         val result = logged ?: return@LaunchedEffect
         val outcome = snackbar.showSnackbar(loggedMessage.orEmpty(), actionLabel = undoLabel)
@@ -324,7 +325,7 @@ private fun GroupCard(group: EntryGroup, canEdit: Boolean, viewModel: DayDetailV
             Column(Modifier.weight(1f)) {
                 Text(name, style = QintarType.BodyStrong, color = colors.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Text(
-                    "${stringResource(R.string.ayahs_n, formatNumber(group.total))} · $methods",
+                    "${ayahCount(group.total)} · $methods",
                     style = QintarType.Caption,
                     color = colors.onSurfaceVariant,
                 )

@@ -3,9 +3,11 @@
 package io.github.mehrdad_abdi.qintar.playback
 
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.OptIn
+import io.github.mehrdad_abdi.qintar.MainActivity
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.ForwardingPlayer
@@ -45,6 +47,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+/** Set on the intent that the playback notification sends to the activity: show what is playing. */
+const val EXTRA_OPEN_PLAYER = "io.github.mehrdad_abdi.qintar.OPEN_PLAYER"
+
+fun openPlayerIntent(context: Context): Intent = Intent(context, MainActivity::class.java)
+    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    .putExtra(EXTRA_OPEN_PLAYER, true)
 
 /**
  * The one player of the app (§7.8): an ExoPlayer behind a media session. Media3 gives it the
@@ -98,11 +107,10 @@ class PlaybackService : MediaSessionService() {
             DefaultMediaNotificationProvider.Builder(this).build().apply { setSmallIcon(R.drawable.ic_notification) },
         )
         val builder = MediaSession.Builder(this, QueuePlayer(exo)).setCallback(SessionCallback())
-        packageManager.getLaunchIntentForPackage(packageName)?.let { launch ->
-            builder.setSessionActivity(
-                PendingIntent.getActivity(this, 0, launch, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT),
-            )
-        }
+        // A tap on the notification (or on the lock-screen player) opens the reader the audio came from.
+        builder.setSessionActivity(
+            PendingIntent.getActivity(this, 0, openPlayerIntent(this), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT),
+        )
         session = builder.build()
 
         // Speed, reciter and quality follow the settings while the service lives.

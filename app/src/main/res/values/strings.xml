@@ -139,6 +139,9 @@
     <string name="today_no_routine_message">Give a bookmark or a group a schedule to build a daily routine.</string>
     <string name="today_open_bookmarks">Open bookmarks</string>
     <string name="today_browse_quran">Browse the Quran</string>
-    <string name="ayahs_n">%1$s ayahs</string>
+    <plurals name="ayahs_n">
+        <item quantity="one">%1$s ayah</item>
+        <item quantity="other">%1$s ayahs</item>
+    </plurals>
     <string name="progress_of">%1$s / %2$s</string>
 </resources>

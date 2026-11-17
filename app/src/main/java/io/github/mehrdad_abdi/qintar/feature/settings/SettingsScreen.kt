@@ -711,7 +711,7 @@ private fun importedText(phase: BackupPhase.Imported): String {
         formatNumber(r.groupsAdded),
         formatNumber(r.khatmsAdded),
     )
-    val skipped = r.eventsSkipped + r.talliesSkipped
+    val skipped = r.eventsSkipped + r.talliesSkipped + r.itemsSkipped
     return if (skipped > 0) added + "\n" + stringResource(R.string.backup_done_skipped, formatNumber(skipped)) else added
 }
 

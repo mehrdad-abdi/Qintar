@@ -125,20 +125,64 @@ class BackupManager @Inject constructor(
         )
     }
 
+    /**
+     * Adds the file to what is on the device. A khatm, group or bookmark of the file that the device
+     * already holds with the same content (a second merge of the same file, a device's own export, a
+     * carry-over from v1 that is repeated) is not added again: its readings attach to the one that is
+     * there. Each row on the device stands in for at most one row of the file.
+     */
     private suspend fun merge(data: BackupData): ImportResult {
-        val khatmIds = data.khatms.associate { it.id to khatms.insert(it.copy(id = 0), data.exportedAt) }
+        var reused = 0
 
-        val groupSortBase = (bookmarks.groups().maxOfOrNull { it.sortIndex } ?: -1) + 1
-        val groupIds = data.groups.sortedBy { it.sortIndex }.withIndex().associate { (position, group) ->
-            group.id to bookmarks.insertGroup(group.copy(id = 0, sortIndex = groupSortBase + position))
+        val freeKhatms = khatms.khatms().toMutableList()
+        val khatmIds = data.khatms.associate { khatm ->
+            val same = freeKhatms.firstOrNull { it.copy(id = khatm.id) == khatm }
+            khatm.id to if (same != null) {
+                freeKhatms.remove(same)
+                reused++
+                same.id
+            } else {
+                khatms.insert(khatm.copy(id = 0), data.exportedAt)
+            }
+        }
+        val khatmsAdded = data.khatms.size - reused
+
+        val deviceGroups = bookmarks.groups()
+        val freeGroups = deviceGroups.toMutableList()
+        var groupSort = (deviceGroups.maxOfOrNull { it.sortIndex } ?: -1) + 1
+        var groupsAdded = 0
+        val groupIds = data.groups.sortedBy { it.sortIndex }.associate { group ->
+            val same = freeGroups.firstOrNull { it.name == group.name && it.description == group.description && it.schedule == group.schedule }
+            group.id to if (same != null) {
+                freeGroups.remove(same)
+                reused++
+                same.id
+            } else {
+                groupsAdded++
+                bookmarks.insertGroup(group.copy(id = 0, sortIndex = groupSort++))
+            }
         }
 
         // Imported bookmarks go after the device's own in the custom order, keeping their relative order.
-        val bookmarkSortBase = (bookmarks.bookmarks().maxOfOrNull { it.sortIndex } ?: -1) + 1
-        val bookmarkIds = data.bookmarks.sortedBy { it.sortIndex }.withIndex().associate { (position, bookmark) ->
-            bookmark.id to bookmarks.insertBookmark(
-                bookmark.copy(id = 0, groupId = bookmark.groupId?.let(groupIds::getValue), sortIndex = bookmarkSortBase + position),
-            )
+        val deviceBookmarks = bookmarks.bookmarks()
+        val freeBookmarks = deviceBookmarks.toMutableList()
+        var bookmarkSort = (deviceBookmarks.maxOfOrNull { it.sortIndex } ?: -1) + 1
+        var bookmarksAdded = 0
+        val bookmarkIds = data.bookmarks.sortedBy { it.sortIndex }.associate { bookmark ->
+            val groupId = bookmark.groupId?.let(groupIds::getValue)
+            val same = freeBookmarks.firstOrNull {
+                it.range == bookmark.range && it.kind == bookmark.kind && it.label == bookmark.label &&
+                    it.description == bookmark.description && it.repeatTarget == bookmark.repeatTarget &&
+                    it.groupId == groupId && it.schedule == bookmark.schedule
+            }
+            bookmark.id to if (same != null) {
+                freeBookmarks.remove(same)
+                reused++
+                same.id
+            } else {
+                bookmarksAdded++
+                bookmarks.insertBookmark(bookmark.copy(id = 0, groupId = groupId, sortIndex = bookmarkSort++))
+            }
         }
 
         fun remap(context: ReadContext): ReadContext = when (context) {
@@ -181,9 +225,10 @@ class BackupManager @Inject constructor(
             eventsSkipped = data.events.size - newEvents.size,
             talliesAdded = newTallies.size,
             talliesSkipped = data.tallies.size - newTallies.size,
-            bookmarksAdded = data.bookmarks.size,
-            groupsAdded = data.groups.size,
-            khatmsAdded = data.khatms.size,
+            bookmarksAdded = bookmarksAdded,
+            groupsAdded = groupsAdded,
+            khatmsAdded = khatmsAdded,
+            itemsSkipped = reused,
         )
     }
 

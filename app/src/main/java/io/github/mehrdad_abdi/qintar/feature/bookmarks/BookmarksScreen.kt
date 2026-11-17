@@ -70,6 +70,7 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.ScheduleChip
 import io.github.mehrdad_abdi.qintar.ui.designsystem.SetCountDialog
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Sizes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
+import io.github.mehrdad_abdi.qintar.ui.designsystem.ayahCount
 import io.github.mehrdad_abdi.qintar.ui.designsystem.formatNumber
 import io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.GroupEditorRoute
@@ -401,7 +402,7 @@ internal fun BookmarkItemCard(item: BookmarkItem, actions: BookmarkActions, modi
         progress.started -> stringResource(R.string.progress_of, formatNumber(progress.readings), formatNumber(progress.required))
         else -> null
     }
-    val ayahs = stringResource(R.string.ayahs_n, formatNumber(bookmark.range.size))
+    val ayahs = ayahCount(bookmark.range.size)
     val meta = if (progress.repeatTarget > 1) "$ayahs · ${stringResource(R.string.times_n, formatNumber(progress.repeatTarget))}" else ayahs
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         BookmarkCard(

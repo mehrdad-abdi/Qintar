@@ -100,6 +100,8 @@ fun AyahRow(
     readCount: Int = if (checkState == AyahCheckState.ReadToday) 1 else 0,
     starred: Boolean = false,
     playing: Boolean = false,
+    /** The player is at this ayah, playing or paused: the row keeps its tint while paused. */
+    highlighted: Boolean = playing,
     sajdaLabel: String? = null,
     fontSizeSp: Int = QuranTextSizeDefaultSp,
     accessibilityLabel: String = reference,
@@ -119,7 +121,7 @@ fun AyahRow(
     val markReadLabel = stringResource(R.string.ayah_action_mark_read)
     val bookmarkLabel = stringResource(R.string.ayah_action_bookmark)
     val playLabel = stringResource(R.string.ayah_action_play)
-    val rowTint = if (playing) colors.primaryContainer.copy(alpha = 0.35f) else Color.Transparent
+    val rowTint = if (highlighted) colors.primaryContainer.copy(alpha = 0.35f) else Color.Transparent
 
     Column(modifier.fillMaxWidth().background(rowTint)) {
         // The Quran font carries its own script; TalkBack gets the reference and state instead

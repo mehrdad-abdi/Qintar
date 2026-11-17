@@ -124,6 +124,13 @@
     <string name="today_no_routine_message">حدّد جدولاً لعلامة أو مجموعة لتبني ورداً يومياً.</string>
     <string name="today_open_bookmarks">فتح العلامات</string>
     <string name="today_browse_quran">تصفح القرآن</string>
-    <string name="ayahs_n">%1$s آية</string>
+    <plurals name="ayahs_n">
+        <item quantity="zero">%1$s آية</item>
+        <item quantity="one">آية واحدة</item>
+        <item quantity="two">آيتان</item>
+        <item quantity="few">%1$s آيات</item>
+        <item quantity="many">%1$s آية</item>
+        <item quantity="other">%1$s آية</item>
+    </plurals>
     <string name="progress_of">%1$s / %2$s</string>
 </resources>

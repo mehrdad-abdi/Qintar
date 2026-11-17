@@ -85,6 +85,7 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
 import io.github.mehrdad_abdi.qintar.ui.designsystem.StackedProgressRow
 import io.github.mehrdad_abdi.qintar.ui.designsystem.WeekDayUi
 import io.github.mehrdad_abdi.qintar.ui.designsystem.WeekStrip
+import io.github.mehrdad_abdi.qintar.ui.designsystem.ayahCount
 import io.github.mehrdad_abdi.qintar.ui.designsystem.formatNumber
 import io.github.mehrdad_abdi.qintar.ui.designsystem.localizeDigits
 import io.github.mehrdad_abdi.qintar.ui.navigation.BookmarksRoute
@@ -127,7 +128,7 @@ fun TodayScreen(
     var logged by remember { mutableStateOf<Pair<LogResult, LogReadingViewModel>?>(null) }
     val snackbar = remember { SnackbarHostState() }
     val undoLabel = stringResource(R.string.action_undo)
-    val loggedMessage = logged?.first?.let { stringResource(R.string.log_snack_added_today, formatNumber(it.count)) }
+    val loggedMessage = logged?.first?.let { stringResource(R.string.log_snack_added_today, ayahCount(it.count)) }
     LaunchedEffect(logged) {
         val (result, logViewModel) = logged ?: return@LaunchedEffect
         val outcome = snackbar.showSnackbar(loggedMessage.orEmpty(), actionLabel = undoLabel)
@@ -348,7 +349,7 @@ private fun trailing(item: BookmarkState): String {
     return if (p.repeatTarget > 1 || p.started) {
         stringResource(R.string.progress_of, formatNumber(p.readings), formatNumber(p.required))
     } else {
-        stringResource(R.string.ayahs_n, formatNumber(item.bookmark.range.size))
+        ayahCount(item.bookmark.range.size)
     }
 }
 

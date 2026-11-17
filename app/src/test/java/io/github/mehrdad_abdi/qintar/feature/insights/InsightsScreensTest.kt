@@ -210,9 +210,9 @@ class InsightsScreensTest {
         compose.onNodeWithTag(TODAY_LOG_TAG).performScrollTo().performClick()
         compose.waitForIdle()
         compose.onNodeWithTag(LOG_SHEET_TAG).assertIsDisplayed()
-        compose.onNodeWithText("Add 1 ayahs").performScrollTo().performClick()
+        compose.onNodeWithText("Add 1 ayah").performScrollTo().performClick()
         compose.waitForIdle()
         assertEquals(1, today.state.value.rank.count)
-        compose.onNodeWithText("1 ayahs added to today").assertIsDisplayed()
+        compose.onNodeWithText("1 ayah added to today").assertIsDisplayed()
     }
 }
