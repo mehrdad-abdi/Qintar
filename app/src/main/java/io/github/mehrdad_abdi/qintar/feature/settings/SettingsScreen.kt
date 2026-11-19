@@ -47,6 +47,7 @@ import io.github.mehrdad_abdi.qintar.playback.Reciters
 import kotlin.math.abs
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -665,7 +666,7 @@ private fun PreviewDialog(
                 Text(stringResource(R.string.backup_count_khatms, formatNumber(summary.khatms)), style = QintarType.Body)
                 phase.legacy?.let { report ->
                     val skipped = report.skippedAyahIds + report.skippedBookmarks + report.skippedDays
-                    if (skipped > 0) Text(stringResource(R.string.notice_skipped, formatNumber(skipped)), style = QintarType.Caption)
+                    if (skipped > 0) Text(pluralStringResource(R.plurals.notice_skipped, skipped, formatNumber(skipped)), style = QintarType.Caption)
                 }
                 Spacer(Modifier.height(Spacing.sm))
                 if (phase.fromV1) {

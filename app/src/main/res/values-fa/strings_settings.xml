@@ -54,7 +54,10 @@
     <string name="notice_carried_title">خوش برگشتید</string>
     <string name="notice_carried_body">خواندن‌ها و نشانک‌های شما از نسخهٔ پیشین منتقل شد.</string>
     <string name="notice_carried_numbers">%1$s نشانک، %2$s روز خواندن، %3$s آیه.</string>
-    <string name="notice_skipped">%1$s مورد خوانده نشد و کنار گذاشته شد.</string>
+    <plurals name="notice_skipped">
+        <item quantity="one">%1$s مورد خوانده نشد و کنار گذاشته شد.</item>
+        <item quantity="other">%1$s مورد خوانده نشد و کنار گذاشته شد.</item>
+    </plurals>
     <string name="notice_dismiss">متوجه شدم</string>
     <string name="notice_failed_title">داده‌های قدیمی منتقل نشد</string>
     <string name="notice_failed_body">داده‌های نسخهٔ پیشین دست‌نخورده است. می‌توانید دوباره تلاش کنید.</string>

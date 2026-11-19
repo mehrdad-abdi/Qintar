@@ -66,7 +66,10 @@
     <!-- 1: bookmarks, 2: days of reading, 3: ayahs -->
     <string name="notice_carried_numbers">%1$s bookmarks, %2$s days of reading, %3$s ayahs.</string>
     <!-- 1: count -->
-    <string name="notice_skipped">%1$s items could not be read and were left out.</string>
+    <plurals name="notice_skipped">
+        <item quantity="one">%1$s item could not be read and was left out.</item>
+        <item quantity="other">%1$s items could not be read and were left out.</item>
+    </plurals>
     <string name="notice_dismiss">Got it</string>
     <string name="notice_failed_title">Your old data was not carried over</string>
     <string name="notice_failed_body">Your data from the previous version is untouched. You can try again.</string>

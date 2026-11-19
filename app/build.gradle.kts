@@ -39,7 +39,11 @@ android {
     buildTypes {
         debug {
             // Lets a debug build sit next to an installed release (and next to v1).
-            applicationIdSuffix = ".debug"
+            // `-Pqintar.v1UpgradeTest=true` drops the suffix, so that a debug build installs over a
+            // debug build of v1 (same debug key) to test the in-place upgrade (docs/v2/RELEASING.md).
+            if (providers.gradleProperty("qintar.v1UpgradeTest").orNull != "true") {
+                applicationIdSuffix = ".debug"
+            }
         }
         release {
             signingConfig = signingConfigs.findByName("release")

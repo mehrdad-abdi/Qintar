@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -140,7 +141,7 @@ fun MigrationNoticeCard(
                     style = QintarType.Label,
                 )
                 val skipped = report.skippedAyahIds + report.skippedBookmarks + report.skippedDays
-                if (skipped > 0) Text(stringResource(R.string.notice_skipped, formatNumber(skipped)), style = QintarType.Caption)
+                if (skipped > 0) Text(pluralStringResource(R.plurals.notice_skipped, skipped, formatNumber(skipped)), style = QintarType.Caption)
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 TextButton(onClick = onDismiss, modifier = Modifier.testTag(MIGRATION_DISMISS_TAG)) {

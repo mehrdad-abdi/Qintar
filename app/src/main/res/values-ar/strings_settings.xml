@@ -54,7 +54,14 @@
     <string name="notice_carried_title">مرحبًا بعودتك</string>
     <string name="notice_carried_body">تم نقل قراءاتك وعلاماتك من النسخة السابقة.</string>
     <string name="notice_carried_numbers">%1$s علامة، %2$s يوم قراءة، %3$s آية.</string>
-    <string name="notice_skipped">تعذّرت قراءة %1$s عنصر وتم تجاوزها.</string>
+    <plurals name="notice_skipped">
+        <item quantity="zero">تعذّرت قراءة %1$s عنصر وتم تجاوزها.</item>
+        <item quantity="one">تعذّرت قراءة عنصر واحد وتم تجاوزه.</item>
+        <item quantity="two">تعذّرت قراءة عنصرين وتم تجاوزهما.</item>
+        <item quantity="few">تعذّرت قراءة %1$s عناصر وتم تجاوزها.</item>
+        <item quantity="many">تعذّرت قراءة %1$s عنصرًا وتم تجاوزها.</item>
+        <item quantity="other">تعذّرت قراءة %1$s عنصر وتم تجاوزها.</item>
+    </plurals>
     <string name="notice_dismiss">فهمت</string>
     <string name="notice_failed_title">لم تُنقل بياناتك القديمة</string>
     <string name="notice_failed_body">بيانات النسخة السابقة سليمة. يمكنك المحاولة مرة أخرى.</string>
