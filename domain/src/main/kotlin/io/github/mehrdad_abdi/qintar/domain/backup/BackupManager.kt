@@ -136,7 +136,9 @@ class BackupManager @Inject constructor(
 
         val freeKhatms = khatms.khatms().toMutableList()
         val khatmIds = data.khatms.associate { khatm ->
-            val same = freeKhatms.firstOrNull { it.copy(id = khatm.id) == khatm }
+            // The start day is left out: a carry-over from v1 that is repeated on a later day dates a
+            // khatm without readings "today", and it is still the same khatm.
+            val same = freeKhatms.firstOrNull { it.copy(id = khatm.id, startedDay = khatm.startedDay) == khatm }
             khatm.id to if (same != null) {
                 freeKhatms.remove(same)
                 reused++

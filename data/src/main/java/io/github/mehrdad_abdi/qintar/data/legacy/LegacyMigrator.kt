@@ -13,6 +13,7 @@ import io.github.mehrdad_abdi.qintar.domain.time.DayClock
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 
 sealed interface LegacyMigrationOutcome {
@@ -53,14 +54,14 @@ class LegacyMigrator @Inject constructor(
      * @param retryFailed also run when an earlier attempt ended in `FAILED`.
      */
     override suspend fun migrate(khatmName: String, retryFailed: Boolean): LegacyMigrationOutcome {
-        val before = prefs.prefs.first()
-        val state = before.legacyMigrationState
-        // IN_PROGRESS: an earlier run died after writing the marker. Its import may have committed.
+        val state = prefs.prefs.first().legacyMigrationState
+        // IN_PROGRESS: an earlier run stopped after writing the marker. Its import may have committed.
         val interrupted = state == LegacyMigrationState.IN_PROGRESS
         val due = state == LegacyMigrationState.PENDING || interrupted ||
             (retryFailed && state == LegacyMigrationState.FAILED)
         if (!due) return LegacyMigrationOutcome.AlreadyHandled(state)
 
+        var imported = false
         return try {
             when (val read = reader.read()) {
                 LegacyReadResult.NotPresent -> {
@@ -78,20 +79,23 @@ class LegacyMigrator @Inject constructor(
                         khatmName = khatmName,
                     )
                     // The marker goes first: the import is one transaction but the state is a separate
-                    // write, and a crash between them would otherwise import everything twice.
+                    // write, and a crash between them would otherwise leave no trace of the import.
                     setState(LegacyMigrationState.IN_PROGRESS)
-                    // After an interruption the earlier import may be on disk. Migration runs at
-                    // start-up, before the user can have added anything, so what is there is that
-                    // import: replacing it (rather than merging into it) cannot duplicate anything.
-                    val result = backup.import(conversion.data, if (interrupted) ImportMode.REPLACE else ImportMode.MERGE)
-                    // The import leaves preferences alone (a replace writes the file's, which are
-                    // not wanted here), so v1's settings are applied to what was there before,
-                    // together with the state: one atomic preferences write.
+                    // A merge, also after an interruption: merging the same conversion again adds nothing
+                    // that is already there (readings are compared as a multiset, khatms, groups and
+                    // bookmarks by content), so it is safe whether or not the earlier import committed,
+                    // and nothing the user added in between is touched. A replace would wipe that.
+                    val result = backup.import(conversion.data, ImportMode.MERGE)
+                    imported = true
+                    // The import leaves preferences alone, so v1's settings are applied here, together
+                    // with the state: one atomic preferences write. It is retried before giving up, as
+                    // the data is already in.
                     val carried = conversion.data.prefs
-                    prefs.update { current ->
-                        val base = if (interrupted) before else current
-                        (if (carried != null) base.withV1Settings(carried) else base)
-                            .copy(legacyMigrationState = LegacyMigrationState.MIGRATED)
+                    retrying(FINAL_WRITE_ATTEMPTS) {
+                        prefs.update { current ->
+                            (if (carried != null) current.withV1Settings(carried) else current)
+                                .copy(legacyMigrationState = LegacyMigrationState.MIGRATED)
+                        }
                     }
                     LegacyMigrationOutcome.Migrated(conversion.report, result)
                 }
@@ -99,21 +103,40 @@ class LegacyMigrator @Inject constructor(
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (failure: Exception) {
-            fail(failure, interrupted)
+            fail(failure, keepMarker = interrupted || imported)
         }
     }
 
     /**
-     * After an interrupted run the marker stays: the earlier import may be on disk, and only the
-     * replace done under the marker is safe to retry (the next start tries again).
+     * The marker stays when an import may be on disk (an interrupted run, or this run's import went in
+     * but the final write failed): the next start merges again, which adds nothing twice. Otherwise
+     * nothing was imported and the state says `FAILED`, for the user to retry.
      */
     private suspend fun fail(cause: Exception, keepMarker: Boolean): LegacyMigrationOutcome {
-        if (!keepMarker) setState(LegacyMigrationState.FAILED)
+        if (!keepMarker) runCatching { setState(LegacyMigrationState.FAILED) }
         return LegacyMigrationOutcome.Failed(cause)
+    }
+
+    private suspend fun <T> retrying(attempts: Int, block: suspend () -> T): T {
+        repeat(attempts - 1) {
+            try {
+                return block()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                delay(RETRY_DELAY_MILLIS)
+            }
+        }
+        return block()
     }
 
     private suspend fun setState(state: LegacyMigrationState) {
         prefs.update { it.copy(legacyMigrationState = state) }
+    }
+
+    private companion object {
+        const val FINAL_WRITE_ATTEMPTS = 3
+        const val RETRY_DELAY_MILLIS = 200L
     }
 
     /** Exactly the settings v1 had (§7.11); everything else keeps its current value. */

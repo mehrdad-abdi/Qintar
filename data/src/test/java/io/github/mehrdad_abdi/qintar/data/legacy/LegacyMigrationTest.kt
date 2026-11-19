@@ -479,4 +479,120 @@ class LegacyMigrationTest {
         assertEquals(LegacyMigrationState.MIGRATED, prefs.current.legacyMigrationState)
         assertEquals(emptyMap<LocalDate, Int>(), totals.totals(null, null))
     }
+
+    // ---- a database written by v1 itself on a device ----
+
+    /**
+     * `v1-device/` is v1's database as v1 left it on an emulator (v1-final debug build, data entered
+     * through its screens; tags and the 18 November row were added with SQLite, v1 has no screen for
+     * them). Its last reading is still in the write-ahead log, as it is on a phone where v1 was simply
+     * closed: the read-only open must see it.
+     */
+    private fun installDeviceFixture() {
+        val dir = v1File.parentFile!!.apply { mkdirs() }
+        for (name in listOf(LegacyV1Reader.DATABASE_NAME, LegacyV1Reader.DATABASE_NAME + "-wal")) {
+            javaClass.classLoader!!.getResourceAsStream("v1-device/$name")!!.use { input ->
+                File(dir, name).outputStream().use { input.copyTo(it) }
+            }
+        }
+        context.getSharedPreferences(LegacyV1Reader.SETTINGS_NAME, Context.MODE_PRIVATE).edit().putString("theme", "DARK").commit()
+    }
+
+    @Test
+    fun aDatabaseWrittenByV1OnADeviceIsCarriedOverWhole() = runTest {
+        installDeviceFixture()
+        clock.set(LocalDateTime.of(2026, 11, 19, 23, 45))
+
+        val outcome = migrator.migrate("Khatm") as LegacyMigrationOutcome.Migrated
+
+        // What v1 showed: 25 ayahs on the 18th, 16 today (the last one only in the WAL), a 2-day streak.
+        assertEquals(mapOf(LocalDate.of(2026, 11, 18) to 25, LocalDate.of(2026, 11, 19) to 16), totals.totals(null, null))
+        assertEquals(1, outcome.report.skippedAyahIds)
+        val bookmarks = stores.bookmarks.bookmarks()
+        assertEquals(
+            listOf(BookmarkKind.AYAH, BookmarkKind.SURAH, BookmarkKind.RANGE, BookmarkKind.PAGE),
+            bookmarks.sortedBy { it.sortIndex }.map { it.kind },
+        )
+        assertEquals(setOf("Daily", "Friday"), stores.bookmarks.groups().map { it.name }.toSet())
+        val kursi = bookmarks.single { it.kind == BookmarkKind.AYAH }
+        assertEquals("Ayat al-Kursi\nTags: Protection", kursi.description)
+        assertEquals(index.pageRange(50), bookmarks.single { it.kind == BookmarkKind.PAGE }.range)
+        // v1's khatm stood at page 3: pages 1 and 2 count as covered.
+        val khatm = stores.khatms.khatms().single()
+        assertEquals(index.pageRange(2).end.value, khatm.assumedCoveredUpTo)
+        assertEquals(ThemeMode.DARK, prefs.current.theme)
+        assertEquals(LegacyMigrationState.MIGRATED, prefs.current.legacyMigrationState)
+    }
+
+    // ---- recovery: the final preferences write ----
+
+    /** Fails the write that records `MIGRATED` [failures] times, then lets it through. */
+    private class FlakyPrefs(private val inner: FakePrefsStore, var failures: Int) : io.github.mehrdad_abdi.qintar.domain.port.PrefsStore by inner {
+        override suspend fun update(transform: (UserPrefs) -> UserPrefs): UserPrefs {
+            if (failures > 0 && transform(inner.current).legacyMigrationState == LegacyMigrationState.MIGRATED) {
+                failures--
+                throw java.io.IOException("disk full")
+            }
+            return inner.update(transform)
+        }
+    }
+
+    private fun migratorWith(store: io.github.mehrdad_abdi.qintar.domain.port.PrefsStore): LegacyMigrator {
+        val backup = BackupManager(stores.log, stores.khatms, stores.bookmarks, store, DefaultReadingTracker(stores.log, stores.khatms, clock, stores.tx), clock, stores.tx)
+        return LegacyMigrator(store, LegacyV1Reader(context), Provider { index }, backup, clock)
+    }
+
+    @Test
+    fun aFailedFinalWriteIsRetriedInTheSameRun() = runTest {
+        createTypicalV1Database()
+        val flaky = FlakyPrefs(prefs, failures = 2)
+
+        assertTrue(migratorWith(flaky).migrate("Khatm") is LegacyMigrationOutcome.Migrated)
+
+        assertEquals(LegacyMigrationState.MIGRATED, prefs.current.legacyMigrationState)
+        assertEquals(4, stores.bookmarks.bookmarks().size)
+    }
+
+    @Test
+    fun whenTheFinalWriteKeepsFailingTheMarkerStaysAndTheNextStartAddsNothingTwice() = runTest {
+        createTypicalV1Database()
+        val flaky = FlakyPrefs(prefs, failures = 100)
+
+        assertTrue(migratorWith(flaky).migrate("Khatm") is LegacyMigrationOutcome.Failed)
+        // Not FAILED: the data is in, and "try again" must not be offered as if nothing had happened.
+        assertEquals(LegacyMigrationState.IN_PROGRESS, prefs.current.legacyMigrationState)
+
+        assertTrue(migrator.migrate("Khatm") is LegacyMigrationOutcome.Migrated)
+        assertEquals(4, stores.bookmarks.bookmarks().size)
+        assertEquals(2, stores.bookmarks.groups().size)
+        assertEquals(1, stores.khatms.khatms().size)
+        assertEquals(mapOf(day1 to 5, day2 to 60, day3 to 4), totals.totals(null, null))
+    }
+
+    @Test
+    fun whatTheUserAddedBeforeAnInterruptedMigrationWasResumedIsKept() = runTest {
+        createTypicalV1Database()
+        val dying = DyingPrefs(prefs)
+        try {
+            migratorWith(dying).migrate("Khatm")
+            org.junit.Assert.fail("the simulated crash must escape")
+        } catch (_: Crash) {
+        }
+        assertEquals(LegacyMigrationState.IN_PROGRESS, prefs.current.legacyMigrationState)
+
+        // The process went on after the failed write (or the user was quick): a reading and a khatm of their own.
+        val ownKhatm = stores.khatms.insert(
+            io.github.mehrdad_abdi.qintar.domain.model.Khatm(0, "Mine", clock.today(), null, 0, null),
+            clock.now(),
+        )
+        stores.log.insertEvents(
+            listOf(io.github.mehrdad_abdi.qintar.domain.model.NewReadEvent(index.ayahId(36, 1)!!, clock.today(), clock.now(), ReadContext.Khatm(ownKhatm), ReadMethod.TAP, null)),
+        )
+
+        assertTrue(migrator.migrate("Khatm") is LegacyMigrationOutcome.Migrated)
+
+        assertEquals(setOf("Mine", "Khatm"), stores.khatms.khatms().map { it.name }.toSet())
+        assertEquals(mapOf(day1 to 5, day2 to 60, day3 to 4, clock.today() to 1), totals.totals(null, null))
+        assertEquals(4, stores.bookmarks.bookmarks().size)
+    }
 }
