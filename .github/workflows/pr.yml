@@ -55,8 +55,12 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
-      - name: Unit tests (all modules)
-        run: ./gradlew :domain:test :data:testDebugUnitTest :app:testDebugUnitTest --stacktrace
+      - name: Unit tests (domain, data)
+        run: ./gradlew :domain:test :data:testDebugUnitTest --stacktrace
+      # verifyRoborazziDebug is the app's testDebugUnitTest run with screenshot comparison on:
+      # every app test runs once, and a screenshot that differs from app/src/test/screenshots fails it.
+      - name: App unit tests and screenshot comparison (Roborazzi)
+        run: ./gradlew :app:verifyRoborazziDebug --stacktrace
       - name: Android lint
         run: ./gradlew :app:lintDebug
       - name: Build debug and release APKs

@@ -30,3 +30,23 @@ Add these repository secrets (Settings → Secrets and variables → Actions):
 
 Without those variables `assembleRelease` still succeeds but produces an unsigned APK, which is
 what the pull-request workflow builds to prove that the release configuration compiles.
+
+## Before a release that users of version 1 will install
+
+Version 2 keeps v1's application id (`io.github.mehrdad_abdi.quranbookmarks`), so it installs as
+an update only if it is signed with the key v1 was signed with, and carries v1's data over on its
+first start (DESIGN.md §7.11). To repeat the device test of that path:
+
+1. Build v1 from tag `v1-final` in a separate worktree (`git worktree add --detach ../qintar-v1 v1-final`,
+   then `./gradlew :app:assembleDebug` there), install it on an emulator and enter some data
+   through its screens: bookmarks, readings, the khatm page, a setting.
+2. Build v2 with `./gradlew :app:assembleDebug -Pqintar.v1UpgradeTest=true` (debug build without
+   the `.debug` suffix, signed with the same debug key) and `adb install -r` it over v1.
+3. Check: no crash; the "carried over" card; bookmarks, groups (from tags), day totals, khatm
+   position and settings as v1 showed them; a second start imports nothing; after "Got it", v1's
+   `databases/quran.db` and caches are gone while `databases/quran_bookmarks_database` stays until
+   Settings → Data → "Remove data of the previous version".
+4. Uninstall that test package afterwards.
+
+The same data, taken from such an emulator, is checked by `LegacyMigrationTest`
+(`data/src/test/resources/v1-device/`).
