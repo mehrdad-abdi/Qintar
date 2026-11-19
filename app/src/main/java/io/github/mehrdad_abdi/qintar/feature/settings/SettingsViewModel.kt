@@ -3,8 +3,10 @@ package io.github.mehrdad_abdi.qintar.feature.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.mehrdad_abdi.qintar.data.legacy.LegacyFileStore
 import io.github.mehrdad_abdi.qintar.data.legacy.LegacyMigration
 import io.github.mehrdad_abdi.qintar.domain.model.AppLanguage
+import io.github.mehrdad_abdi.qintar.domain.model.LegacyMigrationState
 import io.github.mehrdad_abdi.qintar.domain.model.Rank
 import io.github.mehrdad_abdi.qintar.domain.model.ThemeMode
 import io.github.mehrdad_abdi.qintar.domain.model.UserPrefs
@@ -28,6 +30,8 @@ data class SettingsUiState(
     val retrying: Boolean = false,
     /** Bytes of stored recitation; null until measured. */
     val audioBytes: Long? = null,
+    /** v1's own database is still on the device (it can be removed once its data was carried over). */
+    val legacyDataPresent: Boolean = false,
 )
 
 /**
@@ -40,6 +44,7 @@ class SettingsViewModel @Inject constructor(
     private val migration: LegacyMigration,
     private val reports: MigrationReports,
     private val audio: AudioStorage,
+    private val legacyFiles: LegacyFileStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsUiState())
@@ -50,6 +55,7 @@ class SettingsViewModel @Inject constructor(
             prefs.prefs.collect { p -> _state.update { it.copy(loading = false, prefs = p) } }
         }
         refreshAudioSize()
+        refreshLegacyData()
     }
 
     private fun edit(transform: (UserPrefs) -> UserPrefs) {
@@ -106,6 +112,23 @@ class SettingsViewModel @Inject constructor(
     }
 
     // ---- Data
+    /** Settings → Data → "Remove data of the previous version", after the user confirmed. */
+    fun removeLegacyData() {
+        val state = _state.value.prefs.legacyMigrationState
+        if (state != LegacyMigrationState.MIGRATED && state != LegacyMigrationState.ACKNOWLEDGED) return
+        viewModelScope.launch {
+            runCatching { legacyFiles.deleteUserData() }
+            refreshLegacyData()
+        }
+    }
+
+    private fun refreshLegacyData() {
+        viewModelScope.launch {
+            val present = runCatching { legacyFiles.userDataPresent() }.getOrDefault(false)
+            _state.update { it.copy(legacyDataPresent = present) }
+        }
+    }
+
     fun retryMigration(khatmName: String) {
         if (_state.value.retrying) return
         viewModelScope.launch {

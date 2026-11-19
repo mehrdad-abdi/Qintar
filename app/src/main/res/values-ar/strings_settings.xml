@@ -42,6 +42,11 @@
     <string name="settings_migration_failed">فشل النقل. بياناتك القديمة سليمة.</string>
     <string name="settings_migration_none">لم يُعثر على بيانات من النسخة السابقة.</string>
     <string name="settings_migration_pending">جارٍ البحث عن بيانات النسخة السابقة.</string>
+    <string name="settings_remove_v1">حذف بيانات الإصدار السابق</string>
+    <string name="settings_remove_v1_summary">احذف قاعدة بيانات الإصدار القديم. نُقل كل ما فيها.</string>
+    <string name="settings_remove_v1_confirm_title">حذف بيانات الإصدار السابق؟</string>
+    <string name="settings_remove_v1_confirm_body">تُحذف قاعدة بيانات الإصدار القديم من هذا الهاتف. لا تتأثر قراءاتك وعلاماتك في قنطار.</string>
+    <string name="settings_remove_v1_action">حذف</string>
     <string name="settings_version">الإصدار %1$s</string>
     <string name="settings_privacy_title">الخصوصية</string>
     <string name="settings_privacy_body">يعمل قنطار دون اتصال بالإنترنت. لا حساب ولا تحليلات، ولا يغادر هاتفك شيء إلا إذا صدّرت نسخة احتياطية بنفسك.</string>

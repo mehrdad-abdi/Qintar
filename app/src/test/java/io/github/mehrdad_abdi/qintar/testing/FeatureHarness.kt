@@ -13,6 +13,7 @@ import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmDetailViewModel
 import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmListViewModel
 import io.github.mehrdad_abdi.qintar.feature.khatm.NewKhatmViewModel
 import io.github.mehrdad_abdi.qintar.data.backup.BackupCodec
+import io.github.mehrdad_abdi.qintar.data.legacy.LegacyFileStore
 import io.github.mehrdad_abdi.qintar.data.legacy.LegacyMigration
 import io.github.mehrdad_abdi.qintar.data.legacy.LegacyMigrationOutcome
 import io.github.mehrdad_abdi.qintar.domain.backup.ImportResult
@@ -348,7 +349,20 @@ fun DomainFixture.settingsViewModel(
     migration: LegacyMigration = FakeLegacyMigration(prefs),
     reports: MigrationReports = MigrationReports(),
     audio: AudioStorage = FakeAudioStorage(),
-) = SettingsViewModel(prefs = prefs, migration = migration, reports = reports, audio = audio)
+    legacyFiles: LegacyFileStore = FakeLegacyFiles(present = false),
+) = SettingsViewModel(prefs = prefs, migration = migration, reports = reports, audio = audio, legacyFiles = legacyFiles)
+
+class FakeLegacyFiles(var present: Boolean) : LegacyFileStore {
+    var regenerableDeletions = 0
+    var userDeletions = 0
+    override suspend fun userDataPresent() = present
+    override suspend fun deleteRegenerable() { regenerableDeletions++ }
+    override suspend fun deleteUserData(): Boolean {
+        userDeletions++
+        present = false
+        return true
+    }
+}
 
 fun DomainFixture.backupViewModel(io: CoroutineDispatcher) = BackupViewModel(
     backup = backup,

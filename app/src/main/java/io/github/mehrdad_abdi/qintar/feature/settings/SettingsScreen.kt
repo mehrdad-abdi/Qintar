@@ -111,6 +111,8 @@ object SettingsTags {
     const val EXPORT = "setting-export"
     const val IMPORT = "setting-import"
     const val MIGRATION_RETRY = "setting-migration-retry"
+    const val REMOVE_V1 = "setting-remove-v1"
+    const val REMOVE_V1_CONFIRM = "setting-remove-v1-confirm"
     const val LICENCES = "setting-licences"
     const val TANZIL_LINK = "setting-tanzil-link"
 }
@@ -148,7 +150,7 @@ fun SettingsScreen(
             GoalSection(state.prefs, viewModel)
             RemindersSection(state.prefs, viewModel)
             AudioSection(state.prefs, state.audioBytes, viewModel)
-            DataSection(state.prefs.legacyMigrationState, state.retrying, viewModel, backupViewModel)
+            DataSection(state.prefs.legacyMigrationState, state.retrying, state.legacyDataPresent, viewModel, backupViewModel)
             AboutSection(onOpenLicences = { onNavigate(LicencesRoute) })
         }
     }
@@ -494,6 +496,7 @@ private fun AudioSection(prefs: UserPrefs, audioBytes: Long?, vm: SettingsViewMo
 private fun DataSection(
     migration: LegacyMigrationState,
     retrying: Boolean,
+    legacyDataPresent: Boolean,
     vm: SettingsViewModel,
     backup: BackupViewModel,
 ) = Section(stringResource(R.string.settings_section_data)) {
@@ -545,6 +548,34 @@ private fun DataSection(
             TextButton(onClick = { vm.retryMigration(khatmName) }, enabled = !retrying, modifier = Modifier.testTag(SettingsTags.MIGRATION_RETRY)) {
                 Text(stringResource(R.string.notice_retry), style = QintarType.Label)
             }
+        }
+    }
+    // v1's own database stays as a fallback after the carry-over, until the user lets it go.
+    val carried = migration == LegacyMigrationState.MIGRATED || migration == LegacyMigrationState.ACKNOWLEDGED
+    if (carried && legacyDataPresent) {
+        var confirming by remember { mutableStateOf(false) }
+        RowDivider()
+        ActionRow(
+            stringResource(R.string.settings_remove_v1),
+            stringResource(R.string.settings_remove_v1_summary),
+            SettingsTags.REMOVE_V1,
+        ) { confirming = true }
+        if (confirming) {
+            AlertDialog(
+                onDismissRequest = { confirming = false },
+                title = { Text(stringResource(R.string.settings_remove_v1_confirm_title), style = QintarType.Title) },
+                text = { Text(stringResource(R.string.settings_remove_v1_confirm_body), style = QintarType.Body) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            confirming = false
+                            vm.removeLegacyData()
+                        },
+                        modifier = Modifier.testTag(SettingsTags.REMOVE_V1_CONFIRM),
+                    ) { Text(stringResource(R.string.settings_remove_v1_action), color = MaterialTheme.colorScheme.error) }
+                },
+                dismissButton = { TextButton(onClick = { confirming = false }) { Text(stringResource(R.string.action_cancel)) } },
+            )
         }
     }
 }

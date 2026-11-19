@@ -50,6 +50,11 @@
     <string name="settings_migration_failed">Carrying over failed. Your old data is untouched.</string>
     <string name="settings_migration_none">No data from the previous version was found.</string>
     <string name="settings_migration_pending">Looking for data from the previous version.</string>
+    <string name="settings_remove_v1">Remove data of the previous version</string>
+    <string name="settings_remove_v1_summary">Delete the old version\'s database. Everything in it was carried over.</string>
+    <string name="settings_remove_v1_confirm_title">Remove the previous version\'s data?</string>
+    <string name="settings_remove_v1_confirm_body">The old version\'s database is deleted from this phone. Your readings and bookmarks in Qintar are not affected.</string>
+    <string name="settings_remove_v1_action">Remove</string>
     <!-- 1: version number -->
     <string name="settings_version">Version %1$s</string>
     <string name="settings_privacy_title">Privacy</string>

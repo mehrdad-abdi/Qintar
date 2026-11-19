@@ -7,6 +7,7 @@ import io.github.mehrdad_abdi.qintar.domain.model.ThemeMode
 import io.github.mehrdad_abdi.qintar.domain.model.UserPrefs
 import io.github.mehrdad_abdi.qintar.domain.model.WeekStart
 import io.github.mehrdad_abdi.qintar.domain.testing.DomainFixture
+import io.github.mehrdad_abdi.qintar.testing.FakeLegacyFiles
 import io.github.mehrdad_abdi.qintar.testing.FakeLegacyMigration
 import io.github.mehrdad_abdi.qintar.testing.MainDispatcherRule
 import io.github.mehrdad_abdi.qintar.testing.settingsViewModel
@@ -129,5 +130,23 @@ class SettingsViewModelTest {
         assertEquals(LegacyMigrationState.MIGRATED, withMigration.state.value.prefs.legacyMigrationState)
         assertEquals(migration.report, reports.last.value)
         assertFalse(withMigration.state.value.retrying)
+    }
+
+    @Test
+    fun `the previous version's database can be removed only after its data was carried over`() {
+        val files = FakeLegacyFiles(present = true)
+        runBlocking { app.prefs.update { it.copy(legacyMigrationState = LegacyMigrationState.FAILED) } }
+        val failed = app.settingsViewModel(legacyFiles = files)
+        assertTrue(failed.state.value.legacyDataPresent)
+
+        failed.removeLegacyData()
+        assertEquals("a failed carry-over still needs the old database", 0, files.userDeletions)
+
+        runBlocking { app.prefs.update { it.copy(legacyMigrationState = LegacyMigrationState.ACKNOWLEDGED) } }
+        val carried = app.settingsViewModel(legacyFiles = files)
+        carried.removeLegacyData()
+
+        assertEquals(1, files.userDeletions)
+        assertFalse(carried.state.value.legacyDataPresent)
     }
 }

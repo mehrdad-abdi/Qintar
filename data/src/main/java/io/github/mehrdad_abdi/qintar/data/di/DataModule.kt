@@ -98,5 +98,8 @@ abstract class StorageBindings {
     abstract fun legacyMigration(migrator: io.github.mehrdad_abdi.qintar.data.legacy.LegacyMigrator): io.github.mehrdad_abdi.qintar.data.legacy.LegacyMigration
 
     @Binds
+    abstract fun legacyFiles(files: io.github.mehrdad_abdi.qintar.data.legacy.LegacyFiles): io.github.mehrdad_abdi.qintar.data.legacy.LegacyFileStore
+
+    @Binds
     abstract fun quranTextSource(source: AssetQuranTextSource): QuranTextSource
 }

@@ -42,6 +42,11 @@
     <string name="settings_migration_failed">انتقال ناموفق بود. داده‌های قدیمی شما دست‌نخورده است.</string>
     <string name="settings_migration_none">داده‌ای از نسخهٔ پیشین پیدا نشد.</string>
     <string name="settings_migration_pending">در جست‌وجوی داده‌های نسخهٔ پیشین.</string>
+    <string name="settings_remove_v1">حذف داده‌های نسخهٔ پیشین</string>
+    <string name="settings_remove_v1_summary">پایگاه‌دادهٔ نسخهٔ قدیمی را پاک کنید. همهٔ آن منتقل شده است.</string>
+    <string name="settings_remove_v1_confirm_title">داده‌های نسخهٔ پیشین حذف شود؟</string>
+    <string name="settings_remove_v1_confirm_body">پایگاه‌دادهٔ نسخهٔ قدیمی از این گوشی پاک می‌شود. خوانده‌ها و نشانک‌های شما در قنطار دست نمی‌خورند.</string>
+    <string name="settings_remove_v1_action">حذف</string>
     <string name="settings_version">نسخهٔ %1$s</string>
     <string name="settings_privacy_title">حریم خصوصی</string>
     <string name="settings_privacy_body">قنطار بدون اینترنت کار می‌کند. حساب کاربری و آمارگیری ندارد و هیچ چیز از گوشی شما بیرون نمی‌رود، مگر این‌که خودتان پشتیبان بگیرید.</string>

@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import dagger.Lazy
+import io.github.mehrdad_abdi.qintar.data.legacy.LegacyFileStore
 import io.github.mehrdad_abdi.qintar.data.legacy.LegacyMigrator
+import io.github.mehrdad_abdi.qintar.domain.model.LegacyMigrationState
 import io.github.mehrdad_abdi.qintar.domain.port.PrefsStore
 import io.github.mehrdad_abdi.qintar.feature.settings.MigrationReports
 import io.github.mehrdad_abdi.qintar.reminders.ReminderScheduler
@@ -26,7 +28,7 @@ import kotlinx.coroutines.launch
 /**
  * The work done once per process, none of it on the main thread:
  *  - load the Quran index, so that the first screen does not pay for it;
- *  - carry over v1 data (a no-op after the first run);
+ *  - carry over v1 data (a no-op after the first run), and remove v1's caches once that is acknowledged;
  *  - keep the reminder alarms in step with the settings;
  *  - clear "once" schedules of earlier days now and at every day boundary.
  */
@@ -34,6 +36,7 @@ import kotlinx.coroutines.launch
 class AppStartup @Inject constructor(
     private val index: Lazy<QuranIndex>,
     private val migrator: LegacyMigrator,
+    private val legacyFiles: LegacyFileStore,
     private val availability: Availability,
     private val clock: SystemDayClock,
     private val prefs: PrefsStore,
@@ -54,6 +57,13 @@ class AppStartup @Inject constructor(
         // The migration goes first: the first screen waits for it, and it loads the index itself if it needs it.
         runCatching { migrator.migrate(migratedKhatmName) }.onSuccess(reports::record)
         index.get()
+        // Once the carried-over data has been seen, v1's regenerable files go (§7.11). Its user
+        // database stays until the user removes it in Settings.
+        launch {
+            prefs.prefs.map { it.legacyMigrationState == LegacyMigrationState.ACKNOWLEDGED }
+                .distinctUntilChanged()
+                .collect { acknowledged -> if (acknowledged) runCatching { legacyFiles.deleteRegenerable() } }
+        }
         // The first value is today, so this runs at start and then once per new reading day.
         clock.todayFlow.collect { runCatching { availability.rollOverOnce() } }
     }
