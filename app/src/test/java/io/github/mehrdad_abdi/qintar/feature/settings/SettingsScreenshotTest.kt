@@ -68,16 +68,22 @@ class SettingsScreenshotTest(private val language: String, private val dark: Boo
     }
 
     @Test
+    fun onboardingHadith() {
+        val vm = app.onboardingViewModel()
+        shot("feature_onboarding_hadith", 1500) { OnboardingScreen(onFinished = {}, viewModel = vm) }
+    }
+
+    @Test
     fun onboardingRanks() {
         val vm = app.onboardingViewModel()
+        vm.next()
         shot("feature_onboarding_ranks", 915) { OnboardingScreen(onFinished = {}, viewModel = vm) }
     }
 
     @Test
     fun onboardingGoal() {
         val vm = app.onboardingViewModel()
-        vm.next()
-        vm.next()
+        repeat(3) { vm.next() }
         shot("feature_onboarding_goal", 1300) { OnboardingScreen(onFinished = {}, viewModel = vm) }
     }
 
