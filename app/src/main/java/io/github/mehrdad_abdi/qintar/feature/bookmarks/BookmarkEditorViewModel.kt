@@ -69,7 +69,14 @@ enum class EditorProblem(@StringRes val message: Int) {
 data class GroupOption(val id: Long, val name: String, val schedule: Schedule?)
 
 /** One ayah of the preview: [text] is formatted exactly as the reader formats it. */
-data class PreviewAyah(val id: AyahId, val surah: Int, val number: Int, val text: String)
+data class PreviewAyah(
+    val id: AyahId,
+    val surah: Int,
+    val number: Int,
+    val text: String,
+    /** The Bismillah stands before it: ayah 1 of every surah but al-Fatiha (where it is ayah 1) and at-Tawba. */
+    val basmala: Boolean = false,
+)
 
 /**
  * The first ayahs of the passage; for a long one, how many are left out and then its [last] ayah, so
@@ -326,7 +333,10 @@ class BookmarkEditorViewModel(
             val ayahs = withContext(io) { text.ayahs(shown) + if (hasLast) text.ayahs(AyahRange.single(range.end)) else emptyList() }
             val formatted = ayahs.map { ayah ->
                 val ref: AyahRef = quran.ref(ayah.id)
-                PreviewAyah(ayah.id, ref.surah, ref.ayah, AyahTextFormatter.format(ayah.text, ref.ayah, breakAtPauseMarks))
+                PreviewAyah(
+                    ayah.id, ref.surah, ref.ayah, AyahTextFormatter.format(ayah.text, ref.ayah, breakAtPauseMarks),
+                    basmala = ref.ayah == 1 && quran.surah(ref.surah).hasBasmala,
+                )
             }
             val preview = PassagePreview(
                 ayahs = if (hasLast) formatted.dropLast(1) else formatted,

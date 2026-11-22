@@ -179,6 +179,10 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
                             when (row) {
                                 is BookmarksRow.Section -> SectionRow(row, viewModel, onNavigate)
                                 is BookmarksRow.Entry -> EntryRow(row, viewModel, onNavigate)
+                                is BookmarksRow.Basmala -> io.github.mehrdad_abdi.qintar.ui.designsystem.BasmalaRow(
+                                    Modifier.padding(top = Spacing.md),
+                                    fontSizeSp = state.fontSp,
+                                )
                                 is BookmarksRow.Ayah -> InlineAyah(row, state, viewModel)
                                 is BookmarksRow.End -> EndRow(row, viewModel)
                             }

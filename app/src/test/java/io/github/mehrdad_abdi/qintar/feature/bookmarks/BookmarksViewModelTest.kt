@@ -72,6 +72,24 @@ class BookmarksViewModelTest {
     }
 
     @Test
+    fun `a bookmark that starts a surah shows the Bismillah before ayah 1, but not at-Tawba or al-Fatiha`() = runTest {
+        // Owner, 2026-11-22: a whole-surah bookmark had no Bismillah.
+        val ikhlas = kahf()
+        val tawba = app.library.create(BookmarkDrafts.surah(9, app.index))
+        val fatiha = app.library.create(BookmarkDrafts.surah(1, app.index))
+        val inside = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)))
+        val vm = open()
+        listOf(ikhlas, tawba, fatiha, inside).forEach { vm.onToggleBookmark(it.id) }
+        val rows = vm.state.value.rows
+
+        val first = rows.indexOfFirst { it is BookmarksRow.Ayah && it.bookmarkId == ikhlas.id }
+        assertEquals(BookmarksRow.Basmala(ikhlas.id, 112), rows[first - 1])
+        assertTrue(rows.none { it is BookmarksRow.Basmala && it.bookmarkId == tawba.id })
+        assertTrue("its ayah 1 is the Bismillah", rows.none { it is BookmarksRow.Basmala && it.bookmarkId == fatiha.id })
+        assertTrue("a passage inside a surah has none", rows.none { it is BookmarksRow.Basmala && it.bookmarkId == inside.id })
+    }
+
+    @Test
     fun `ticking an ayah in the list counts it under its bookmark`() = runTest {
         val b = kahf()
         val vm = open()

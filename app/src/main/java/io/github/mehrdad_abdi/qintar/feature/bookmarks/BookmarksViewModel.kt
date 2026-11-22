@@ -95,6 +95,11 @@ sealed interface BookmarksRow {
         override val key: String get() = "ayah-$bookmarkId-${id.value}"
     }
 
+    /** Before ayah 1 of a surah inside an expanded bookmark: every surah but al-Fatiha and at-Tawba. */
+    data class Basmala(val bookmarkId: Long, val surah: Int) : BookmarksRow {
+        override val key: String get() = "basmala-$bookmarkId-$surah"
+    }
+
     /** Under the last ayah of an expanded bookmark: "Mark read" for all its ayahs, until it is done. */
     data class End(val bookmarkId: Long, val done: Boolean) : BookmarksRow {
         override val key: String get() = "end-$bookmarkId"
@@ -277,6 +282,7 @@ class BookmarksViewModel @Inject constructor(
                 loadTexts(item)
                 for (id in item.state.bookmark.range) {
                     val ref = index.ref(id)
+                    if (ref.ayah == 1 && index.surah(ref.surah).hasBasmala) rows += BookmarksRow.Basmala(item.id, ref.surah)
                     rows += BookmarksRow.Ayah(item.id, id, ref.surah, ref.ayah, index.sajdaOf(id))
                 }
                 rows += BookmarksRow.End(item.id, item.state.progress.done)

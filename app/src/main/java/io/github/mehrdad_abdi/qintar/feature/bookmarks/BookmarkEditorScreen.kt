@@ -245,6 +245,7 @@ fun PassagePreviewCard(preview: PassagePreview, fontSp: Int, modifier: Modifier 
         Spacer(Modifier.height(Spacing.sm))
         // One flowing paragraph, as in the reader: ayah text, then its end marker.
         preview.ayahs.forEach { ayah ->
+            if (ayah.basmala) io.github.mehrdad_abdi.qintar.ui.designsystem.BasmalaRow(fontSizeSp = fontSp)
             Text(ayah.text, style = quranTextStyle(fontSp), color = colors.onSurface, modifier = Modifier.fillMaxWidth())
         }
         if (preview.more > 0) {

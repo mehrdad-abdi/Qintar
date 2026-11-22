@@ -66,6 +66,18 @@ class EditorViewModelsTest {
     }
 
     @Test
+    fun `the preview of a surah starts with the Bismillah, except at-Tawba`() = runTest {
+        val vm = newEditor()
+        vm.onKind(BookmarkKind.SURAH)
+        vm.onSurah(112)
+        assertTrue(vm.state.value.preview.ayahs.first().basmala)
+        vm.onSurah(9)
+        assertFalse(vm.state.value.preview.ayahs.first().basmala)
+        vm.onSurah(1)
+        assertFalse("al-Fatiha's ayah 1 is the Bismillah", vm.state.value.preview.ayahs.first().basmala)
+    }
+
+    @Test
     fun `the preview ends with the last ayah of a long range`() = runTest {
         val vm = newEditor()
         vm.onKind(BookmarkKind.RANGE)
