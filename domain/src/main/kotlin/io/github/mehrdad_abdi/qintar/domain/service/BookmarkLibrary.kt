@@ -126,6 +126,17 @@ class BookmarkLibrary @Inject constructor(
 
     // ---- quick star ----
 
+    /**
+     * Every ayah that is in a bookmark, with the bookmark it opens: the first one created that
+     * contains it. The reader's filled stars.
+     */
+    fun observeBookmarkedAyahs(): Flow<Map<AyahId, Long>> =
+        store.observeBookmarks().map { list ->
+            val map = HashMap<AyahId, Long>()
+            list.sortedBy { it.id }.forEach { b -> b.range.forEach { ayah -> map.putIfAbsent(ayah, b.id) } }
+            map as Map<AyahId, Long>
+        }.distinctUntilChanged()
+
     /** Ayahs that have a single-ayah bookmark of kind AYAH: the filled stars. */
     fun observeStarred(): Flow<Set<AyahId>> =
         store.observeBookmarks().map { list -> list.filter(::isStar).mapTo(HashSet()) { it.range.start } }

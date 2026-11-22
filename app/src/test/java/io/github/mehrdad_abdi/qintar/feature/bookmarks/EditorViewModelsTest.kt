@@ -54,24 +54,28 @@ class EditorViewModelsTest {
     }
 
     @Test
-    fun `a range within a surah and across surahs`() = runTest {
+    fun `a range is one surah and two ayahs`() = runTest {
         val within = newEditor()
         within.onKind(BookmarkKind.RANGE)
         within.onSurah(18)
         within.onAyahText("1")
-        within.onToSurah(18)
         within.onToAyahText("10")
+        assertEquals("choosing the surah sets both ends", 18, within.state.value.toSurah)
         assertEquals(AyahRange(app.ayah(18, 1), app.ayah(18, 10)), saved(within).range)
+        assertTrue("Juz is not offered", BookmarkKind.JUZ !in within.state.value.kinds)
+    }
 
-        val across = newEditor()
-        across.onKind(BookmarkKind.RANGE)
-        across.onSurah(2)
-        across.onAyahText("285")
-        across.onToSurah(3)
-        across.onToAyahText("5")
-        val b = saved(across)
-        assertEquals(AyahRange(app.ayah(2, 285), app.ayah(3, 5)), b.range)
-        assertEquals(BookmarkKind.RANGE, b.kind)
+    @Test
+    fun `the preview ends with the last ayah of a long range`() = runTest {
+        val vm = newEditor()
+        vm.onKind(BookmarkKind.RANGE)
+        vm.onSurah(2)
+        vm.onAyahText("1")
+        vm.onToAyahText("100")
+        val preview = vm.state.value.preview
+        assertEquals(BookmarkEditorViewModel.PREVIEW_AYAHS, preview.ayahs.size)
+        assertEquals(app.ayah(2, 100), preview.last?.id)
+        assertEquals("between the first ones and the last", 100 - BookmarkEditorViewModel.PREVIEW_AYAHS - 1, preview.more)
     }
 
     @Test
@@ -138,12 +142,8 @@ class EditorViewModelsTest {
         val preview = vm.state.value.preview
         assertEquals(BookmarkEditorViewModel.PREVIEW_AYAHS, preview.ayahs.size)
         assertEquals(app.ayah(2, 1), preview.ayahs.first().id)
-        assertEquals(286 - BookmarkEditorViewModel.PREVIEW_AYAHS, preview.more)
-
-        vm.onKind(BookmarkKind.JUZ)
-        vm.onJuzText("30")
-        assertEquals(app.index.juzRange(30).start, vm.state.value.preview.ayahs.first().id)
-        assertEquals(app.index.juzRange(30).size - BookmarkEditorViewModel.PREVIEW_AYAHS, vm.state.value.preview.more)
+        assertEquals(286 - BookmarkEditorViewModel.PREVIEW_AYAHS - 1, preview.more)
+        assertEquals(app.ayah(2, 286), preview.last?.id)
     }
 
     // ---- validation ----------------------------------------------------------------------------------

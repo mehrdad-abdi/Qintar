@@ -71,8 +71,11 @@ data class GroupOption(val id: Long, val name: String, val schedule: Schedule?)
 /** One ayah of the preview: [text] is formatted exactly as the reader formats it. */
 data class PreviewAyah(val id: AyahId, val surah: Int, val number: Int, val text: String)
 
-/** The first ayahs of the passage and how many more there are. */
-data class PassagePreview(val ayahs: List<PreviewAyah> = emptyList(), val more: Int = 0)
+/**
+ * The first ayahs of the passage; for a long one, how many are left out and then its [last] ayah, so
+ * the preview shows from where to where.
+ */
+data class PassagePreview(val ayahs: List<PreviewAyah> = emptyList(), val more: Int = 0, val last: PreviewAyah? = null)
 
 data class BookmarkEditorUiState(
     val phase: EditorPhase = EditorPhase.LOADING,
@@ -102,6 +105,10 @@ data class BookmarkEditorUiState(
     /** Set once the bookmark is saved: the screen leaves. */
     val savedId: Long? = null,
 ) {
+    /** The kinds offered. A juz is not (owner, 2026-11-22), except to show an existing juz bookmark. */
+    val kinds: List<BookmarkKind>
+        get() = BookmarkKind.entries.filter { it != BookmarkKind.JUZ || kind == BookmarkKind.JUZ }
+
     /** The schedule a grouped bookmark falls back to when it has none of its own. */
     val inheritedSchedule: Schedule? get() = groups.firstOrNull { it.id == groupId }?.schedule
 }
@@ -227,7 +234,11 @@ class BookmarkEditorViewModel(
         refresh()
     }
 
-    fun onSurah(number: Int) = change { copy(surah = number, ayahText = clampAyah(number, ayahText)) }
+    /** A range stays inside one surah (owner, 2026-11-22): choosing the surah sets both ends. */
+    fun onSurah(number: Int) = change {
+        val moved = copy(surah = number, ayahText = clampAyah(number, ayahText))
+        if (kind == BookmarkKind.RANGE) moved.copy(toSurah = number, toAyahText = clampAyah(number, toAyahText)) else moved
+    }
 
     fun onAyahText(value: String) = change { copy(ayahText = value) }
 
@@ -311,13 +322,16 @@ class BookmarkEditorViewModel(
         }
         previewJob = viewModelScope.launch {
             val shown = AyahRange(range.start, AyahId(minOf(range.end.value, range.start.value + PREVIEW_AYAHS - 1)))
-            val ayahs = withContext(io) { text.ayahs(shown) }
+            val hasLast = range.end != shown.end
+            val ayahs = withContext(io) { text.ayahs(shown) + if (hasLast) text.ayahs(AyahRange.single(range.end)) else emptyList() }
+            val formatted = ayahs.map { ayah ->
+                val ref: AyahRef = quran.ref(ayah.id)
+                PreviewAyah(ayah.id, ref.surah, ref.ayah, AyahTextFormatter.format(ayah.text, ref.ayah, breakAtPauseMarks))
+            }
             val preview = PassagePreview(
-                ayahs = ayahs.map { ayah ->
-                    val ref: AyahRef = quran.ref(ayah.id)
-                    PreviewAyah(ayah.id, ref.surah, ref.ayah, AyahTextFormatter.format(ayah.text, ref.ayah, breakAtPauseMarks))
-                },
-                more = range.size - shown.size,
+                ayahs = if (hasLast) formatted.dropLast(1) else formatted,
+                more = range.size - shown.size - (if (hasLast) 1 else 0),
+                last = if (hasLast) formatted.lastOrNull() else null,
             )
             _state.update { if (it.range == range) it.copy(preview = preview) else it }
         }

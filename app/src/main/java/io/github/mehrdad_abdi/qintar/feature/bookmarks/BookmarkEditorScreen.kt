@@ -111,7 +111,7 @@ private fun EditorForm(state: BookmarkEditorUiState, vm: BookmarkEditorViewModel
         )
         SectionHeader(stringResource(R.string.bm_kind_label))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            BookmarkKind.entries.forEach { kind ->
+            state.kinds.forEach { kind ->
                 FilterChip(
                     selected = state.kind == kind,
                     onClick = { vm.onKind(kind) },
@@ -127,9 +127,16 @@ private fun EditorForm(state: BookmarkEditorUiState, vm: BookmarkEditorViewModel
                 AyahNumberField(state.ayahText, vm::onAyahText, Modifier.fillMaxWidth(), error = state.errors[EditorField.FROM_AYAH]?.message)
             }
             BookmarkKind.RANGE -> {
-                SurahPicker(state.surahs, state.surah, vm::onSurah, Modifier.fillMaxWidth(), label = stringResource(R.string.bm_range_from))
-                AyahNumberField(state.ayahText, vm::onAyahText, Modifier.fillMaxWidth(), error = state.errors[EditorField.FROM_AYAH]?.message)
-                SurahPicker(state.surahs, state.toSurah, vm::onToSurah, Modifier.fillMaxWidth(), label = stringResource(R.string.bm_range_to))
+                // One surah, two ayahs. A range saved across surahs (older bookmarks) still shows its end surah.
+                SurahPicker(state.surahs, state.surah, vm::onSurah, Modifier.fillMaxWidth())
+                AyahNumberField(
+                    state.ayahText, vm::onAyahText, Modifier.fillMaxWidth(),
+                    label = stringResource(R.string.bm_range_from) + " · " + stringResource(R.string.bm_ayah_number),
+                    error = state.errors[EditorField.FROM_AYAH]?.message,
+                )
+                if (state.toSurah != state.surah) {
+                    SurahPicker(state.surahs, state.toSurah, vm::onToSurah, Modifier.fillMaxWidth(), label = stringResource(R.string.bm_range_to))
+                }
                 AyahNumberField(
                     state.toAyahText, vm::onToAyahText, Modifier.fillMaxWidth(),
                     label = stringResource(R.string.bm_range_to) + " · " + stringResource(R.string.bm_ayah_number),
@@ -243,7 +250,10 @@ fun PassagePreviewCard(preview: PassagePreview, fontSp: Int, modifier: Modifier 
         if (preview.more > 0) {
             Spacer(Modifier.height(Spacing.xs))
             Text(stringResource(R.string.bm_preview_more, formatNumber(preview.more)), style = QintarType.Label, color = colors.onSurfaceVariant)
+            Spacer(Modifier.height(Spacing.xs))
         }
+        // The end of the passage, after the dots: from where to where.
+        preview.last?.let { Text(it.text, style = quranTextStyle(fontSp), color = colors.onSurface, modifier = Modifier.fillMaxWidth()) }
     }
 }
 

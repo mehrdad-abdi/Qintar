@@ -15,6 +15,7 @@ import io.github.mehrdad_abdi.qintar.testing.countOf
 import io.github.mehrdad_abdi.qintar.testing.readerViewModel
 import io.github.mehrdad_abdi.qintar.testing.row
 import io.github.mehrdad_abdi.qintar.ui.designsystem.AyahCheckState
+import io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -408,32 +409,24 @@ class ReaderViewModelTest {
     // ---- Stars -----------------------------------------------------------------------------------
 
     @Test
-    fun `the star adds and removes a plain bookmark`() = runTest {
+    fun `the star opens the bookmark editor filled with the ayah`() = runTest {
         val reader = browse()
         val ayah = app.ayah(2, 5)
-
-        reader.onStar(reader.row(ayah))
-        assertTrue(ayah in reader.state.value.starred)
-
-        reader.onStar(reader.row(ayah))
-        assertFalse(ayah in reader.state.value.starred)
-        assertNull(reader.state.value.dialog)
+        assertFalse(ayah in reader.state.value.bookmarkedBy)
+        assertEquals(BookmarkEditorRoute.forAyah(ayah.value), reader.starTarget(reader.row(ayah)))
+        assertTrue("nothing is saved by the star itself", app.bookmarkStore.bookmarks().isEmpty())
     }
 
     @Test
-    fun `removing the star of a bookmark with a description asks first`() = runTest {
-        val kursi = app.ayah(2, 255)
-        app.library.create(BookmarkDrafts.ayah(kursi).copy(description = "After every prayer"))
-        val reader = browse(2, 255)
-        assertTrue(kursi in reader.state.value.starred)
-
-        reader.onStar(reader.row(kursi))
-        assertTrue(reader.state.value.dialog is ReaderDialog.ConfirmUnstar)
-        assertTrue("still there until confirmed", kursi in reader.state.value.starred)
-
-        reader.onUnstarConfirmed()
-        assertFalse(kursi in reader.state.value.starred)
-        assertTrue(app.bookmarkStore.bookmarks().isEmpty())
+    fun `an ayah inside a bookmark has a filled star that opens that bookmark`() = runTest {
+        val range = io.github.mehrdad_abdi.qintar.domain.model.AyahRange(app.ayah(2, 255), app.ayah(2, 257))
+        val bookmark = app.library.create(
+            io.github.mehrdad_abdi.qintar.domain.model.BookmarkDraft(range, io.github.mehrdad_abdi.qintar.domain.model.BookmarkKind.RANGE),
+        )
+        val reader = browse(2, 256)
+        val inside = app.ayah(2, 256)
+        assertEquals(bookmark.id, reader.state.value.bookmarkedBy[inside])
+        assertEquals(BookmarkEditorRoute(bookmarkId = bookmark.id), reader.starTarget(reader.row(inside)))
     }
 
     // ---- Opening, text and settings ----------------------------------------------------------------

@@ -409,6 +409,7 @@ private fun ReaderList(
                     },
                     viewModel = viewModel,
                     onAddBookmark = { onNavigate(io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute.forAyah(row.id.value)) },
+                    onStar = { onNavigate(viewModel.starTarget(row)) },
                 )
             }
         }
@@ -494,6 +495,7 @@ private fun AyahItem(
     onCheck: () -> Unit,
     viewModel: ReaderViewModel,
     onAddBookmark: () -> Unit,
+    onStar: () -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     // A row whose text has not arrived keeps its place and its controls.
@@ -506,7 +508,7 @@ private fun AyahItem(
             reference = localizeDigits("${row.surah}:${row.number}"),
             checkState = state.checkState(row),
             readCount = state.count(row),
-            starred = row.id in state.starred,
+            starred = row.id in state.bookmarkedBy,
             sajdaLabel = if (row.sajda != SajdaType.NONE) stringResource(R.string.sajda_label) else null,
             fontSizeSp = state.fontSp,
             accessibilityLabel = stringResource(R.string.ayah_label, surahLabel, formatNumber(row.number)),
@@ -514,7 +516,7 @@ private fun AyahItem(
             playing = state.isPlaying(row),
             highlighted = state.isAudioAt(row),
             onPlay = { viewModel.onPlay(row) },
-            onStar = { viewModel.onStar(row) },
+            onStar = onStar,
             onMenu = { menuOpen = true },
         )
         Box(Modifier.align(Alignment.End)) {
@@ -565,16 +567,5 @@ private fun ReaderDialogs(state: ReaderUiState, viewModel: ReaderViewModel) {
                 },
             )
         }
-        is ReaderDialog.ConfirmUnstar -> AlertDialog(
-            onDismissRequest = viewModel::onDialogDismissed,
-            title = { Text(stringResource(R.string.unstar_confirm_title)) },
-            text = { Text(stringResource(R.string.unstar_confirm_message)) },
-            confirmButton = {
-                TextButton(onClick = viewModel::onUnstarConfirmed) { Text(stringResource(R.string.action_remove)) }
-            },
-            dismissButton = {
-                TextButton(onClick = viewModel::onDialogDismissed) { Text(stringResource(R.string.action_cancel)) }
-            },
-        )
     }
 }

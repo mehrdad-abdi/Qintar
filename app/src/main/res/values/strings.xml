@@ -112,8 +112,6 @@
     <string name="khatm_skip_message">Mark all %1$s ayahs from %2$s to here as read?</string>
     <string name="khatm_skip_mark_n">Mark %1$s ayahs</string>
     <string name="khatm_skip_only_this">Only this ayah</string>
-    <string name="unstar_confirm_title">Remove this bookmark?</string>
-    <string name="unstar_confirm_message">It has a description, a schedule or a group, and those are removed with it.</string>
     <string name="reader_not_found_title">Nothing to read here</string>
     <string name="reader_not_found_message">This khatm, bookmark or group no longer exists.</string>
     <string name="rank_distance_goal">%1$s to %2$s, your goal</string>

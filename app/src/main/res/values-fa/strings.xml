@@ -97,8 +97,6 @@
     <string name="khatm_skip_message">همهٔ %1$s آیه از %2$s تا اینجا خوانده‌شده علامت بخورد؟</string>
     <string name="khatm_skip_mark_n">علامت‌زدن %1$s آیه</string>
     <string name="khatm_skip_only_this">فقط همین آیه</string>
-    <string name="unstar_confirm_title">این نشانک حذف شود؟</string>
-    <string name="unstar_confirm_message">این نشانک توضیح، برنامه یا گروه دارد و آن‌ها هم با آن حذف می‌شوند.</string>
     <string name="reader_not_found_title">چیزی برای خواندن اینجا نیست</string>
     <string name="reader_not_found_message">این ختم، نشانک یا گروه دیگر وجود ندارد.</string>
     <string name="rank_distance_goal">%1$s تا %2$s، هدف شما</string>

@@ -46,6 +46,7 @@ import io.github.mehrdad_abdi.qintar.playback.origin
 import io.github.mehrdad_abdi.qintar.ui.common.GoToProblem
 import io.github.mehrdad_abdi.qintar.ui.common.RankReachedDetector
 import io.github.mehrdad_abdi.qintar.ui.designsystem.AyahCheckState
+import io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderEntry
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
 import javax.inject.Provider
@@ -93,7 +94,6 @@ sealed interface ReaderDialog {
     data class KhatmSkip(override val row: ReaderRow.Ayah, val gap: AyahRange) : ReaderDialog
 
     /** The star belongs to a bookmark that carries more than a star (§4.7). */
-    data class ConfirmUnstar(override val row: ReaderRow.Ayah, val bookmark: Bookmark) : ReaderDialog
 }
 
 /** What a sheet over the reader shows. */
@@ -139,7 +139,8 @@ data class ReaderUiState(
     /** Khatm entry: ayahs with an event of this khatm on any day. */
     val covered: Set<AyahId> = emptySet(),
     val assumedCoveredUpTo: Int = 0,
-    val starred: Set<AyahId> = emptySet(),
+    /** Ayahs in a bookmark, with the bookmark their filled star opens. */
+    val bookmarkedBy: Map<AyahId, Long> = emptyMap(),
     val fontSp: Int = UserPrefs.DEFAULT_FONT_SP,
     val breakAtPauseMarks: Boolean = true,
     val keepScreenOn: Boolean = true,
@@ -279,7 +280,7 @@ class ReaderViewModel @AssistedInject constructor(
             }
         }
         viewModelScope.launch {
-            library.observeStarred().collect { starred -> _state.update { it.copy(starred = starred) } }
+            library.observeBookmarkedAyahs().collect { map -> _state.update { it.copy(bookmarkedBy = map) } }
         }
         viewModelScope.launch {
             downloads.state.collect { download -> _state.update { it.copy(download = download) } }
@@ -766,16 +767,13 @@ class ReaderViewModel @AssistedInject constructor(
 
     // ---- Star -----------------------------------------------------------------------------------
 
-    fun onStar(row: ReaderRow.Ayah) = act {
-        val result = library.toggleStar(row.id)
-        if (result is StarResult.NeedsConfirmation) {
-            _state.update { it.copy(dialog = ReaderDialog.ConfirmUnstar(row, result.bookmark)) }
-        }
-    }
-
-    fun onUnstarConfirmed() = act {
-        val dialog = takeDialog<ReaderDialog.ConfirmUnstar>() ?: return@act
-        library.toggleStar(dialog.row.id, confirmed = true)
+    /**
+     * Where the star of [row] leads (owner, 2026-11-22): the editor of the bookmark the ayah is in, or
+     * a new bookmark filled with the ayah, where a description and the end of the range can be added.
+     */
+    fun starTarget(row: ReaderRow.Ayah): BookmarkEditorRoute {
+        val id = _state.value.bookmarkedBy[row.id]
+        return if (id != null) BookmarkEditorRoute(bookmarkId = id) else BookmarkEditorRoute.forAyah(row.id.value)
     }
 
     fun onDialogDismissed() {

@@ -97,8 +97,6 @@
     <string name="khatm_skip_message">هل تريد تعليم %1$s آية من %2$s إلى هنا مقروءة؟</string>
     <string name="khatm_skip_mark_n">تعليم %1$s آية</string>
     <string name="khatm_skip_only_this">هذه الآية فقط</string>
-    <string name="unstar_confirm_title">إزالة هذه العلامة؟</string>
-    <string name="unstar_confirm_message">لهذه العلامة وصف أو جدول أو مجموعة، وستزال معها.</string>
     <string name="reader_not_found_title">لا شيء للقراءة هنا</string>
     <string name="reader_not_found_message">هذه الختمة أو العلامة أو المجموعة لم تعد موجودة.</string>
     <string name="rank_distance_goal">%1$s إلى %2$s، هدفك</string>
