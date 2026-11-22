@@ -36,11 +36,12 @@ class ReaderScreenTest {
 
     private val app = DomainFixture()
     private var backs = 0
+    private val navigated = ArrayList<Any>()
 
     private fun open(route: ReaderRoute) {
         val viewModel = app.readerViewModel(route, Dispatchers.Unconfined)
         compose.setContent {
-            QintarTheme { ReaderScreen(route, onBack = { backs++ }, onNavigate = {}, viewModel = viewModel) }
+            QintarTheme { ReaderScreen(route, onBack = { backs++ }, onNavigate = { navigated += it }, viewModel = viewModel) }
         }
     }
 
@@ -150,12 +151,12 @@ class ReaderScreenTest {
     }
 
     @Test
-    fun `the star bookmarks the ayah`() {
+    fun `the star opens the bookmark editor for the ayah`() {
         open(ReaderRoute.browse(app.ayah(2, 1).value))
 
         compose.onAllNodesWithContentDescription("Bookmark")[0].performClick()
 
-        compose.onNodeWithContentDescription("Bookmarked").assertIsDisplayed()
-        assertEquals(app.ayah(2, 1), runBlocking { app.bookmarkStore.bookmarks() }.single().range.start)
+        assertEquals(io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute.forAyah(app.ayah(2, 1).value), navigated.last())
+        assertTrue("nothing saved until the editor saves", runBlocking { app.bookmarkStore.bookmarks() }.isEmpty())
     }
 }

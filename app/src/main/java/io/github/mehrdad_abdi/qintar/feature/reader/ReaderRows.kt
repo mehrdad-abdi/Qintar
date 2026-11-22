@@ -41,6 +41,16 @@ sealed interface ReaderRow {
         override val key get() = "ayah-$segment-${id.value}"
     }
 
+    /** After the last ayah of a bookmark's segment: one "Mark read" for all its ayahs. */
+    data class SegmentEnd(override val segment: Int) : ReaderRow {
+        override val key get() = "segment-end-$segment"
+    }
+
+    /** After the last ayah of [surah] in a khatm or free reading: "Mark surah read". */
+    data class SurahEnd(override val segment: Int, val surah: Int) : ReaderRow {
+        override val key get() = "surah-end-$segment-$surah"
+    }
+
     /** Stands before the first ayah of [page] when the page changes inside a segment. */
     data class PageDivider(
         override val segment: Int,
@@ -67,6 +77,8 @@ class ReaderRowModel private constructor(
     private val ayahRows: List<IntArray>,
 ) {
     fun surahOf(row: ReaderRow.Ayah): SurahInfo = surahs[row.surah - 1]
+
+    fun surahInfo(number: Int): SurahInfo = surahs[number - 1]
 
     /** Row index of [ayah] in [segment]; null when the segment does not contain it. */
     fun indexOf(segment: Int, ayah: AyahId): Int? {
@@ -135,9 +147,13 @@ class ReaderRowModel private constructor(
                     }
                     positions[id.value - segment.range.start.value] = rows.size
                     rows += ReaderRow.Ayah(s, id, segment.context, ref.surah, ref.ayah, page, juz, index.sajdaOf(id))
+                    // A surah's end gets "Mark surah read" in a khatm and in free reading.
+                    val surahEnds = segment.context is ReadContext.Khatm || segment.context == ReadContext.Browse
+                    if (surahEnds && ref.ayah == index.surah(ref.surah).ayahCount) rows += ReaderRow.SurahEnd(s, ref.surah)
                     previous = id
                     previousPage = page
                 }
+                if (segment.context is ReadContext.Bookmark) rows += ReaderRow.SegmentEnd(s)
                 ayahRows += positions
             }
             return ReaderRowModel(segments, rows, index.surahs, ayahRows)

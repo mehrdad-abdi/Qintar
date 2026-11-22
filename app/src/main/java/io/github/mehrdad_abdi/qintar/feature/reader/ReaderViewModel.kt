@@ -187,6 +187,32 @@ data class ReaderUiState(
      * "Mark page" is offered only then. [belowRow] is a page divider's row, or the row count for the
      * last page of the scope.
      */
+    /** "Mark page" at the divider [row]: not inside a bookmark, which has its own Mark read at its end. */
+    fun pageMarkOffered(row: Int): Boolean {
+        val divider = model?.rows?.getOrNull(row) ?: return false
+        if (model.segments.getOrNull(divider.segment)?.context is ReadContext.Bookmark) return false
+        return pageAboveHasUnread(row)
+    }
+
+    /** Whether the bookmark of [segment] has an ayah not read today: its Mark read is offered. */
+    fun segmentHasUnread(segment: Int): Boolean =
+        model?.rows?.any { it is ReaderRow.Ayah && it.segment == segment && checkState(it) == AyahCheckState.Unread } == true
+
+    /** Whether the surah that ends at the [SurahEnd][ReaderRow.SurahEnd] row [endRow] has an unread ayah. */
+    fun surahHasUnread(endRow: Int): Boolean {
+        val rows = model?.rows ?: return false
+        var i = endRow - 1
+        while (i >= 0) {
+            when (val row = rows[i]) {
+                is ReaderRow.Ayah -> if (checkState(row) == AyahCheckState.Unread) return true
+                is ReaderRow.SurahHeader, is ReaderRow.SegmentHeader -> return false
+                else -> Unit
+            }
+            i--
+        }
+        return false
+    }
+
     fun pageAboveHasUnread(belowRow: Int): Boolean {
         val rows = model?.rows ?: return false
         var i = minOf(belowRow, rows.size) - 1
@@ -603,6 +629,22 @@ class ReaderViewModel @AssistedInject constructor(
         val target = model.segments.getOrNull(segment) ?: return@act
         val range = bulk.get().page(page, target.range) ?: return@act
         offerUndo(tracker.markRange(range, target.context, ReadMethod.BULK, RangeMode.FILL))
+    }
+
+    /** "Mark surah read": one reading for each unread ayah of [surah] inside the segment's scope. */
+    fun onMarkSurah(surah: Int, segment: Int) = act {
+        val target = model?.segments?.getOrNull(segment) ?: return@act
+        val whole = quran?.surahRange(surah) ?: return@act
+        val from = maxOf(whole.start.value, target.range.start.value)
+        val to = minOf(whole.end.value, target.range.end.value)
+        if (from > to) return@act
+        offerUndo(tracker.markRange(AyahRange(AyahId(from), AyahId(to)), target.context, ReadMethod.BULK, RangeMode.FILL))
+    }
+
+    /** "Mark read" at the end of a bookmark: one reading for each of its ayahs not read today. */
+    fun onMarkSegment(segment: Int) = act {
+        val target = model?.segments?.getOrNull(segment) ?: return@act
+        offerUndo(tracker.markRange(target.range, target.context, ReadMethod.BULK, RangeMode.FILL))
     }
 
     /** "Log a full reading" of one bookmark: one more reading of every ayah of its passage; one Undo. */

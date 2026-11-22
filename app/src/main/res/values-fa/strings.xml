@@ -127,4 +127,6 @@
         <item quantity="other">%1$s آیه</item>
     </plurals>
     <string name="progress_of">%1$s / %2$s</string>
+    <string name="reader_mark_bookmark">علامت خوانده‌شده</string>
+    <string name="reader_mark_surah">علامت خواندن سوره %1$s</string>
 </resources>

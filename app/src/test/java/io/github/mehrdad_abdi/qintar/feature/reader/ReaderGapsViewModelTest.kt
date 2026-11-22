@@ -193,6 +193,48 @@ class ReaderGapsViewModelTest {
         assertTrue(marked.all { it.ayahId >= from && it.ayahId <= page.end && it.context == ReadContext.Bookmark(bookmark.id) })
     }
 
+    // ---- Mark read at the end of a bookmark, Mark surah (owner, 2026-11-22) ----------------------
+
+    @Test
+    fun `a bookmark ends with one Mark read and offers no Mark page`() = runTest {
+        val page = app.index.pageRange(3)
+        val bookmark = app.library.create(BookmarkDraft(AyahRange(page.start, AyahId(page.end.value + 4)), BookmarkKind.RANGE))
+        val reader = reader(ReaderRoute.bookmark(bookmark.id))
+        val rows = reader.state.value.rows
+        assertEquals(ReaderRow.SegmentEnd(0), rows.last())
+        assertTrue("no surah end inside a bookmark", rows.none { it is ReaderRow.SurahEnd })
+        val divider = rows.indexOfFirst { it is ReaderRow.PageDivider }
+        assertFalse("Mark page is not offered in a bookmark", reader.state.value.pageMarkOffered(divider))
+        assertTrue(reader.state.value.segmentHasUnread(0))
+
+        reader.onMarkSegment(0)
+        assertEquals(bookmark.range.size, app.log.events.size)
+        assertTrue(app.log.events.all { it.context == ReadContext.Bookmark(bookmark.id) })
+        assertFalse(reader.state.value.segmentHasUnread(0))
+        reader.onUndoBulk()
+        assertTrue(app.log.events.isEmpty())
+    }
+
+    @Test
+    fun `free reading and a khatm have Mark surah at the end of each surah, besides Mark page`() = runTest {
+        val reader = reader(ReaderRoute.browse(app.ayah(1, 1).value))
+        val rows = reader.state.value.rows
+        val end = rows.indexOfFirst { it is ReaderRow.SurahEnd && it.surah == 1 }
+        assertEquals("right after the last ayah of al-Fatiha", app.ayah(1, 7), (rows[end - 1] as ReaderRow.Ayah).id)
+        val divider = rows.indexOfFirst { it is ReaderRow.PageDivider }
+        assertTrue(reader.state.value.pageMarkOffered(divider))
+        assertTrue(reader.state.value.surahHasUnread(end))
+
+        reader.onMarkSurah(1, 0)
+        assertEquals(7, app.log.events.size)
+        assertTrue(app.log.events.all { it.context == ReadContext.Browse && it.ayahId in app.index.surahRange(1) })
+        assertFalse(reader.state.value.surahHasUnread(end))
+
+        val khatm = app.khatms.start("K")
+        val inKhatm = reader(ReaderRoute.khatm(khatm.id, startAyahId = app.ayah(1, 1).value))
+        assertTrue(inKhatm.state.value.rows.any { it is ReaderRow.SurahEnd && it.surah == 114 })
+    }
+
     // ---- First unread ----------------------------------------------------------------------------
 
     @Test

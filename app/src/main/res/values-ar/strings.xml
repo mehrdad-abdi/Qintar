@@ -131,4 +131,6 @@
         <item quantity="other">%1$s آية</item>
     </plurals>
     <string name="progress_of">%1$s / %2$s</string>
+    <string name="reader_mark_bookmark">تعليم كمقروءة</string>
+    <string name="reader_mark_surah">تعليم سورة %1$s كمقروءة</string>
 </resources>

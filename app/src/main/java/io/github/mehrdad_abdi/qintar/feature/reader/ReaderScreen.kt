@@ -2,6 +2,7 @@ package io.github.mehrdad_abdi.qintar.feature.reader
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -391,12 +392,22 @@ private fun ReaderList(
                     },
                     juzLabel = if (row.startsJuz) stringResource(R.string.juz_n, formatNumber(row.juz)) else null,
                     // The page above this divider: marked read in one tap while it has unread ayahs.
-                    actionLabel = if (state.pageAboveHasUnread(rowIndex)) {
+                    actionLabel = if (state.pageMarkOffered(rowIndex)) {
                         stringResource(R.string.reader_mark_page, formatNumber(row.page - 1))
                     } else {
                         null
                     },
                     onAction = { viewModel.onMarkPage(row.page - 1, row.segment) },
+                )
+                is ReaderRow.SegmentEnd -> EndAction(
+                    label = stringResource(R.string.reader_mark_bookmark),
+                    done = !state.segmentHasUnread(row.segment),
+                    onClick = { viewModel.onMarkSegment(row.segment) },
+                )
+                is ReaderRow.SurahEnd -> EndAction(
+                    label = stringResource(R.string.reader_mark_surah, surahName(model.surahInfo(row.surah))),
+                    done = !state.surahHasUnread(rowIndex),
+                    onClick = { viewModel.onMarkSurah(row.surah, row.segment) },
                 )
                 is ReaderRow.Ayah -> AyahItem(
                     row = row,
@@ -413,9 +424,10 @@ private fun ReaderList(
                 )
             }
         }
-        // The last page of the scope has no divider below it: its "Mark page" stands at the end.
+        // The last page of the scope has no divider below it: its "Mark page" stands at the end
+        // (not in a bookmark, which ends with its own Mark read).
         val last = model.rows.lastOrNull { it is ReaderRow.Ayah } as? ReaderRow.Ayah
-        if (last != null && state.pageAboveHasUnread(model.rows.size)) {
+        if (last != null && last.context !is ReadContext.Bookmark && state.pageAboveHasUnread(model.rows.size)) {
             item(key = "footer") {
                 PageDivider(
                     text = stringResource(R.string.page_divider, formatNumber(last.page), formatNumber(last.juz)),
@@ -566,6 +578,22 @@ private fun ReaderDialogs(state: ReaderUiState, viewModel: ReaderViewModel) {
                     }
                 },
             )
+        }
+    }
+}
+
+/** A one-tap "mark read" at the end of a surah or a bookmark; once all is read, a quiet check. */
+@Composable
+private fun EndAction(label: String, done: Boolean, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = Spacing.screen, vertical = Spacing.sm),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (done) {
+            io.github.mehrdad_abdi.qintar.ui.designsystem.ReadStateIndicator(io.github.mehrdad_abdi.qintar.ui.designsystem.ReadState.Done)
+        } else {
+            androidx.compose.material3.FilledTonalButton(onClick = onClick) { Text(label, style = QintarType.Label) }
         }
     }
 }

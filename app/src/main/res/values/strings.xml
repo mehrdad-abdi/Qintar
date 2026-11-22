@@ -142,4 +142,6 @@
         <item quantity="other">%1$s ayahs</item>
     </plurals>
     <string name="progress_of">%1$s / %2$s</string>
+    <string name="reader_mark_bookmark">Mark read</string>
+    <string name="reader_mark_surah">Mark %1$s read</string>
 </resources>

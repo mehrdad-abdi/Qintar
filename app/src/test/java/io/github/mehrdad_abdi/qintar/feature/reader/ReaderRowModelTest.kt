@@ -17,13 +17,15 @@ class ReaderRowModelTest {
     private fun model(vararg ranges: AyahRange, context: (Int) -> ReadContext = { ReadContext.Browse }) =
         ReaderRowModel.build(ranges.mapIndexed { i, range -> Segment(context(i), range) }, index)
 
-    private fun ReaderRowModel.shape(): List<String> = rows.map { row ->
+    /** The text rows; the end-of-surah and end-of-bookmark actions are tested in ReaderGapsViewModelTest. */
+    private fun ReaderRowModel.shape(): List<String> = rows.mapNotNull { row ->
         when (row) {
             is ReaderRow.SegmentHeader -> "segment ${row.segment}"
             is ReaderRow.SurahHeader -> "surah ${row.surah.number}"
             is ReaderRow.Basmala -> "basmala"
             is ReaderRow.Ayah -> "${row.surah}:${row.number}"
             is ReaderRow.PageDivider -> "page ${row.page}"
+            is ReaderRow.SegmentEnd, is ReaderRow.SurahEnd -> null
         }
     }
 
@@ -133,12 +135,13 @@ class ReaderRowModelTest {
         val kursiRows = model.rows.filterIsInstance<ReaderRow.Ayah>().filter { it.id == kursi.start }
         assertEquals(listOf(ReadContext.Bookmark(10), ReadContext.Bookmark(12)), kursiRows.map { it.context })
         assertEquals("the same ayah twice still has two keys", 2, kursiRows.map { it.key }.toSet().size)
-        assertEquals(10, model.indexOf(2, kursi.start))
+        // Each bookmark ends with its Mark read row, so the third one starts two rows later.
+        assertEquals(12, model.indexOf(2, kursi.start))
     }
 
     @Test
     fun `sajda ayahs are flagged`() {
-        val row = model(index.surahRange(96)).rows.last() as ReaderRow.Ayah
+        val row = model(index.surahRange(96)).rows.last { it is ReaderRow.Ayah } as ReaderRow.Ayah
 
         assertEquals(19, row.number)
         assertTrue(row.sajda != io.github.mehrdad_abdi.qintar.domain.model.SajdaType.NONE)
