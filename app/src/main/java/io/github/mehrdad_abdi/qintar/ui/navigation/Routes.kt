@@ -137,6 +137,10 @@ data object SettingsRoute
 @Serializable
 data object OnboardingRoute
 
+/** Settings → Diagnostics: the canary, for reporting bugs. */
+@Serializable
+data object DiagnosticsRoute
+
 /** Open-source licences and the Tanzil attribution, reached from Settings → About. */
 @Serializable
 data object LicencesRoute

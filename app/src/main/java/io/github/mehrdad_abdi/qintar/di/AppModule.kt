@@ -70,6 +70,17 @@ object AppModule {
     @Provides
     fun dayClock(clock: SystemDayClock): DayClock = clock
 
+    /** The canary's record (Settings → Diagnostics); off until the user turns it on. */
+    @Provides
+    @Singleton
+    fun diagnostics(@dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context, clock: DayClock): io.github.mehrdad_abdi.qintar.diagnostics.Diagnostics =
+        io.github.mehrdad_abdi.qintar.diagnostics.Diagnostics(
+            dir = java.io.File(context.filesDir, "diagnostics"),
+            now = clock::now,
+            device = { io.github.mehrdad_abdi.qintar.diagnostics.deviceInfo(context) },
+            executor = java.util.concurrent.Executors.newSingleThreadExecutor(),
+        )
+
     /** A single instance behind both interfaces, so that the log has exactly one writer (§4.2). */
     @Provides
     @Singleton

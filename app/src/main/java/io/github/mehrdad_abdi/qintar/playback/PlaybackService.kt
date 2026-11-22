@@ -71,6 +71,7 @@ class PlaybackService : MediaSessionService() {
     @Inject lateinit var index: Provider<QuranIndex>
     @Inject lateinit var cache: Media3AudioCache
     @Inject lateinit var source: AudioSource
+    @Inject lateinit var diagnostics: io.github.mehrdad_abdi.qintar.diagnostics.Diagnostics
 
     @Inject
     @IoDispatcher
@@ -149,6 +150,7 @@ class PlaybackService : MediaSessionService() {
     // ---- The queue -------------------------------------------------------------------------------
 
     private fun start(request: PlayRequest) {
+        diagnostics.log("player", "play ${request.origin.entry} segments=${request.segments.size} from=${request.startAyah.value}")
         loading?.cancel()
         idle?.cancel()
         publishExtras()
@@ -235,6 +237,7 @@ class PlaybackService : MediaSessionService() {
     }
 
     private fun close() {
+        diagnostics.log("player", "closed")
         loading?.cancel()
         idle?.cancel()
         exo.stop()
@@ -325,7 +328,10 @@ class PlaybackService : MediaSessionService() {
 
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) = watchIdle()
 
-        override fun onPlayerError(error: PlaybackException) = counter.onError()
+        override fun onPlayerError(error: PlaybackException) {
+            diagnostics.log("player", "error ${error.errorCodeName}")
+            counter.onError()
+        }
     }
 
     /**

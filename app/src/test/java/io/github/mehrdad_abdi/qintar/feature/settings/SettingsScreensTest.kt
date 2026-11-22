@@ -143,6 +143,13 @@ class SettingsScreensTest {
     }
 
     @Test
+    fun `about has the diagnostics row`() {
+        open()
+        tag(SettingsTags.DIAGNOSTICS).performScrollTo().performClick()
+        assertEquals(listOf<Any>(io.github.mehrdad_abdi.qintar.ui.navigation.DiagnosticsRoute), navigated)
+    }
+
+    @Test
     fun `the licences screen reads the texts shipped with the app`() {
         compose.setContent { QintarTheme { LicencesScreen(onBack = {}) } }
         compose.waitUntil(5_000) { compose.onAllNodesWithTextCount("Vazirmatn-OFL") > 0 }

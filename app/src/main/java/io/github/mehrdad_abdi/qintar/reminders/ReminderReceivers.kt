@@ -29,6 +29,8 @@ interface ReminderEntryPoint {
 
     fun scheduler(): ReminderScheduler
 
+    fun diagnostics(): io.github.mehrdad_abdi.qintar.diagnostics.Diagnostics
+
     @ApplicationScope
     fun scope(): CoroutineScope
 }
@@ -54,6 +56,7 @@ class ReminderReceiver : BroadcastReceiver() {
                     // Judged against the reading day the alarm was set for, not the day it happens to be delivered on.
                     val day = ReminderPlanner.readingDayAt(scheduledAt ?: now, ZoneId.systemDefault(), p.dayStartMinutes)
                     val decision = ReminderPlanner.decide(kind, totals.total(day), p.goalRank, now, scheduledAt)
+                    graph.diagnostics().log("reminders", "$kind fired: $decision")
                     if (decision != ReminderDecision.Skip) {
                         val localized = ReminderNotifier.localized(context.applicationContext, p.language)
                         ReminderNotifier.text(localized, decision, p)?.let { ReminderNotifier.post(localized, kind, it) }

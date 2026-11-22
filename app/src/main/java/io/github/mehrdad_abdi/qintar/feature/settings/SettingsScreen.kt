@@ -109,6 +109,7 @@ object SettingsTags {
     const val STOP_BEFORE_SAJDA = "setting-stop-before-sajda"
     const val SAJDA_DHIKR = "setting-sajda-dhikr"
     const val HADITH = "setting-hadith"
+    const val DIAGNOSTICS = "setting-diagnostics"
     const val WIFI_ONLY = "setting-wifi-only"
     const val CLEAR_AUDIO = "setting-clear-audio"
     const val EXPORT = "setting-export"
@@ -154,7 +155,7 @@ fun SettingsScreen(
             RemindersSection(state.prefs, viewModel)
             AudioSection(state.prefs, state.audioBytes, viewModel)
             DataSection(state.prefs.legacyMigrationState, state.retrying, state.legacyDataPresent, viewModel, backupViewModel)
-            AboutSection(onOpenLicences = { onNavigate(LicencesRoute) })
+            AboutSection(onOpenLicences = { onNavigate(LicencesRoute) }, onOpenDiagnostics = { onNavigate(io.github.mehrdad_abdi.qintar.ui.navigation.DiagnosticsRoute) })
         }
     }
     BackupDialogs(backupViewModel)
@@ -617,7 +618,7 @@ private fun ActionRow(title: String, summary: String, tag: String, onClick: () -
 }
 
 @Composable
-private fun AboutSection(onOpenLicences: () -> Unit) = Section(stringResource(R.string.settings_section_about)) {
+private fun AboutSection(onOpenLicences: () -> Unit, onOpenDiagnostics: () -> Unit) = Section(stringResource(R.string.settings_section_about)) {
     val uriHandler = LocalUriHandler.current
     Column(Modifier.fillMaxWidth().padding(vertical = Spacing.sm)) {
         Text(stringResource(R.string.app_name), style = QintarType.BodyStrong)
@@ -652,6 +653,8 @@ private fun AboutSection(onOpenLicences: () -> Unit) = Section(stringResource(R.
     }
     RowDivider()
     ActionRow(stringResource(R.string.settings_licences), stringResource(R.string.settings_licences_summary), SettingsTags.LICENCES, onOpenLicences)
+    RowDivider()
+    ActionRow(stringResource(R.string.diagnostics_title), stringResource(R.string.diagnostics_row_summary), SettingsTags.DIAGNOSTICS, onOpenDiagnostics)
 }
 
 const val TANZIL_URL = "https://tanzil.net"

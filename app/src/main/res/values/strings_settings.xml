@@ -142,4 +142,27 @@
     <string name="reminder_text_in_progress">%1$s ayahs today — %2$s more to %3$s.</string>
     <!-- 1: ayahs still needed -->
     <string name="reminder_text_streak">%1$s more ayahs keep your streak today.</string>
+    <string name="diagnostics_title">Diagnostics (canary)</string>
+    <string name="diagnostics_row_summary">Record what happens to help fix a bug</string>
+    <string name="diagnostics_intro">When something goes wrong, Qintar can keep a record of what happened on this phone: the screens you opened, settings you changed, notification and playback events, and any crash. Nothing is sent anywhere; you decide what to share.</string>
+    <string name="diagnostics_steps_title">To report a bug</string>
+    <string name="diagnostics_step_1">Turn on “Record diagnostics” below (and screenshots, if you agree).</string>
+    <string name="diagnostics_step_2">Do again what caused the problem. When it happens, tap the red bug button at the edge of the screen.</string>
+    <string name="diagnostics_step_3">Come back here and tap “Save report”. Choose where to keep the file, for example Downloads.</string>
+    <string name="diagnostics_step_4">Tap “Open a GitHub issue”, describe what you did and what you expected, and attach the saved file.</string>
+    <string name="diagnostics_step_5">Turn recording off and clear the record when you are done.</string>
+    <string name="diagnostics_recording">Recording</string>
+    <string name="diagnostics_record">Record diagnostics</string>
+    <string name="diagnostics_record_summary">Keeps the last 500 events and every crash on this phone</string>
+    <string name="diagnostics_screenshots">Allow screenshots</string>
+    <string name="diagnostics_screenshots_summary">The bug button also takes a picture of the screen. It may show your bookmarks and notes.</string>
+    <string name="diagnostics_report">Report</string>
+    <string name="diagnostics_counts">%1$s events · %2$s crashes · %3$s screenshots</string>
+    <string name="diagnostics_save">Save report</string>
+    <string name="diagnostics_open_issue">Open a GitHub issue</string>
+    <string name="diagnostics_clear">Clear the record</string>
+    <string name="diagnostics_privacy">The record holds no Quran text, bookmark notes or names, except in screenshots you allowed. It is kept only on this phone and is not part of backups.</string>
+    <string name="diagnostics_mark">Mark the problem here</string>
+    <string name="diagnostics_marked">Problem marked in the record</string>
+    <string name="diagnostics_marked_with_screenshot">Problem marked, with a screenshot</string>
 </resources>

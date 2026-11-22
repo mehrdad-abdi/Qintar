@@ -45,6 +45,9 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var prefsStore: PrefsStore
 
+    @Inject
+    lateinit var diagnostics: io.github.mehrdad_abdi.qintar.diagnostics.Diagnostics
+
     /** Counts taps on the playback notification; the shell opens the playing reader on each new value. */
     private val openPlayerRequests = mutableIntStateOf(0)
 
@@ -73,7 +76,10 @@ class MainActivity : AppCompatActivity() {
                 onDispose {}
             }
             QintarTheme(darkTheme = dark, pureBlack = appearance.pureBlack) {
-                CompositionLocalProvider(LocalNumeralStyle provides appearance.numerals) {
+                CompositionLocalProvider(
+                    LocalNumeralStyle provides appearance.numerals,
+                    io.github.mehrdad_abdi.qintar.diagnostics.LocalDiagnostics provides diagnostics,
+                ) {
                     val destination = start
                     if (destination == null) {
                         // The migration is still deciding: the app's background rather than a blank window.

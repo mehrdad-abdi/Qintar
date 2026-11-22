@@ -1353,6 +1353,8 @@ two disagree, this section wins. The full list of findings is in `phone-test-not
 | Surah list | The bar under a surah shows its coverage in the current khatm (none without a khatm), in place of the divider. | §5.3 surah row |
 | Revisit | Per bookmark: never read from the bookmark first, then the ones read longest ago; a tap opens it. | §4.8 |
 | Audio | Setting **Stop before sajda ayahs** (off by default): playback stops before a sajda ayah and plays it when the listener taps play. Setting **Sajda dhikr after sajda ayahs** (on by default): after a sajda ayah the bundled dhikr (`res/raw/sajda_dhikr.mp3`: سُبْحَانَ رَبِّيَ الْأَعْلَى وَبِحَمْدِهِ and the sajda dua, voice by Google Cloud Text-to-Speech, credited in About) plays, never counted, then playback waits until the listener plays on. | §7.8 |
+| Reminder permission | Whether reminders can be shown is read from the system (permission and the app's notification switch), not from the dialog's answer. The red "blocked" text opens the app's notification settings; coming back allowed turns the asked-for reminder on. | §5.9 reminders |
+| Diagnostics (canary) | Settings → About → Diagnostics: opt-in, offline record kept in `files/diagnostics` (not backed up): last 500 events (screens, setting changes, notification answers, playback, reminders), every crash with its stack trace, and, only with a second permission, screenshots taken with the floating bug button. "Save report" writes one zip where the user chooses; "Open a GitHub issue" opens the bug template, which asks for the zip. Nothing is sent by the app. | new |
 
 ## Appendix A — Sources checked on 2026-11-15
 

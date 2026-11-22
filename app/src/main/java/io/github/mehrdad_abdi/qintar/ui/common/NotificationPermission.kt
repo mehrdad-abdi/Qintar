@@ -62,12 +62,16 @@ object NotificationGate {
 fun rememberNotificationGate(onResult: (allowed: Boolean) -> Unit): () -> Unit {
     val context = LocalContext.current
     val callback = rememberUpdatedState(onResult)
+    val diagnostics = io.github.mehrdad_abdi.qintar.diagnostics.LocalDiagnostics.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { reported ->
-        callback.value(NotificationGate.resolve(reported, NotificationGate.allowed(context)))
+        val allowedNow = NotificationGate.allowed(context)
+        diagnostics?.log("notifications", "dialog answered reported=$reported allowedNow=$allowedNow")
+        callback.value(NotificationGate.resolve(reported, allowedNow))
     }
     return {
         val permissionMissing = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        diagnostics?.log("notifications", "asked: allowed=${NotificationGate.allowed(context)} permissionMissing=$permissionMissing")
         when {
             NotificationGate.allowed(context) -> callback.value(true)
             permissionMissing -> launcher.launch(Manifest.permission.POST_NOTIFICATIONS)

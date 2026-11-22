@@ -42,6 +42,7 @@ class AppStartup @Inject constructor(
     private val prefs: PrefsStore,
     private val reminders: ReminderScheduler,
     private val reports: MigrationReports,
+    private val diagnostics: io.github.mehrdad_abdi.qintar.diagnostics.Diagnostics,
     @ApplicationScope private val scope: CoroutineScope,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) {
@@ -52,7 +53,22 @@ class AppStartup @Inject constructor(
             prefs.prefs
                 .map { listOf(it.reminderEnabled, it.reminderTime, it.streakReminderEnabled, it.streakReminderTime, it.dayStartMinutes) }
                 .distinctUntilChanged()
-                .collect { runCatching { reminders.reschedule() } }
+                .collect { values ->
+                    diagnostics.log("reminders", "reschedule for $values")
+                    runCatching { reminders.reschedule() }.onFailure { diagnostics.log("reminders", "reschedule failed: ${it.javaClass.simpleName}") }
+                }
+        }
+        // The canary records which settings change (names and values; settings hold no personal text).
+        launch {
+            var previous: Map<String, String>? = null
+            prefs.prefs.collect { p ->
+                val now = settingsOf(p)
+                previous?.let { before ->
+                    val changed = now.filter { (k, v) -> before[k] != v }
+                    if (changed.isNotEmpty()) diagnostics.log("settings", changed.entries.joinToString { "${it.key}=${it.value}" })
+                }
+                previous = now
+            }
         }
         // The migration goes first: the first screen waits for it, and it loads the index itself if it needs it.
         runCatching { migrator.migrate(migratedKhatmName) }.onSuccess(reports::record)
@@ -87,3 +103,9 @@ class ClockChangeReceiver(private val clock: SystemDayClock) : BroadcastReceiver
         }
     }
 }
+
+/** A settings snapshot as name → value, for the canary's "settings" events. */
+internal fun settingsOf(p: io.github.mehrdad_abdi.qintar.domain.model.UserPrefs): Map<String, String> =
+    p.toString().removePrefix("UserPrefs(").removeSuffix(")").split(", ")
+        .mapNotNull { part -> part.split("=", limit = 2).takeIf { it.size == 2 }?.let { it[0] to it[1] } }
+        .toMap()

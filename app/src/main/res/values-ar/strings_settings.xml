@@ -120,4 +120,27 @@
     <string name="reminder_text_nothing_read">عشر آيات تُخرجك من الغافلين.</string>
     <string name="reminder_text_in_progress">%1$s آية اليوم — بقي %2$s للوصول إلى %3$s.</string>
     <string name="reminder_text_streak">بقي %1$s آيات للحفاظ على سلسلتك اليوم.</string>
+    <string name="diagnostics_title">التشخيص (الكناري)</string>
+    <string name="diagnostics_row_summary">تسجيل ما يحدث للمساعدة في إصلاح خلل</string>
+    <string name="diagnostics_intro">عندما يحدث خلل، يستطيع قنطار أن يحفظ سجلًا لما جرى على هذا الهاتف: الشاشات التي فتحتها، والإعدادات التي غيّرتها، وأحداث الإشعارات والتشغيل، وأي توقف مفاجئ. لا يُرسل شيء إلى أي مكان؛ أنت تقرر ما تشاركه.</string>
+    <string name="diagnostics_steps_title">للإبلاغ عن خلل</string>
+    <string name="diagnostics_step_1">فعّل «تسجيل التشخيص» أدناه (ولقطات الشاشة إن وافقت).</string>
+    <string name="diagnostics_step_2">كرّر ما سبّب المشكلة. عندما تحدث، اضغط زر الحشرة الأحمر على حافة الشاشة.</string>
+    <string name="diagnostics_step_3">ارجع إلى هنا واضغط «حفظ التقرير». اختر مكان حفظ الملف، مثل مجلد التنزيلات.</string>
+    <string name="diagnostics_step_4">اضغط «فتح بلاغ في GitHub»، واكتب ما فعلته وما توقعته، وأرفق الملف المحفوظ.</string>
+    <string name="diagnostics_step_5">عند الانتهاء أوقف التسجيل وامسح السجل.</string>
+    <string name="diagnostics_recording">التسجيل</string>
+    <string name="diagnostics_record">تسجيل التشخيص</string>
+    <string name="diagnostics_record_summary">يحتفظ بآخر ٥٠٠ حدث وبكل توقف مفاجئ على هذا الهاتف</string>
+    <string name="diagnostics_screenshots">السماح بلقطات الشاشة</string>
+    <string name="diagnostics_screenshots_summary">يلتقط زر الحشرة صورة للشاشة أيضًا، وقد تظهر فيها علاماتك وملاحظاتك.</string>
+    <string name="diagnostics_report">التقرير</string>
+    <string name="diagnostics_counts">%1$s حدث · %2$s توقف · %3$s لقطة</string>
+    <string name="diagnostics_save">حفظ التقرير</string>
+    <string name="diagnostics_open_issue">فتح بلاغ في GitHub</string>
+    <string name="diagnostics_clear">مسح السجل</string>
+    <string name="diagnostics_privacy">لا يحوي السجل نص القرآن ولا ملاحظات العلامات ولا الأسماء، إلا في اللقطات التي سمحت بها. يبقى على هذا الهاتف فقط وليس جزءًا من النسخ الاحتياطية.</string>
+    <string name="diagnostics_mark">تعليم المشكلة هنا</string>
+    <string name="diagnostics_marked">عُلّمت المشكلة في السجل</string>
+    <string name="diagnostics_marked_with_screenshot">عُلّمت المشكلة مع لقطة شاشة</string>
 </resources>

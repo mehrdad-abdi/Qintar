@@ -74,6 +74,7 @@ fun QintarNavHost(
         }
         composable<SettingsRoute> { SettingsScreen(onBack, onNavigate) } // feature/settings
         composable<LicencesRoute> { LicencesScreen(onBack) }             // feature/settings
+        composable<DiagnosticsRoute> { io.github.mehrdad_abdi.qintar.feature.settings.DiagnosticsScreen(onBack) } // feature/settings
         composable<OnboardingRoute> {                                    // feature/onboarding
             OnboardingScreen(
                 onFinished = {

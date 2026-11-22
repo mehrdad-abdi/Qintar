@@ -80,6 +80,10 @@ fun QintarAppShell(
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentTab = backStackEntry?.destination.topLevel()
+    // The canary records each screen opened (its route, which holds ids only).
+    val diagnostics = io.github.mehrdad_abdi.qintar.diagnostics.LocalDiagnostics.current
+    val screen = backStackEntry?.destination?.route?.substringAfterLast('.').orEmpty()
+    LaunchedEffect(screen) { if (screen.isNotEmpty()) diagnostics?.log("screen", screen) }
 
     // The playback notification was tapped: go to the reader the audio came from, unless it is the one on screen.
     if (player != null && openPlayerRequest > 0) {
@@ -124,6 +128,9 @@ fun QintarAppShell(
                 player = player,
                 modifier = Modifier.widthIn(max = Sizes.contentMaxWidth).fillMaxSize(),
             )
+            diagnostics?.let {
+                io.github.mehrdad_abdi.qintar.diagnostics.DiagnosticsMarker(it, screen, Modifier.align(Alignment.CenterEnd))
+            }
         }
     }
 }

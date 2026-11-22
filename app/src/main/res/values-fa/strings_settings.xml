@@ -116,4 +116,27 @@
     <string name="reminder_text_nothing_read">ده آیه شما را از غافلان بیرون می‌برد.</string>
     <string name="reminder_text_in_progress">امروز %1$s آیه — %2$s آیهٔ دیگر تا %3$s.</string>
     <string name="reminder_text_streak">%1$s آیهٔ دیگر پیاپی‌خوانی امروزتان را نگه می‌دارد.</string>
+    <string name="diagnostics_title">عیب‌یابی (قناری)</string>
+    <string name="diagnostics_row_summary">ثبت رخدادها برای کمک به رفع اشکال</string>
+    <string name="diagnostics_intro">وقتی چیزی درست کار نمی‌کند، قنطار می‌تواند آنچه را روی این گوشی رخ داده ثبت کند: صفحه‌هایی که باز کردید، تنظیماتی که تغییر دادید، رخدادهای اعلان و پخش، و هر خطای منجر به بسته شدن برنامه. چیزی به جایی فرستاده نمی‌شود؛ خودتان تصمیم می‌گیرید چه چیزی را بفرستید.</string>
+    <string name="diagnostics_steps_title">برای گزارش اشکال</string>
+    <string name="diagnostics_step_1">«ثبت عیب‌یابی» را در پایین روشن کنید (و اگر موافقید، تصویر صفحه را هم).</string>
+    <string name="diagnostics_step_2">کاری را که باعث اشکال شد دوباره انجام دهید. وقتی رخ داد، دکمهٔ قرمز حشره را در لبهٔ صفحه بزنید.</string>
+    <string name="diagnostics_step_3">به اینجا برگردید و «ذخیرهٔ گزارش» را بزنید. جای نگهداری فایل را انتخاب کنید، مثلاً پوشهٔ دانلودها.</string>
+    <string name="diagnostics_step_4">«باز کردن گزارش در گیت‌هاب» را بزنید، بنویسید چه کردید و چه انتظاری داشتید، و فایل ذخیره‌شده را پیوست کنید.</string>
+    <string name="diagnostics_step_5">در پایان ثبت را خاموش و سابقه را پاک کنید.</string>
+    <string name="diagnostics_recording">ثبت</string>
+    <string name="diagnostics_record">ثبت عیب‌یابی</string>
+    <string name="diagnostics_record_summary">۵۰۰ رخداد آخر و هر بسته شدن ناگهانی را روی این گوشی نگه می‌دارد</string>
+    <string name="diagnostics_screenshots">اجازهٔ تصویر صفحه</string>
+    <string name="diagnostics_screenshots_summary">دکمهٔ حشره از صفحه هم تصویر می‌گیرد. ممکن است نشان‌ها و یادداشت‌های شما در آن دیده شود.</string>
+    <string name="diagnostics_report">گزارش</string>
+    <string name="diagnostics_counts">%1$s رخداد · %2$s خطا · %3$s تصویر</string>
+    <string name="diagnostics_save">ذخیرهٔ گزارش</string>
+    <string name="diagnostics_open_issue">باز کردن گزارش در گیت‌هاب</string>
+    <string name="diagnostics_clear">پاک کردن سابقه</string>
+    <string name="diagnostics_privacy">این سابقه متن قرآن، یادداشت نشان‌ها یا نام‌ها را ندارد، مگر در تصویرهایی که اجازه داده‌اید. فقط روی همین گوشی می‌ماند و در پشتیبان نیست.</string>
+    <string name="diagnostics_mark">علامت زدن اشکال در اینجا</string>
+    <string name="diagnostics_marked">اشکال در سابقه علامت خورد</string>
+    <string name="diagnostics_marked_with_screenshot">اشکال با تصویر صفحه علامت خورد</string>
 </resources>
