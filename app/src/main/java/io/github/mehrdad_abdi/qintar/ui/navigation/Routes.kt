@@ -42,6 +42,12 @@ enum class ReaderEntry {
 
     /** Context Random; scope [ReaderRoute.scopeFirstAyahId]..[ReaderRoute.scopeLastAyahId]. */
     RANDOM,
+
+    /**
+     * Every bookmark, in the order of the Bookmarks list (groups, then Ungrouped), each counted under
+     * its own bookmark. The Bookmarks tab plays under this origin; a tap on the player returns there.
+     */
+    BOOKMARKS,
 }
 
 /**
@@ -69,6 +75,7 @@ data class ReaderRoute(
         fun khatm(khatmId: Long, startAyahId: Int = UNSET) = ReaderRoute(ReaderEntry.KHATM, khatmId, startAyahId)
         fun bookmark(bookmarkId: Long, startAyahId: Int = UNSET) = ReaderRoute(ReaderEntry.BOOKMARK, bookmarkId, startAyahId)
         fun group(groupId: Long) = ReaderRoute(ReaderEntry.GROUP, groupId)
+        fun bookmarks() = ReaderRoute(ReaderEntry.BOOKMARKS)
         fun browse(startAyahId: Int) = ReaderRoute(ReaderEntry.BROWSE, startAyahId = startAyahId)
         fun random(firstAyahId: Int, lastAyahId: Int = firstAyahId) = ReaderRoute(
             ReaderEntry.RANDOM,

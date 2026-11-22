@@ -1,19 +1,14 @@
 package io.github.mehrdad_abdi.qintar.feature.bookmarks
 
 import io.github.mehrdad_abdi.qintar.domain.model.BookmarkDraft
-import io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort
 import io.github.mehrdad_abdi.qintar.domain.model.Schedule
 import io.github.mehrdad_abdi.qintar.domain.model.TimeWindow
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkDrafts
 import io.github.mehrdad_abdi.qintar.domain.testing.DomainFixture
+import io.github.mehrdad_abdi.qintar.testing.FakePlayerController
 import io.github.mehrdad_abdi.qintar.testing.MainDispatcherRule
 import io.github.mehrdad_abdi.qintar.testing.bookmarksViewModel
-import io.github.mehrdad_abdi.qintar.testing.readerViewModel
-import io.github.mehrdad_abdi.qintar.feature.reader.ReaderPhase
-import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
-import java.time.DayOfWeek
 import java.time.LocalTime
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -28,90 +23,143 @@ class BookmarksViewModelTest {
     val main = MainDispatcherRule()
 
     private val app = DomainFixture() // Sunday 15 Nov 2026, 09:00
-    private val ticks = MutableSharedFlow<Unit>(extraBufferCapacity = 8)
     private val morning = Schedule.daily(TimeWindow(LocalTime.of(8, 0), LocalTime.of(12, 0)))
 
-    private fun open() = app.bookmarksViewModel(main.dispatcher, ticks)
+    private fun open() = app.bookmarksViewModel(main.dispatcher)
 
     private suspend fun kahf(schedule: Schedule? = morning, target: Int = 1, groupId: Long? = null) =
         app.library.create(BookmarkDrafts.surah(112, app.index).copy(schedule = schedule, repeatTarget = target, groupId = groupId))
 
-    private fun BookmarksUiState.nowIds() = now.flatMap { s -> s.items.map { it.id } }
+    // ---- the list (§5.6) ---------------------------------------------------------------------------
 
-    // ---- availability ------------------------------------------------------------------------------
+    private fun BookmarksUiState.sections() = rows.filterIsInstance<BookmarksRow.Section>()
+    private fun BookmarksUiState.entries() = rows.filterIsInstance<BookmarksRow.Entry>().map { it.item.id }
+    private fun BookmarksUiState.ayahsOf(id: Long) = rows.filterIsInstance<BookmarksRow.Ayah>().filter { it.bookmarkId == id }
 
     @Test
-    fun `a window bookmark is in Now at 09, Later at 07, Earlier at 13 and always openable`() = runTest {
+    fun `groups come first, then Ungrouped, groups open and bookmarks closed`() = runTest {
+        val morning = app.library.createGroup("Morning")
+        val inGroup = kahf(groupId = morning.id)
+        val loose = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)))
+        val vm = open()
+        val state = vm.state.value
+        assertEquals(listOf(morning.id, UNGROUPED), state.sections().map { it.sectionKey })
+        assertTrue(state.sections().all { it.expanded })
+        assertEquals(listOf(inGroup.id, loose.id), state.entries())
+        assertTrue("no ayahs until a bookmark is opened", state.rows.none { it is BookmarksRow.Ayah })
+    }
+
+    @Test
+    fun `a group folds its bookmarks and a bookmark folds its ayahs`() = runTest {
+        val g = app.library.createGroup("G")
+        val b = kahf(groupId = g.id)
+        val vm = open()
+
+        vm.onToggleBookmark(b.id)
+        val ayahs = vm.state.value.ayahsOf(b.id)
+        assertEquals(b.range.toList(), ayahs.map { it.id })
+        assertTrue("the text is loaded for them", ayahs.all { it.id in vm.state.value.texts })
+        assertEquals("Mark read ends the bookmark", BookmarksRow.End(b.id, done = false), vm.state.value.rows.last())
+
+        vm.onToggleSection(g.id)
+        assertEquals(listOf(g.id), vm.state.value.sections().map { it.sectionKey })
+        assertTrue(vm.state.value.entries().isEmpty())
+
+        vm.onToggleSection(g.id)
+        assertEquals("the bookmark is still open", b.range.size, vm.state.value.ayahsOf(b.id).size)
+        vm.onToggleBookmark(b.id)
+        assertTrue(vm.state.value.ayahsOf(b.id).isEmpty())
+    }
+
+    @Test
+    fun `ticking an ayah in the list counts it under its bookmark`() = runTest {
         val b = kahf()
         val vm = open()
-        assertEquals(listOf(b.id), vm.state.value.nowIds())
-
-        app.clock.setTime(7)
-        ticks.tryEmit(Unit)
-        assertEquals(emptyList<Long>(), vm.state.value.nowIds())
-        assertEquals(listOf(b.id), vm.state.value.laterToday.map { it.id })
-
-        app.clock.setTime(13)
-        ticks.tryEmit(Unit)
-        assertEquals(listOf(b.id), vm.state.value.earlierToday.map { it.id })
-
-        // Nothing locks: the reader opens it at 13:00 all the same.
-        val reader = app.readerViewModel(ReaderRoute.bookmark(b.id), main.dispatcher)
-        assertEquals(ReaderPhase.READY, reader.state.value.phase)
+        vm.onToggleBookmark(b.id)
+        val first = vm.state.value.ayahsOf(b.id).first()
+        vm.onCheck(first)
+        assertEquals(1, vm.state.value.count(first))
+        val event = app.log.allEvents().single()
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(b.id), event.context)
     }
 
     @Test
-    fun `a weekday schedule lists the bookmark only on those days`() = runTest {
-        val b = kahf(Schedule(setOf(DayOfWeek.MONDAY), null))
-        val vm = open()
-        assertTrue("Sunday: not scheduled", vm.state.value.nowIds().isEmpty())
-        assertTrue(vm.state.value.laterToday.isEmpty() && vm.state.value.earlierToday.isEmpty())
-        assertEquals("still found under All", listOf(b.id), vm.state.value.all.map { it.id })
-
-        app.clock.advanceDays(1)
-        assertEquals(listOf(b.id), vm.state.value.nowIds())
-    }
-
-    @Test
-    fun `a bookmark inherits its group's schedule`() = runTest {
-        val group = app.library.createGroup("Morning", schedule = morning)
-        val b = kahf(schedule = null, groupId = group.id)
-        val vm = open()
-        val section = vm.state.value.now.single()
-        assertEquals(group.id, section.group?.id)
-        assertEquals(listOf(b.id), section.items.map { it.id })
-        assertEquals(morning, section.items.single().state.schedule)
-
-        app.clock.setTime(14)
-        ticks.tryEmit(Unit)
-        assertEquals(listOf(b.id), vm.state.value.earlierToday.map { it.id })
-    }
-
-    @Test
-    fun `reading it to the target moves it to Done`() = runTest {
+    fun `Mark read at the end fills only the unread ayahs and can be undone`() = runTest {
         val b = kahf()
         val vm = open()
-        vm.onLogFullReading(b.id)
-        assertTrue(vm.state.value.nowIds().isEmpty())
-        assertEquals(listOf(b.id), vm.state.value.doneToday.map { it.id })
+        vm.onToggleBookmark(b.id)
+        vm.onCheck(vm.state.value.ayahsOf(b.id).first())
+        vm.onMarkBookmarkRead(b.id)
+        assertEquals("one reading each", b.range.size, app.log.allEvents().size)
+        assertEquals(BookmarksRow.End(b.id, done = true), vm.state.value.rows.last())
+        vm.onUndo()
+        assertEquals(1, app.log.allEvents().size)
     }
 
     @Test
-    fun `a repeat target of 3 shows 1 of 3 and then 3 of 3`() = runTest {
-        val b = kahf(target = 3)
+    fun `Unread hides read bookmarks, but one read here stays until the screen is left`() = runTest {
+        val read = kahf()
+        val unread = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)))
+        app.tracker.markRange(read.range, io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(read.id), io.github.mehrdad_abdi.qintar.domain.model.ReadMethod.BULK, io.github.mehrdad_abdi.qintar.domain.model.RangeMode.FILL)
         val vm = open()
-        vm.onLogFullReading(b.id)
-        var progress = vm.state.value.all.single().state.progress
-        assertEquals(1, progress.fullReadings)
-        assertEquals(3, progress.repeatTarget)
-        assertEquals(listOf(b.id), vm.state.value.nowIds())
+        vm.onFilter(BookmarksFilter.UNREAD)
+        assertEquals(listOf(unread.id), vm.state.value.entries())
 
-        vm.onLogFullReading(b.id)
-        vm.onLogFullReading(b.id)
-        progress = vm.state.value.all.single().state.progress
-        assertEquals(3, progress.fullReadings)
-        assertTrue(progress.done)
-        assertEquals(listOf(b.id), vm.state.value.doneToday.map { it.id })
+        vm.onMarkBookmarkRead(unread.id)
+        assertEquals("stays where it is", listOf(unread.id), vm.state.value.entries())
+
+        vm.onScreenLeft()
+        assertTrue(vm.state.value.entries().isEmpty())
+        assertTrue(vm.state.value.rows.isEmpty())
+    }
+
+    // ---- audio -------------------------------------------------------------------------------------
+
+    @Test
+    fun `play goes on through the following bookmarks of the list`() = runTest {
+        val g = app.library.createGroup("G")
+        val one = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)).copy(groupId = g.id))
+        val two = kahf(groupId = g.id)
+        val three = app.library.create(BookmarkDrafts.ayah(app.ayah(1, 1)))
+        val player = FakePlayerController()
+        val vm = app.bookmarksViewModel(main.dispatcher, player)
+
+        vm.onPlayBookmark(two.id)
+        val request = player.requests.single()
+        assertEquals(BOOKMARKS_ORIGIN, request.origin)
+        assertEquals("every listed bookmark, in list order", listOf(one.range, two.range, three.range), request.segments.map { it.range })
+        assertEquals(1, request.startSegment)
+        assertEquals(two.range.start, request.startAyah)
+    }
+
+    @Test
+    fun `under Unread, play skips bookmarks already read`() = runTest {
+        val read = app.library.create(BookmarkDrafts.ayah(app.ayah(1, 1)))
+        val first = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)))
+        val second = kahf()
+        app.tracker.mark(read.range.start, io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(read.id), io.github.mehrdad_abdi.qintar.domain.model.ReadMethod.TAP)
+        val player = FakePlayerController()
+        val vm = app.bookmarksViewModel(main.dispatcher, player)
+        vm.onFilter(BookmarksFilter.UNREAD)
+        vm.onPlaySection(UNGROUPED)
+        assertEquals(listOf(first.range, second.range), player.requests.single().segments.map { it.range })
+    }
+
+    @Test
+    fun `the bookmark being played opens and its ayah is highlighted`() = runTest {
+        val b = kahf()
+        val player = FakePlayerController()
+        val vm = app.bookmarksViewModel(main.dispatcher, player)
+        val ayah = b.range.drop(1).first()
+        player.nowAt(BOOKMARKS_ORIGIN, 0, ayah, io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(b.id))
+        val state = vm.state.value
+        assertEquals(ListAudio(b.id, ayah), state.audio)
+        val row = state.ayahsOf(b.id).single { it.id == ayah }
+        assertTrue(state.isAudioAt(row))
+        assertEquals(state.rows.indexOf(row), state.scrollRequest?.row)
+
+        vm.onPlayAyah(row)
+        assertEquals("the playing ayah's button pauses", listOf("toggle"), player.calls)
     }
 
     // ---- actions -----------------------------------------------------------------------------------
@@ -227,28 +275,7 @@ class BookmarksViewModelTest {
         assertEquals(0, app.log.allEvents().size)
     }
 
-    // ---- sort and titles ---------------------------------------------------------------------------
-
-    @Test
-    fun `the sort mode is persisted and orders the lists`() = runTest {
-        val later = app.library.create(BookmarkDrafts.surah(112, app.index))
-        app.clock.advanceMinutes(5)
-        val earlier = app.library.create(BookmarkDrafts.ayah(app.ayah(1, 1)))
-        val vm = open()
-        assertEquals(BookmarkSort.MUSHAF, vm.state.value.sort)
-        assertEquals(listOf(earlier.id, later.id), vm.state.value.all.map { it.id })
-
-        vm.onSort(BookmarkSort.RECENT)
-        assertEquals(BookmarkSort.RECENT, app.prefs.current.bookmarkSort)
-        assertEquals(BookmarkSort.RECENT, vm.state.value.sort)
-        assertEquals(listOf(earlier.id, later.id), vm.state.value.all.map { it.id })
-
-        vm.onSort(BookmarkSort.CUSTOM)
-        assertEquals(listOf(later.id, earlier.id), vm.state.value.all.map { it.id })
-
-        // A new view model starts from the saved mode.
-        assertEquals(BookmarkSort.CUSTOM, open().state.value.sort)
-    }
+    // ---- titles ---------------------------------------------------------------------------
 
     @Test
     fun `items carry their title as data and the description`() = runTest {

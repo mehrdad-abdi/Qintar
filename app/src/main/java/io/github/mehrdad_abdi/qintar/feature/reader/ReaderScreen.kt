@@ -273,6 +273,7 @@ private fun readerTitle(title: ReaderTitle, current: ReaderRow.Ayah?, viewModelI
     is ReaderTitle.Name -> title.text
     is ReaderTitle.OfBookmark -> bookmarkTitleText(title.title)
     ReaderTitle.CurrentSurah -> current?.let { surahName(viewModelIndex.surahOf(it)) }.orEmpty()
+    ReaderTitle.AllBookmarks -> stringResource(R.string.tab_bookmarks)
 }
 
 @Composable

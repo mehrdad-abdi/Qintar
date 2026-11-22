@@ -2,6 +2,10 @@ package io.github.mehrdad_abdi.qintar.feature.bookmarks
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.semantics.Role
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -117,10 +121,13 @@ private fun GroupForm(state: GroupEditorUiState, vm: GroupEditorViewModel) {
             shape = QintarShapes.Inner,
             modifier = Modifier.fillMaxWidth(),
         )
-        SectionHeader(stringResource(R.string.sched_title))
-        ScheduleEditor(state.schedule, vm::onSchedule, state.weekDays, stringResource(R.string.sched_none), allowOnce = false)
+        // Schedules are hidden for now (owner, 2026-11-22): a group is just a set of bookmarks.
+        if (SHOW_SCHEDULES) {
+            SectionHeader(stringResource(R.string.sched_title))
+            ScheduleEditor(state.schedule, vm::onSchedule, state.weekDays, stringResource(R.string.sched_none), allowOnce = false)
+        }
 
-        if (!state.isNew) {
+        run {
             SectionHeader(stringResource(R.string.grp_members))
             if (state.members.isEmpty()) {
                 Text(stringResource(R.string.grp_members_empty), style = QintarType.Body, color = colors.onSurfaceVariant)
@@ -152,6 +159,34 @@ private fun GroupForm(state: GroupEditorUiState, vm: GroupEditorViewModel) {
                 }
             }
         }
+        SectionHeader(stringResource(R.string.grp_add_members))
+        if (state.candidates.isEmpty()) {
+            Text(stringResource(R.string.grp_add_members_none), style = QintarType.Body, color = colors.onSurfaceVariant)
+        } else {
+            QCard(Modifier.fillMaxWidth(), contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = Spacing.xs)) {
+                state.candidates.forEachIndexed { position, candidate ->
+                    if (position > 0) Hairline(Modifier.padding(horizontal = Spacing.card))
+                    Row(
+                        Modifier.fillMaxWidth().clickable(role = Role.Button) { vm.onAdd(candidate.id) }.padding(start = Spacing.card),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            bookmarkTitleText(candidate.title),
+                            style = QintarType.Body,
+                            color = colors.onSurface,
+                            maxLines = 1,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Box(Modifier.size(Sizes.touchTarget), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Rounded.Add, stringResource(R.string.grp_add_members))
+                        }
+                    }
+                }
+            }
+        }
         Spacer(Modifier.height(Spacing.xxl))
     }
 }
+
+/** Off while schedules are hidden; the code stays so they can come back. */
+internal const val SHOW_SCHEDULES = false

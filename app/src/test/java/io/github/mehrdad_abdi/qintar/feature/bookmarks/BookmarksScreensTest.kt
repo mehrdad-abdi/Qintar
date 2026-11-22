@@ -47,7 +47,7 @@ class BookmarksScreensTest {
     private fun seedMorning() = runBlocking {
         val group = app.library.createGroup("Morning", schedule = Schedule.daily(TimeWindow(LocalTime.of(8, 0), LocalTime.of(12, 0))))
         app.library.create(
-            BookmarkDrafts.ayah(app.ayah(2, 255)).copy(groupId = group.id, description = "Read after every prayer", repeatTarget = 3),
+            BookmarkDrafts.ayah(app.ayah(2, 255)).copy(groupId = group.id, description = "Read after every prayer"),
         )
     }
 
@@ -60,38 +60,28 @@ class BookmarksScreensTest {
     }
 
     @Test
-    fun `Now lists what is open, shows its description and opens the reader`() {
+    fun `the list shows the group, its bookmark and description, a tap opens its ayahs with Mark read`() {
         seedMorning()
-        val group = runBlocking { app.bookmarkStore.bookmarks().single() }
         openTab()
         compose.onNodeWithText("Morning").assertIsDisplayed()
-        compose.onNodeWithText("Read after every prayer").assertIsDisplayed()
-        compose.onNodeWithText("Read after every prayer").performClick()
-        assertEquals(ReaderRoute.bookmark(group.id), navigated.single())
-    }
-
-    @Test
-    fun `Groups has Read for the group and the add actions`() {
-        seedMorning()
-        openTab()
-        compose.onNodeWithText("Groups").performClick()
         compose.onNodeWithText("0 of 1 done").assertIsDisplayed()
-        compose.onNodeWithText("Read").performClick()
-        val groupId = runBlocking { app.bookmarkStore.groups().single().id }
-        assertEquals(ReaderRoute.group(groupId), navigated.single())
+        compose.onNodeWithText("Read after every prayer").assertIsDisplayed()
+        compose.onNodeWithText("Mark read").assertDoesNotExist()
+        compose.onNodeWithText("1 ayah").performClick()
+        compose.onNodeWithText("Mark read").performClick()
+        compose.waitForIdle()
+        assertEquals(1, runBlocking { app.log.allEvents().size })
+        assertTrue("nothing navigates: the bookmark is read in place", navigated.isEmpty())
     }
 
     @Test
-    fun `logging a full reading shows the repeat progress and Undo takes it back`() {
+    fun `Open in reader is in the bookmark's menu`() {
         seedMorning()
+        val bookmark = runBlocking { app.bookmarkStore.bookmarks().single() }
         openTab()
         compose.onAllNodesWithContentDescription("Bookmark actions")[0].performClick()
-        compose.onNodeWithText("Log a full reading").performClick()
-        compose.onNodeWithText("1 / 3").assertIsDisplayed()
-        compose.onNodeWithText("Logged a full reading").assertIsDisplayed()
-        compose.onNodeWithText("Undo").performClick()
-        compose.waitForIdle()
-        assertEquals(0, runBlocking { app.log.allEvents().size })
+        compose.onNodeWithText("Open in reader").performClick()
+        assertEquals(ReaderRoute.bookmark(bookmark.id), navigated.single())
     }
 
     @Test
@@ -111,13 +101,13 @@ class BookmarksScreensTest {
     }
 
     @Test
-    fun `All sorts and remembers the mode`() {
+    fun `Unread hides what is read today`() {
         seedMorning()
         openTab()
-        compose.onNodeWithText("All").performClick()
-        compose.onNodeWithText("Recent").performClick()
-        compose.waitForIdle()
-        assertEquals(io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort.RECENT, app.prefs.current.bookmarkSort)
+        compose.onNodeWithText("1 ayah").performClick()
+        compose.onNodeWithText("Mark read").performClick()
+        compose.onNodeWithText("Unread").performClick()
+        compose.onNodeWithText("Every bookmark is read today.").assertIsDisplayed()
     }
 
     @Test

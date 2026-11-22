@@ -78,6 +78,9 @@ sealed interface ReaderTitle {
 
     /** Browse and Random: the surah being read. */
     data object CurrentSurah : ReaderTitle
+
+    /** Every bookmark (the Bookmarks list's playback). */
+    data object AllBookmarks : ReaderTitle
 }
 
 sealed interface ReaderDialog {
@@ -308,7 +311,7 @@ class ReaderViewModel @AssistedInject constructor(
             }
             opened.model.ayahAtOrAfter(audioRow ?: opened.startRow)?.let { loadPagesAround(it, it) }
             observeReadState(opened.model.segments)
-            if (route.entry == ReaderEntry.BOOKMARK || route.entry == ReaderEntry.GROUP) observeHeaders(opened.model.segments)
+            if (route.entry == ReaderEntry.BOOKMARK || route.entry == ReaderEntry.GROUP || route.entry == ReaderEntry.BOOKMARKS) observeHeaders(opened.model.segments)
             if (route.entry == ReaderEntry.KHATM) observeKhatmPosition()
             if (route.entry == ReaderEntry.BROWSE) rememberBrowsePosition()
             player.state.collect(::onPlayerState)
@@ -402,6 +405,22 @@ class ReaderViewModel @AssistedInject constructor(
                     },
                     scopeStarts = group.segments.map { it.range.start },
                     segmentTitles = group.bookmarks.map { BookmarkTitles.of(it.bookmark, index) },
+                    index = index,
+                )
+            }
+            ReaderEntry.BOOKMARKS -> {
+                val listed = availability.board().listed
+                if (listed.isEmpty()) return null
+                val model = ReaderRowModel.build(listed.map { it.segment }, index, segmentHeaders = true)
+                val first = listed.firstOrNull { !it.progress.done } ?: listed.first()
+                val segment = listed.indexOf(first)
+                Opened(
+                    model = model,
+                    title = ReaderTitle.AllBookmarks,
+                    start = first.progress.firstBelowTarget ?: first.bookmark.range.start,
+                    startRow = model.rows.indexOfFirst { it.segment == segment },
+                    scopeStarts = listed.map { it.bookmark.range.start },
+                    segmentTitles = listed.map { BookmarkTitles.of(it.bookmark, index) },
                     index = index,
                 )
             }

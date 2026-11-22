@@ -115,6 +115,9 @@ data class BookmarkBoard(
     /** Every bookmark in the current sort mode. */
     val all: List<BookmarkState>,
 ) {
+    /** Every bookmark in the order of the Bookmarks list: each group's in group order, then Ungrouped. */
+    val listed: List<BookmarkState> get() = groups.flatMap { it.bookmarks } + ungrouped
+
     /** Available at this moment and not done, under their group's header, then Ungrouped. */
     val now: List<NowSection>
         get() {

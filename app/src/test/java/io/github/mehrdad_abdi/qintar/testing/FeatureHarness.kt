@@ -239,15 +239,21 @@ fun DomainFixture.khatmDetailViewModel(id: Long, io: CoroutineDispatcher) = Khat
     io = io,
 )
 
-fun DomainFixture.bookmarksViewModel(io: CoroutineDispatcher, ticks: Flow<Unit> = emptyFlow()) = BookmarksViewModel(
+fun DomainFixture.bookmarksViewModel(
+    io: CoroutineDispatcher,
+    player: PlayerController = FakePlayerController(),
+    text: QuranTextSource = this.text,
+) = BookmarksViewModel(
     index = { index },
     availability = availability,
     library = library,
     tracker = tracker,
+    log = log,
+    text = text,
     prefs = prefs,
     clock = clock,
+    player = player,
     io = io,
-    ticks = ticks,
 )
 
 fun DomainFixture.bookmarkEditorViewModel(

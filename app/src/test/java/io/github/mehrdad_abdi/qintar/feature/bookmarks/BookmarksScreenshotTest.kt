@@ -90,18 +90,28 @@ class BookmarksScreenshotTest(private val language: String, private val dark: Bo
     }
 
     @Test
-    fun bookmarksNow() {
+    fun bookmarksList() {
         seed()
         val vm = app.bookmarksViewModel(Dispatchers.Unconfined)
-        shot("feature_bookmarks_now") { BookmarksScreen(onNavigate = {}, viewModel = vm) }
+        shot("feature_bookmarks_list") { BookmarksScreen(onNavigate = {}, viewModel = vm) }
     }
 
     @Test
-    fun bookmarksGroups() {
+    fun bookmarksListOpen() {
         seed()
-        val vm = app.bookmarksViewModel(Dispatchers.Unconfined)
-        vm.onView(BookmarksView.GROUPS)
-        shot("feature_bookmarks_groups") { BookmarksScreen(onNavigate = {}, viewModel = vm) }
+        val text = FakeQuranTextSource(app.index, mapOf(app.ayah(8, 1) to SampleAyahs.ANFAL_1, app.ayah(8, 2) to SampleAyahs.ANFAL_2))
+        val anfal = runBlocking {
+            app.library.create(
+                io.github.mehrdad_abdi.qintar.domain.model.BookmarkDraft(
+                    io.github.mehrdad_abdi.qintar.domain.model.AyahRange(app.ayah(8, 1), app.ayah(8, 2)),
+                    io.github.mehrdad_abdi.qintar.domain.model.BookmarkKind.RANGE,
+                ),
+            )
+        }
+        val vm = app.bookmarksViewModel(Dispatchers.Unconfined, text = text)
+        vm.onToggleSection(vm.state.value.groups.first().id)
+        vm.onToggleBookmark(anfal.id)
+        shot("feature_bookmarks_list_open") { BookmarksScreen(onNavigate = {}, viewModel = vm) }
     }
 
     @Test

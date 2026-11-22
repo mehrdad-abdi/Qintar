@@ -14,7 +14,10 @@ data class Bookmark(
     val label: String?,
     /** Free text, up to [MAX_DESCRIPTION] characters. */
     val description: String?,
-    /** Readings per day that make it done. */
+    /**
+     * Readings per day that make it done. Deprecated in the UI (owner, 2026-11-22): the editor no
+     * longer shows it and new bookmarks get 1; kept in the model because it may come back.
+     */
     val repeatTarget: Int,
     /** At most one group. */
     val groupId: Long?,

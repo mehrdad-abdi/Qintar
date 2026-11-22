@@ -116,4 +116,16 @@
     <string name="grp_move_up">بالا</string>
     <string name="grp_move_down">پایین</string>
     <string name="grp_remove">برداشتن از گروه</string>
+    <string name="bm_filter_all">همه</string>
+    <string name="bm_filter_unread">خوانده‌نشده</string>
+    <string name="bm_unread_empty">همهٔ نشان‌ها امروز خوانده شده‌اند.</string>
+    <string name="bm_description_more">بیشتر</string>
+    <string name="bm_description_less">کمتر</string>
+    <string name="bm_play_group">پخش %1$s</string>
+    <string name="bm_play_bookmark">پخش %1$s</string>
+    <string name="bm_menu_open">باز کردن در قرائت</string>
+    <string name="bm_read_today">امروز خوانده شد</string>
+    <string name="bm_mark_read">علامت خوانده‌شده</string>
+    <string name="grp_add_members">افزودن نشان‌ها</string>
+    <string name="grp_add_members_none">همهٔ نشان‌ها در این گروه هستند.</string>
 </resources>

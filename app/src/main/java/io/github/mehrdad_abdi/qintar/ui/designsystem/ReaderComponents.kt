@@ -107,8 +107,10 @@ fun AyahRow(
     accessibilityLabel: String = reference,
     onTextClick: () -> Unit = {},
     onPlay: (() -> Unit)? = {},
-    onStar: () -> Unit = {},
-    onMenu: () -> Unit = {},
+    /** Null hides the star (the Bookmarks list: the ayah is already in a bookmark). */
+    onStar: (() -> Unit)? = {},
+    /** Null hides the ⋯ menu. */
+    onMenu: (() -> Unit)? = {},
 ) {
     val colors = MaterialTheme.colorScheme
     val stateText = when (checkState) {
@@ -138,7 +140,7 @@ fun AyahRow(
                     contentDescription = "$accessibilityLabel, $stateText"
                     customActions = listOfNotNull(
                         CustomAccessibilityAction(markReadLabel) { onCheck(); true },
-                        CustomAccessibilityAction(bookmarkLabel) { onStar(); true },
+                        onStar?.let { star -> CustomAccessibilityAction(bookmarkLabel) { star(); true } },
                         onPlay?.let { play -> CustomAccessibilityAction(playLabel) { play(); true } },
                     )
                 },
@@ -166,10 +168,10 @@ fun AyahRow(
                 )
             }
             Spacer(Modifier.weight(1f))
-            IconButton(onClick = onMenu, modifier = Modifier.size(Sizes.touchTarget)) {
+            if (onMenu != null) IconButton(onClick = onMenu, modifier = Modifier.size(Sizes.touchTarget)) {
                 Icon(Icons.Rounded.MoreHoriz, stringResource(R.string.ayah_action_more), tint = colors.onSurfaceVariant)
             }
-            IconButton(onClick = onStar, modifier = Modifier.size(Sizes.touchTarget)) {
+            if (onStar != null) IconButton(onClick = onStar, modifier = Modifier.size(Sizes.touchTarget)) {
                 Icon(
                     if (starred) Icons.Rounded.Star else Icons.Rounded.StarBorder,
                     stringResource(if (starred) R.string.ayah_bookmarked else R.string.ayah_action_bookmark),

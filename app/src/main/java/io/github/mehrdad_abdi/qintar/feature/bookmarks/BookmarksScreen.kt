@@ -1,6 +1,10 @@
 package io.github.mehrdad_abdi.qintar.feature.bookmarks
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,66 +16,75 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.EventRepeat
-import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.mehrdad_abdi.qintar.R
-import io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort
+import io.github.mehrdad_abdi.qintar.domain.model.SajdaType
+import io.github.mehrdad_abdi.qintar.domain.service.AyahTextFormatter
 import io.github.mehrdad_abdi.qintar.ui.common.bookmarkTitleText
-import io.github.mehrdad_abdi.qintar.ui.common.scheduleText
-import io.github.mehrdad_abdi.qintar.ui.common.windowText
-import io.github.mehrdad_abdi.qintar.ui.designsystem.BookmarkCard
-import io.github.mehrdad_abdi.qintar.ui.designsystem.CollapsibleRow
+import io.github.mehrdad_abdi.qintar.ui.designsystem.AyahCheckState
+import io.github.mehrdad_abdi.qintar.ui.designsystem.AyahRow
 import io.github.mehrdad_abdi.qintar.ui.designsystem.EmptyState
-import io.github.mehrdad_abdi.qintar.ui.designsystem.GroupHeader
+import io.github.mehrdad_abdi.qintar.ui.designsystem.QProgressBar
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarType
 import io.github.mehrdad_abdi.qintar.ui.designsystem.ReadState
-import io.github.mehrdad_abdi.qintar.ui.designsystem.ScheduleChip
+import io.github.mehrdad_abdi.qintar.ui.designsystem.ReadStateIndicator
 import io.github.mehrdad_abdi.qintar.ui.designsystem.SetCountDialog
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Sizes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
 import io.github.mehrdad_abdi.qintar.ui.designsystem.ayahCount
 import io.github.mehrdad_abdi.qintar.ui.designsystem.formatNumber
+import io.github.mehrdad_abdi.qintar.ui.designsystem.localizeDigits
 import io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.GroupEditorRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
@@ -83,8 +96,8 @@ const val BOOKMARKS_LIST_TAG = "bookmarks-list"
 const val BOOKMARKS_ADD_TAG = "bookmarks-add"
 
 /**
- * The Bookmarks tab (§5.6): Now, Groups and All. A tap opens the reader; the ⋯ menu edits, logs,
- * moves, copies and deletes.
+ * The Bookmarks tab (§5.6): All / Unread, then one list of groups and Ungrouped. A group folds its
+ * bookmarks, a bookmark folds its ayahs, so a whole set is read by scrolling, without opening each.
  *
  * @param onNavigate pass a route object from `ui/navigation/Routes.kt`.
  */
@@ -92,8 +105,11 @@ const val BOOKMARKS_ADD_TAG = "bookmarks-add"
 fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val colors = MaterialTheme.colorScheme
-    val actions = remember(viewModel, onNavigate) { BookmarkActions(viewModel, onNavigate) }
     val snackbar = remember { SnackbarHostState() }
+    val listState = rememberLazyListState()
+
+    // Bookmarks read under Unread stay until the screen is left.
+    DisposableEffect(viewModel) { onDispose { viewModel.onScreenLeft() } }
 
     val messages = mapOf(
         UndoKind.LOGGED to stringResource(R.string.bm_snack_logged),
@@ -107,6 +123,17 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
         if (notice != null) {
             val result = snackbar.showSnackbar(messages.getValue(notice.kind), actionLabel = undoLabel)
             if (result == SnackbarResult.ActionPerformed) viewModel.onUndo() else viewModel.onNoticeShown(notice.id)
+        }
+    }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.let { (it.firstOrNull()?.index ?: 0) to (it.lastOrNull()?.index ?: 0) } }
+            .collect { (first, last) -> viewModel.onVisibleRows(first, last) }
+    }
+    val scroll = state.scrollRequest
+    LaunchedEffect(scroll) {
+        if (scroll != null) {
+            listState.animateScrollToItem(scroll.row)
+            viewModel.onScrollHandled(scroll)
         }
     }
 
@@ -123,18 +150,39 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
             Text(stringResource(R.string.tab_bookmarks), style = QintarType.Title, color = colors.onSurface, modifier = Modifier.weight(1f))
             AddMenu(onNavigate)
         }
-        ViewSwitch(state.view, viewModel::onView)
+        FilterRow(state.filter, viewModel::onFilter)
         Box(Modifier.weight(1f).fillMaxWidth()) {
             if (!state.loading) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().testTag(BOOKMARKS_LIST_TAG),
-                    contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.lg),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.md),
-                ) {
-                    when (state.view) {
-                        BookmarksView.NOW -> nowView(state, actions, viewModel)
-                        BookmarksView.GROUPS -> groupsView(state, actions)
-                        BookmarksView.ALL -> allView(state, actions, viewModel)
+                if (!state.hasBookmarks && state.groups.isEmpty()) {
+                    EmptyState(
+                        title = stringResource(R.string.bm_none_title),
+                        message = stringResource(R.string.bm_none_message),
+                        icon = Icons.Outlined.BookmarkBorder,
+                        actionLabel = stringResource(R.string.bm_add_bookmark),
+                        onAction = { onNavigate(BookmarkEditorRoute()) },
+                        modifier = Modifier.padding(Spacing.screen),
+                    )
+                } else if (state.rows.isEmpty()) {
+                    Text(
+                        stringResource(R.string.bm_unread_empty),
+                        style = QintarType.Body,
+                        color = colors.onSurfaceVariant,
+                        modifier = Modifier.padding(Spacing.screen),
+                    )
+                } else {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize().testTag(BOOKMARKS_LIST_TAG),
+                        contentPadding = PaddingValues(bottom = Spacing.lg),
+                    ) {
+                        itemsIndexed(state.rows, key = { _, row -> row.key }) { _, row ->
+                            when (row) {
+                                is BookmarksRow.Section -> SectionRow(row, viewModel, onNavigate)
+                                is BookmarksRow.Entry -> EntryRow(row, viewModel, onNavigate)
+                                is BookmarksRow.Ayah -> InlineAyah(row, state, viewModel)
+                                is BookmarksRow.End -> EndRow(row, viewModel)
+                            }
+                        }
                     }
                 }
             }
@@ -142,16 +190,6 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
         }
     }
     BookmarksDialogs(state.dialog, viewModel)
-}
-
-/** What the lists do with a bookmark or a group; one object so the rows stay short. */
-internal class BookmarkActions(val viewModel: BookmarksViewModel, val navigate: (Any) -> Unit) {
-    fun open(id: Long) = navigate(ReaderRoute.bookmark(id))
-    fun edit(id: Long) = navigate(BookmarkEditorRoute(bookmarkId = id))
-    fun readGroup(id: Long) = navigate(ReaderRoute.group(id))
-    fun editGroup(id: Long) = navigate(GroupEditorRoute(id))
-    fun addBookmark(groupId: Long? = null) = navigate(BookmarkEditorRoute(draftGroupId = groupId ?: BookmarkEditorRoute.NEW))
-    fun addGroup() = navigate(GroupEditorRoute())
 }
 
 @Composable
@@ -175,260 +213,248 @@ private fun AddMenu(onNavigate: (Any) -> Unit) {
 }
 
 @Composable
-private fun ViewSwitch(view: BookmarksView, onView: (BookmarksView) -> Unit) {
+private fun FilterRow(filter: BookmarksFilter, onFilter: (BookmarksFilter) -> Unit) {
     val labels = mapOf(
-        BookmarksView.NOW to stringResource(R.string.bm_view_now),
-        BookmarksView.GROUPS to stringResource(R.string.bm_view_groups),
-        BookmarksView.ALL to stringResource(R.string.bm_view_all),
+        BookmarksFilter.ALL to stringResource(R.string.bm_filter_all),
+        BookmarksFilter.UNREAD to stringResource(R.string.bm_filter_unread),
     )
-    val description = stringResource(R.string.bm_views_label)
-    SingleChoiceSegmentedButtonRow(
-        Modifier.fillMaxWidth().padding(horizontal = Spacing.screen, vertical = Spacing.sm).semantics { contentDescription = description },
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = Spacing.screen, vertical = Spacing.xs),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        BookmarksView.entries.forEachIndexed { i, entry ->
-            SegmentedButton(
-                selected = entry == view,
-                onClick = { onView(entry) },
-                shape = SegmentedButtonDefaults.itemShape(i, BookmarksView.entries.size),
+        BookmarksFilter.entries.forEach { entry ->
+            FilterChip(
+                selected = entry == filter,
+                onClick = { onFilter(entry) },
                 label = { Text(labels.getValue(entry), style = QintarType.Label) },
             )
         }
     }
 }
 
-// ---- Now -----------------------------------------------------------------------------------------
-
-private fun LazyListScope.nowView(state: BookmarksUiState, actions: BookmarkActions, viewModel: BookmarksViewModel) {
-    if (!state.hasBookmarks) {
-        item(key = "none") { NoBookmarks(actions) }
-        return
-    }
-    if (state.now.isEmpty()) {
-        item(key = "nothing-now") {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                EmptyState(
-                    title = stringResource(R.string.bm_now_empty_title),
-                    message = stringResource(R.string.bm_now_empty_message),
-                    icon = Icons.Outlined.EventRepeat,
-                    actionLabel = stringResource(R.string.bm_show_groups),
-                    onAction = { viewModel.onView(BookmarksView.GROUPS) },
-                )
-                TextButton(onClick = { viewModel.onView(BookmarksView.ALL) }) { Text(stringResource(R.string.bm_show_all), style = QintarType.Label) }
-            }
-        }
-    }
-    state.now.forEachIndexed { sectionIndex, section ->
-        item(key = "now-header-$sectionIndex-${section.group?.id}") {
-            val group = section.group
-            if (group != null) {
-                GroupHeader(
-                    name = group.state.group.name,
-                    state = group.state.progress.readState(),
-                    window = group.state.group.schedule?.window?.let { windowText(it) },
-                    onRead = { actions.readGroup(group.id) },
-                )
-            } else if (state.now.size > 1) {
-                Text(stringResource(R.string.bm_ungrouped), style = QintarType.BodyStrong, color = MaterialTheme.colorScheme.onSurface)
-            }
-        }
-        section.items.forEach { entry -> item(key = "now-${entry.id}") { BookmarkItemCard(entry, actions) } }
-    }
-    laterSection("later", R.string.bm_later_today, state.laterToday, actions)
-    laterSection("earlier", R.string.bm_earlier_today, state.earlierToday, actions)
-    laterSection("done", R.string.bm_done_today, state.doneToday, actions)
-}
-
-/** A collapsed section: the later, earlier and done bookmarks. */
-private fun LazyListScope.laterSection(key: String, title: Int, items: List<BookmarkItem>, actions: BookmarkActions) {
-    if (items.isEmpty()) return
-    item(key = "$key-header") {
-        var expanded by rememberSaveable(key) { mutableStateOf(false) }
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-            CollapsibleRow(stringResource(title), items.size, expanded, onToggle = { expanded = !expanded })
-            if (expanded) items.forEach { BookmarkItemCard(it, actions) }
-        }
-    }
-}
-
-// ---- Groups --------------------------------------------------------------------------------------
-
-private fun LazyListScope.groupsView(state: BookmarksUiState, actions: BookmarkActions) {
-    if (state.groups.isEmpty() && state.ungrouped.isEmpty()) {
-        item(key = "no-groups") {
-            EmptyState(
-                title = stringResource(R.string.bm_groups_empty_title),
-                message = stringResource(R.string.bm_groups_empty_message),
-                icon = Icons.Outlined.FolderOpen,
-                actionLabel = stringResource(R.string.bm_add_group),
-                onAction = actions::addGroup,
-            )
-        }
-        return
-    }
-    state.groups.forEach { group -> item(key = "group-${group.id}") { GroupSection(group, actions) } }
-    if (state.ungrouped.isNotEmpty()) {
-        item(key = "ungrouped-header") {
-            Text(stringResource(R.string.bm_ungrouped), style = QintarType.BodyStrong, color = MaterialTheme.colorScheme.onSurface)
-        }
-        state.ungrouped.forEach { entry -> item(key = "ungrouped-${entry.id}") { BookmarkItemCard(entry, actions) } }
-    }
-    item(key = "add-group") {
-        TextButton(onClick = actions::addGroup, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.bm_add_group), style = QintarType.Label)
-        }
-    }
-}
-
-@Composable
-private fun GroupSection(group: GroupItem, actions: BookmarkActions) {
-    var menu by remember { mutableStateOf(false) }
-    val progress = group.state.progress
-    val schedule = group.state.group.schedule
-    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            GroupHeader(
-                name = group.state.group.name,
-                state = progress.readState(),
-                progressText = if (progress.bookmarkCount > 0) {
-                    stringResource(R.string.bm_group_progress, formatNumber(progress.bookmarksDone), formatNumber(progress.bookmarkCount))
-                } else {
-                    null
-                },
-                onRead = if (progress.bookmarkCount > 0) ({ actions.readGroup(group.id) }) else null,
-                modifier = Modifier.weight(1f),
-            )
-            Box {
-                IconButton(onClick = { menu = true }, modifier = Modifier.size(Sizes.touchTarget)) {
-                    Icon(Icons.Rounded.MoreVert, stringResource(R.string.bm_group_menu_more), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.bm_menu_edit)) },
-                        onClick = { menu = false; actions.editGroup(group.id) },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.bm_group_menu_log)) },
-                        enabled = progress.bookmarkCount > 0,
-                        onClick = { menu = false; actions.viewModel.onLogGroupReading(group.id) },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.bm_group_menu_delete)) },
-                        onClick = { menu = false; actions.viewModel.onDeleteGroupRequested(group.id) },
-                    )
-                }
-            }
-        }
-        if (schedule != null) {
-            ScheduleChip(scheduleText(schedule), Modifier.padding(horizontal = Spacing.card))
-        }
-        group.state.group.description?.let {
-            Text(it, style = QintarType.Label, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, modifier = Modifier.padding(horizontal = Spacing.card))
-        }
-        if (group.items.isEmpty()) {
-            Text(
-                stringResource(R.string.bm_group_empty),
-                style = QintarType.Body,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = Spacing.card),
-            )
-        }
-        group.items.forEach { BookmarkItemCard(it, actions) }
-        TextButton(onClick = { actions.addBookmark(group.id) }) { Text(stringResource(R.string.bm_add_bookmark), style = QintarType.Label) }
-    }
-}
-
-// ---- All -----------------------------------------------------------------------------------------
-
-private fun LazyListScope.allView(state: BookmarksUiState, actions: BookmarkActions, viewModel: BookmarksViewModel) {
-    if (!state.hasBookmarks) {
-        item(key = "none") { NoBookmarks(actions) }
-        return
-    }
-    item(key = "sort") {
-        val labels = mapOf(
-            BookmarkSort.MUSHAF to stringResource(R.string.bm_sort_mushaf),
-            BookmarkSort.CUSTOM to stringResource(R.string.bm_sort_custom),
-            BookmarkSort.RECENT to stringResource(R.string.bm_sort_recent),
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            BookmarkSort.entries.forEach { sort ->
-                FilterChip(
-                    selected = state.sort == sort,
-                    onClick = { viewModel.onSort(sort) },
-                    label = { Text(labels.getValue(sort), style = QintarType.Label) },
-                )
-            }
-        }
-    }
-    state.all.forEach { entry -> item(key = "all-${entry.id}") { BookmarkItemCard(entry, actions) } }
-}
-
-@Composable
-private fun NoBookmarks(actions: BookmarkActions) {
-    EmptyState(
-        title = stringResource(R.string.bm_none_title),
-        message = stringResource(R.string.bm_none_message),
-        icon = Icons.Outlined.BookmarkBorder,
-        actionLabel = stringResource(R.string.bm_add_bookmark),
-        onAction = { actions.addBookmark() },
-    )
-}
-
-// ---- One bookmark --------------------------------------------------------------------------------
-
-private fun io.github.mehrdad_abdi.qintar.domain.service.GroupProgress.readState() = when {
+private fun readState(done: Boolean, started: Boolean) = when {
     done -> ReadState.Done
     started -> ReadState.Partial
     else -> ReadState.NotRead
 }
 
-/** A bookmark as a card with its ⋯ menu; a long press opens the menu too. */
+/** Two lines of a long description; a tap shows all of it, another folds it again. */
 @Composable
-internal fun BookmarkItemCard(item: BookmarkItem, actions: BookmarkActions, modifier: Modifier = Modifier) {
+private fun ExpandableDescription(text: String, color: Color, modifier: Modifier = Modifier) {
+    var expanded by rememberSaveable(text) { mutableStateOf(false) }
+    var overflows by remember(text) { mutableStateOf(false) }
+    val state = stringResource(if (expanded) R.string.state_expanded else R.string.state_collapsed)
+    Column(
+        modifier
+            .animateContentSize()
+            .then(
+                if (overflows || expanded) {
+                    Modifier.clickable(role = Role.Button) { expanded = !expanded }.semantics { stateDescription = state }
+                } else {
+                    Modifier
+                },
+            ),
+    ) {
+        Text(
+            text,
+            style = QintarType.Label.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Normal),
+            color = color,
+            maxLines = if (expanded) Int.MAX_VALUE else 2,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { if (!expanded) overflows = it.hasVisualOverflow },
+        )
+        if (overflows || expanded) {
+            Text(
+                stringResource(if (expanded) R.string.bm_description_less else R.string.bm_description_more),
+                style = QintarType.Label,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+}
+
+// ---- Section (a group or Ungrouped) --------------------------------------------------------------
+
+@Composable
+private fun SectionRow(row: BookmarksRow.Section, vm: BookmarksViewModel, onNavigate: (Any) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val group = row.group
+    val done = row.bookmarkCount > 0 && row.doneCount == row.bookmarkCount
+    val name = group?.state?.group?.name ?: stringResource(R.string.bm_ungrouped)
+    val expandedText = stringResource(if (row.expanded) R.string.state_expanded else R.string.state_collapsed)
     var menu by remember { mutableStateOf(false) }
+    val ink = if (done) colors.onPrimaryContainer else colors.onSurface
+    Column(Modifier.fillMaxWidth().background(if (done) colors.primaryContainer else colors.surfaceContainer)) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable(role = Role.Button) { vm.onToggleSection(row.sectionKey) }
+                .semantics { stateDescription = expandedText }
+                .heightIn(min = Sizes.touchTarget)
+                .padding(start = Spacing.screen, end = Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(if (row.expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, contentDescription = null, tint = ink)
+            Spacer(Modifier.size(Spacing.sm))
+            Column(Modifier.weight(1f)) {
+                Text(name, style = QintarType.BodyStrong, color = ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
+                if (row.bookmarkCount > 0) {
+                    Text(
+                        stringResource(R.string.bm_group_progress, formatNumber(row.doneCount), formatNumber(row.bookmarkCount)),
+                        style = QintarType.Caption,
+                        color = if (done) colors.onPrimaryContainer else colors.onSurfaceVariant,
+                    )
+                }
+            }
+            if (done) ReadStateIndicator(ReadState.Done)
+            if (row.bookmarkCount > 0) {
+                IconButton(onClick = { vm.onPlaySection(row.sectionKey) }, modifier = Modifier.size(Sizes.touchTarget)) {
+                    Icon(Icons.Rounded.PlayArrow, stringResource(R.string.bm_play_group, name), tint = ink)
+                }
+            }
+            if (group != null) {
+                Box {
+                    IconButton(onClick = { menu = true }, modifier = Modifier.size(Sizes.touchTarget)) {
+                        Icon(Icons.Rounded.MoreVert, stringResource(R.string.bm_group_menu_more), tint = colors.onSurfaceVariant)
+                    }
+                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                        DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_edit)) }, onClick = { menu = false; onNavigate(GroupEditorRoute(group.id)) })
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.bm_add_bookmark)) },
+                            onClick = { menu = false; onNavigate(BookmarkEditorRoute(draftGroupId = group.id)) },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.bm_group_menu_log)) },
+                            enabled = row.bookmarkCount > 0,
+                            onClick = { menu = false; vm.onLogGroupReading(group.id) },
+                        )
+                        DropdownMenuItem(text = { Text(stringResource(R.string.bm_group_menu_delete)) }, onClick = { menu = false; vm.onDeleteGroupRequested(group.id) })
+                    }
+                }
+            }
+        }
+        group?.state?.group?.description?.let {
+            ExpandableDescription(
+                it,
+                if (done) colors.onPrimaryContainer else colors.onSurfaceVariant,
+                Modifier.fillMaxWidth().padding(start = Spacing.screen, end = Spacing.screen, bottom = Spacing.sm),
+            )
+        }
+        if (row.expanded && row.bookmarkCount == 0) {
+            Text(
+                stringResource(R.string.bm_group_empty),
+                style = QintarType.Body,
+                color = colors.onSurfaceVariant,
+                modifier = Modifier.padding(start = Spacing.screen, end = Spacing.screen, bottom = Spacing.sm),
+            )
+        }
+    }
+}
+
+// ---- Bookmark ------------------------------------------------------------------------------------
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun EntryRow(row: BookmarksRow.Entry, vm: BookmarksViewModel, onNavigate: (Any) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val item = row.item
     val progress = item.state.progress
     val bookmark = item.state.bookmark
-    val state = when {
-        progress.done -> ReadState.Done
-        progress.started -> ReadState.Partial
-        else -> ReadState.NotRead
-    }
-    val progressText = when {
-        progress.repeatTarget > 1 -> stringResource(
-            R.string.progress_of,
-            formatNumber(minOf(progress.fullReadings, progress.repeatTarget)),
-            formatNumber(progress.repeatTarget),
-        )
-        progress.started -> stringResource(R.string.progress_of, formatNumber(progress.readings), formatNumber(progress.required))
-        else -> null
-    }
-    val ayahs = ayahCount(bookmark.range.size)
-    val meta = if (progress.repeatTarget > 1) "$ayahs · ${stringResource(R.string.times_n, formatNumber(progress.repeatTarget))}" else ayahs
-    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-        BookmarkCard(
-            title = bookmarkTitleText(item.title),
-            state = state,
-            onClick = { actions.open(item.id) },
-            modifier = Modifier.weight(1f),
-            description = bookmark.description,
-            schedule = item.state.schedule?.let { scheduleText(it) },
-            meta = meta,
-            progressText = progressText,
-            progress = progress.fraction,
-            onLongClick = { menu = true },
-        )
-        Box {
-            IconButton(onClick = { menu = true }, modifier = Modifier.size(Sizes.touchTarget)) {
-                Icon(Icons.Rounded.MoreVert, stringResource(R.string.bm_menu_more), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    val state = readState(progress.done, progress.started)
+    val done = state == ReadState.Done
+    val ink = if (done) colors.onPrimaryContainer else colors.onSurface
+    val quiet = if (done) colors.onPrimaryContainer else colors.onSurfaceVariant
+    val expandedText = stringResource(if (row.expanded) R.string.state_expanded else R.string.state_collapsed)
+    var menu by remember { mutableStateOf(false) }
+    Column(Modifier.fillMaxWidth().background(if (done) colors.primaryContainer else colors.background)) {
+        HorizontalDivider(color = colors.outlineVariant, thickness = Sizes.hairline)
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .combinedClickable(role = Role.Button, onLongClick = { menu = true }) { vm.onToggleBookmark(item.id) }
+                .semantics { stateDescription = expandedText }
+                .heightIn(min = Sizes.touchTarget)
+                .padding(start = Spacing.screen, end = Spacing.xs, top = Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(if (row.expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, contentDescription = null, tint = quiet)
+            Spacer(Modifier.size(Spacing.sm))
+            Column(Modifier.weight(1f)) {
+                Text(bookmarkTitleText(item.title), style = QintarType.BodyStrong, color = ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                val meta = if (progress.started && !done) {
+                    stringResource(R.string.progress_of, formatNumber(progress.readings), formatNumber(progress.required))
+                } else {
+                    ayahCount(bookmark.range.size)
+                }
+                Text(meta, style = QintarType.Caption, color = quiet)
             }
-            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                val vm = actions.viewModel
-                DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_edit)) }, onClick = { menu = false; actions.edit(item.id) })
-                DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_log)) }, onClick = { menu = false; vm.onLogFullReading(item.id) })
-                DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_set_count)) }, onClick = { menu = false; vm.onSetCountRequested(item.id) })
-                DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_move)) }, onClick = { menu = false; vm.onMoveRequested(item.id) })
-                DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_duplicate)) }, onClick = { menu = false; vm.onDuplicateRequested(item.id) })
-                DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_delete)) }, onClick = { menu = false; vm.onDelete(item.id) })
+            if (done) ReadStateIndicator(ReadState.Done)
+            IconButton(onClick = { vm.onPlayBookmark(item.id) }, modifier = Modifier.size(Sizes.touchTarget)) {
+                Icon(Icons.Rounded.PlayArrow, stringResource(R.string.bm_play_bookmark, bookmarkTitleText(item.title)), tint = ink)
+            }
+            Box {
+                IconButton(onClick = { menu = true }, modifier = Modifier.size(Sizes.touchTarget)) {
+                    Icon(Icons.Rounded.MoreVert, stringResource(R.string.bm_menu_more), tint = quiet)
+                }
+                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                    DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_open)) }, onClick = { menu = false; onNavigate(ReaderRoute.bookmark(item.id)) })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_edit)) }, onClick = { menu = false; onNavigate(BookmarkEditorRoute(bookmarkId = item.id)) })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_set_count)) }, onClick = { menu = false; vm.onSetCountRequested(item.id) })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_move)) }, onClick = { menu = false; vm.onMoveRequested(item.id) })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_delete)) }, onClick = { menu = false; vm.onDelete(item.id) })
+                }
+            }
+        }
+        bookmark.description?.let {
+            ExpandableDescription(it, quiet, Modifier.fillMaxWidth().padding(start = Spacing.screen + Spacing.xl, end = Spacing.screen, bottom = Spacing.xs))
+        }
+        if (state == ReadState.Partial) {
+            QProgressBar(progress.fraction, Modifier.fillMaxWidth().padding(horizontal = Spacing.screen, vertical = Spacing.xs), height = Spacing.xxs)
+        } else {
+            Spacer(Modifier.height(Spacing.xs))
+        }
+    }
+}
+
+@Composable
+private fun InlineAyah(row: BookmarksRow.Ayah, state: BookmarksUiState, vm: BookmarksViewModel) {
+    val stored = state.texts[row.id]
+    val shown = remember(stored, row.number, state.breakAtPauseMarks) {
+        stored?.let { AyahTextFormatter.format(it, row.number, state.breakAtPauseMarks) } ?: " "
+    }
+    val count = state.count(row)
+    val reference = localizeDigits("${row.surah}:${row.number}")
+    AyahRow(
+        text = shown,
+        reference = reference,
+        checkState = if (count > 0) AyahCheckState.ReadToday else AyahCheckState.Unread,
+        readCount = count,
+        sajdaLabel = if (row.sajda != SajdaType.NONE) stringResource(R.string.sajda_label) else null,
+        fontSizeSp = state.fontSp,
+        onCheck = { vm.onCheck(row) },
+        playing = state.audioPlaying && state.isAudioAt(row),
+        highlighted = state.isAudioAt(row),
+        onPlay = { vm.onPlayAyah(row) },
+        onStar = null,
+        onMenu = null,
+    )
+}
+
+/** The foot of an expanded bookmark: "Mark read" for all its ayahs, or that it is read today. */
+@Composable
+private fun EndRow(row: BookmarksRow.End, vm: BookmarksViewModel) {
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = Spacing.screen, vertical = Spacing.sm),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (row.done) {
+            Text(stringResource(R.string.bm_read_today), style = QintarType.Label, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.size(Spacing.sm))
+            ReadStateIndicator(ReadState.Done)
+        } else {
+            FilledTonalButton(onClick = { vm.onMarkBookmarkRead(row.bookmarkId) }) {
+                Text(stringResource(R.string.bm_mark_read), style = QintarType.Label)
             }
         }
     }
@@ -459,7 +485,7 @@ private fun BookmarksDialogs(dialog: BookmarksDialog?, viewModel: BookmarksViewM
                     }
                     if (dialog.canUngroup) {
                         TextButton(onClick = { viewModel.onGroupChosen(null) }, modifier = Modifier.fillMaxWidth()) {
-                            Text(stringResource(R.string.bm_no_group), style = QintarType.Body, modifier = Modifier.weight(1f))
+                            Text(stringResource(R.string.bm_ungrouped), style = QintarType.Body, modifier = Modifier.weight(1f))
                         }
                     }
                 }

@@ -183,33 +183,37 @@ private fun EditorForm(state: BookmarkEditorUiState, vm: BookmarkEditorViewModel
             modifier = Modifier.fillMaxWidth(),
         )
 
-        // Repeat target
-        SectionHeader(stringResource(R.string.bm_repeat_label))
-        CountField(state.repeatTarget, vm::onRepeatTarget, min = 1)
-        Text(
-            state.errors[EditorField.REPEAT]?.let { stringResource(it.message) } ?: stringResource(R.string.bm_repeat_help),
-            style = QintarType.Caption,
-            color = if (state.errors.containsKey(EditorField.REPEAT)) colors.error else colors.onSurfaceVariant,
-        )
+        // Repeat target: hidden for now (owner, 2026-11-22); the model keeps it, deprecated.
+        if (SHOW_REPEAT_TARGET) {
+            SectionHeader(stringResource(R.string.bm_repeat_label))
+            CountField(state.repeatTarget, vm::onRepeatTarget, min = 1)
+            Text(
+                state.errors[EditorField.REPEAT]?.let { stringResource(it.message) } ?: stringResource(R.string.bm_repeat_help),
+                style = QintarType.Caption,
+                color = if (state.errors.containsKey(EditorField.REPEAT)) colors.error else colors.onSurfaceVariant,
+            )
+        }
 
         // Group
         if (state.groups.isNotEmpty()) {
             SectionHeader(stringResource(R.string.bm_group_label))
             QCard(Modifier.fillMaxWidth()) {
-                GroupChoiceRow(stringResource(R.string.bm_no_group), state.groupId == null) { vm.onGroup(null) }
+                GroupChoiceRow(stringResource(R.string.bm_ungrouped), state.groupId == null) { vm.onGroup(null) }
                 state.groups.forEach { group -> GroupChoiceRow(group.name, state.groupId == group.id) { vm.onGroup(group.id) } }
             }
         }
 
-        // Schedule
-        SectionHeader(stringResource(R.string.sched_title))
-        val inherited = state.inheritedSchedule
-        val noneLabel = when {
-            state.groupId == null -> stringResource(R.string.sched_none)
-            inherited != null -> stringResource(R.string.sched_inherit_with, scheduleText(inherited))
-            else -> stringResource(R.string.sched_inherit)
+        // Schedule: hidden for now (owner, 2026-11-22), see SHOW_SCHEDULES.
+        if (SHOW_SCHEDULES) {
+            SectionHeader(stringResource(R.string.sched_title))
+            val inherited = state.inheritedSchedule
+            val noneLabel = when {
+                state.groupId == null -> stringResource(R.string.sched_none)
+                inherited != null -> stringResource(R.string.sched_inherit_with, scheduleText(inherited))
+                else -> stringResource(R.string.sched_inherit)
+            }
+            ScheduleEditor(state.schedule, vm::onSchedule, state.weekDays, noneLabel)
         }
-        ScheduleEditor(state.schedule, vm::onSchedule, state.weekDays, noneLabel)
         Spacer(Modifier.height(Spacing.xxl))
     }
 }
@@ -242,3 +246,6 @@ fun PassagePreviewCard(preview: PassagePreview, fontSp: Int, modifier: Modifier 
         }
     }
 }
+
+/** Off while "readings per day" is hidden; `Bookmark.repeatTarget` stays in the model. */
+internal const val SHOW_REPEAT_TARGET = false

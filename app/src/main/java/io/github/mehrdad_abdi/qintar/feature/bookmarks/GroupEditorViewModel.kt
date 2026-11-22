@@ -54,6 +54,8 @@ data class GroupEditorUiState(
     val weekDays: List<DayOfWeek> = weekOrder(DayOfWeek.MONDAY),
     /** In the order they will have once saved; removed ones are gone from this list. */
     val members: List<GroupMember> = emptyList(),
+    /** Bookmarks not in the group, in list order: tapping one adds it (and takes it from its old group). */
+    val candidates: List<GroupMember> = emptyList(),
     val problems: Map<String, GroupProblem> = emptyMap(),
     val savedId: Long? = null,
 ) {
@@ -107,11 +109,14 @@ class GroupEditorViewModel(
             val quran = withContext(io) { index.get() }
             val userPrefs = prefs.prefs.first()
             val weekDays = weekOrder(userPrefs.weekStart.firstDay(systemFirstDay()))
+            val board = availability.board()
+            fun candidatesBesides(members: Set<Long>) =
+                board.listed.filter { it.bookmark.id !in members }.map { GroupMember(it.bookmark.id, BookmarkTitles.of(it.bookmark, quran)) }
             if (route.groupId == GroupEditorRoute.NEW) {
-                _state.update { it.copy(phase = EditorPhase.READY, weekDays = weekDays) }
+                _state.update { it.copy(phase = EditorPhase.READY, weekDays = weekDays, candidates = candidatesBesides(emptySet())) }
                 return@launch
             }
-            val group = availability.board().groups.firstOrNull { it.group.id == route.groupId }
+            val group = board.groups.firstOrNull { it.group.id == route.groupId }
             if (group == null) {
                 _state.update { it.copy(phase = EditorPhase.NOT_FOUND) }
                 return@launch
@@ -128,6 +133,7 @@ class GroupEditorViewModel(
                     schedule = ScheduleForm.of(group.group.schedule),
                     weekDays = weekDays,
                     members = members.map { m -> GroupMember(m.id, BookmarkTitles.of(m, quran)) },
+                    candidates = candidatesBesides(members.mapTo(HashSet()) { m -> m.id }),
                 )
             }
         }
@@ -162,7 +168,16 @@ class GroupEditorViewModel(
     }
 
     /** Takes the bookmark out of the group on Save; the bookmark itself is kept, ungrouped. */
-    fun onRemove(bookmarkId: Long) = _state.update { it.copy(members = it.members.filter { m -> m.id != bookmarkId }) }
+    fun onRemove(bookmarkId: Long) = _state.update {
+        val member = it.members.firstOrNull { m -> m.id == bookmarkId } ?: return@update it
+        it.copy(members = it.members - member, candidates = it.candidates + member)
+    }
+
+    /** Adds a bookmark at the end of the group; on save it leaves the group it was in. */
+    fun onAdd(bookmarkId: Long) = _state.update {
+        val candidate = it.candidates.firstOrNull { c -> c.id == bookmarkId } ?: return@update it
+        it.copy(members = it.members + candidate, candidates = it.candidates - candidate)
+    }
 
     fun onSave() {
         var current = _state.value
@@ -179,9 +194,9 @@ class GroupEditorViewModel(
         viewModelScope.launch {
             try {
                 val id = if (current.isNew) {
-                    library.createGroup(current.name, current.description, schedule).id
+                    library.createGroup(current.name, current.description, schedule).id.also { applyMembers(it, current) }
                 } else {
-                    library.updateGroup(route.groupId, current.name, current.description, schedule).id.also { applyMembers(current) }
+                    library.updateGroup(route.groupId, current.name, current.description, schedule).id.also { applyMembers(it, current) }
                 }
                 _state.update { it.copy(savedId = id) }
             } catch (failure: DomainFailure.InvalidInput) {
@@ -197,10 +212,11 @@ class GroupEditorViewModel(
         }
     }
 
-    /** Removes the dropped bookmarks from the group and gives the rest the chosen order. */
-    private suspend fun applyMembers(current: GroupEditorUiState) {
+    /** Removes the dropped bookmarks, moves the added ones in, and gives them the chosen order. */
+    private suspend fun applyMembers(groupId: Long, current: GroupEditorUiState) {
         val kept = current.members.map { it.id }
         original.filter { it !in kept }.forEach { library.moveToGroup(it, null) }
+        kept.filter { it !in original }.forEach { library.moveToGroup(it, groupId) }
         if (kept != original.filter { it in kept }) {
             // Keep the members in the slots they already occupy in the custom order, so that the
             // bookmarks outside the group do not move.
