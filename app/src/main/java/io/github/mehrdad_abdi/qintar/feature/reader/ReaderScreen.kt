@@ -87,7 +87,6 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.Hairline
 import io.github.mehrdad_abdi.qintar.ui.designsystem.PageDivider
 import io.github.mehrdad_abdi.qintar.ui.designsystem.PositionBar
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarType
-import io.github.mehrdad_abdi.qintar.ui.designsystem.SetCountDialog
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Sizes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarShapes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
@@ -421,6 +420,7 @@ private fun ReaderList(
                     viewModel = viewModel,
                     onAddBookmark = { onNavigate(io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute.forAyah(row.id.value)) },
                     onStar = { onNavigate(viewModel.starTarget(row)) },
+                    onTodayReadings = { onNavigate(viewModel.todayReadingsRoute()) },
                 )
             }
         }
@@ -508,6 +508,7 @@ private fun AyahItem(
     viewModel: ReaderViewModel,
     onAddBookmark: () -> Unit,
     onStar: () -> Unit,
+    onTodayReadings: () -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     // A row whose text has not arrived keeps its place and its controls.
@@ -534,12 +535,12 @@ private fun AyahItem(
         Box(Modifier.align(Alignment.End)) {
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.ayah_menu_set_count)) },
-                    onClick = { menuOpen = false; viewModel.onSetCountRequested(row) },
-                )
-                DropdownMenuItem(
                     text = { Text(stringResource(R.string.ayah_menu_add_bookmark)) },
                     onClick = { menuOpen = false; onAddBookmark() },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.todays_readings)) },
+                    onClick = { menuOpen = false; onTodayReadings() },
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.ayah_menu_mark_up_to_here)) },
@@ -556,12 +557,6 @@ private fun ReaderDialogs(state: ReaderUiState, viewModel: ReaderViewModel) {
     val model = state.model ?: return
     when (val dialog = state.dialog) {
         null -> Unit
-        is ReaderDialog.SetCount -> SetCountDialog(
-            initialCount = dialog.current,
-            onConfirm = viewModel::onSetCount,
-            onDismiss = viewModel::onDialogDismissed,
-            supportingText = ayahName(model.surahOf(dialog.row), dialog.row.number),
-        )
         is ReaderDialog.KhatmSkip -> {
             val from = model.find(dialog.gap.start)?.let { model.rows[it] as? ReaderRow.Ayah } ?: dialog.row
             val n = formatNumber(dialog.gap.size)

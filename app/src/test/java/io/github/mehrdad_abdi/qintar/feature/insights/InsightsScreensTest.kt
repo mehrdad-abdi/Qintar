@@ -33,6 +33,8 @@ import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import io.github.mehrdad_abdi.qintar.domain.model.AyahId
+import androidx.compose.ui.test.onAllNodesWithTag
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -133,6 +135,17 @@ class InsightsScreensTest {
     // ---- Day detail -------------------------------------------------------------------------------------
 
     @Test
+    fun `a run opens to its ayahs, and one unwanted ayah is deleted on its own`() {
+        read(yesterday, 1, 5)
+        openDay(yesterday)
+        compose.onNodeWithTag(DAY_RUN_TAG).performScrollTo().performClick()
+        compose.onAllNodesWithTag(DAY_AYAH_DELETE_TAG)[2].performScrollTo().performClick()
+        compose.waitForIdle()
+        assertEquals(4, runBlocking { app.log.allEvents().size })
+        assertTrue(runBlocking { app.log.allEvents() }.none { it.ayahId == AyahId(3) })
+    }
+
+    @Test
     fun `day detail shows the total and rank, and deleting a tally can be undone`() {
         read(yesterday, 1, 10)
         runBlocking { app.tracker.addTally(yesterday, 45, "Walk") }
@@ -147,19 +160,6 @@ class InsightsScreensTest {
         compose.onNodeWithText("Undo").performClick()
         compose.onNodeWithText("Walk").performScrollTo().assertIsDisplayed()
         assertEquals(55, runBlocking { app.totals.total(yesterday) })
-    }
-
-    @Test
-    fun `a run's count can be changed from its row`() {
-        val surah = app.index.surah(112)
-        read(yesterday, app.ayah(112, 1).value, app.ayah(112, 4).value)
-        openDay(yesterday)
-        compose.onNodeWithText("${surah.nameLatin} 1–4").performScrollTo().performClick()
-        compose.onNodeWithText("Set count", substring = true).assertIsDisplayed()
-        compose.onNodeWithContentDescription("Increase").performClick()
-        compose.onNodeWithText("Save").performClick()
-        assertEquals(8, runBlocking { app.totals.total(yesterday) })
-        compose.onNodeWithText("${surah.nameLatin} 1–4 ×2").performScrollTo().assertIsDisplayed()
     }
 
     @Test

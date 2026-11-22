@@ -197,21 +197,6 @@ class BookmarksViewModelTest {
     }
 
     @Test
-    fun `set count gives every ayah that many readings and can be undone`() = runTest {
-        val b = kahf(target = 5)
-        val vm = open()
-        vm.onSetCountRequested(b.id)
-        assertEquals(0, (vm.state.value.dialog as BookmarksDialog.SetCount).current)
-        vm.onSetCount(4)
-        assertNull(vm.state.value.dialog)
-        assertEquals(4, vm.state.value.all.single().state.progress.fullReadings)
-        assertEquals(4 * b.range.size, app.log.allEvents().size)
-
-        vm.onUndo()
-        assertEquals(0, app.log.allEvents().size)
-    }
-
-    @Test
     fun `delete and undo keeps the day's readings`() = runTest {
         val b = kahf()
         val vm = open()

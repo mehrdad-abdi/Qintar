@@ -83,40 +83,6 @@ fun CountField(
 }
 
 /**
- * The "Set count" dialog (§4.2.1): choose exactly how many times something was read today.
- *
- * @param supportingText one line of context, e.g. "Al-Baqarah 255 · today".
- */
-@Composable
-fun SetCountDialog(
-    initialCount: Int,
-    onConfirm: (Int) -> Unit,
-    onDismiss: () -> Unit,
-    title: String = stringResource(R.string.set_count_title),
-    supportingText: String? = null,
-    max: Int = 9999,
-) {
-    var count by rememberSaveable { mutableIntStateOf(initialCount) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title, style = QintarType.Title) },
-        text = {
-            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                if (supportingText != null) {
-                    Text(supportingText, style = QintarType.Body, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.height(Spacing.lg))
-                }
-                CountField(count, { count = it }, max = max)
-            }
-        },
-        confirmButton = { TextButton(onClick = { onConfirm(count) }) { Text(stringResource(R.string.action_save)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
-        shape = QintarShapes.Card,
-        containerColor = MaterialTheme.colorScheme.surface,
-    )
-}
-
-/**
  * Seven round toggles for choosing weekdays. [labels] and the indices of [selected] are in the
  * order the caller wants them shown (the week-start setting); the row follows layout direction.
  *
@@ -181,10 +147,4 @@ private fun InputComponentsDarkRtlPreview() {
             }
         }
     }
-}
-
-@Preview
-@Composable
-private fun SetCountDialogPreview() {
-    QintarTheme(darkTheme = false) { SetCountDialog(2, {}, {}, supportingText = "Al-Baqarah 255") }
 }

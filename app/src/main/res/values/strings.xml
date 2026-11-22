@@ -58,7 +58,6 @@
     <string name="read_state_done">Read today</string>
 
     <!-- Count field and Set count dialog -->
-    <string name="set_count_title">Set count</string>
     <string name="count_field_label">Count</string>
     <string name="count_field_decrease">Decrease</string>
     <string name="count_field_increase">Increase</string>
@@ -106,7 +105,6 @@
     <string name="page_divider_hizb">Page %1$s · Juz %2$s · Hizb %3$s</string>
     <string name="reader_position">Page %1$s of %2$s · %3$s%%</string>
     <string name="sajda_label">Sajdah</string>
-    <string name="ayah_menu_set_count">Set count…</string>
     <string name="ayah_menu_mark_up_to_here">Mark up to here</string>
     <string name="bulk_marked">%1$s ayahs marked</string>
     <string name="khatm_skip_message">Mark all %1$s ayahs from %2$s to here as read?</string>
@@ -150,4 +148,6 @@
     <string name="hadith_label_fa">Persian</string>
     <string name="settings_hadith">The hadith of the ranks</string>
     <string name="settings_hadith_summary">Where the seven ranks come from</string>
+    <string name="todays_readings">Today\'s readings</string>
+    <string name="day_show_ayahs">Show the ayahs</string>
 </resources>

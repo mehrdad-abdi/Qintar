@@ -175,23 +175,21 @@ class DayDetailViewModelTest {
     }
 
     @Test
-    fun `changing the count of a run changes the total, and Undo restores it`() = runTest {
+    fun `one ayah of a run can be deleted, which splits the run, and Undo restores it`() = runTest {
+        // Owner, 2026-11-22: an unwanted check is taken back here, by deleting it; "Set count" is gone.
         read(yesterday, 1, 10, ReadContext.Browse, ReadMethod.TAP)
         val vm = open(yesterday)
         val run = vm.state.value.groups.single().runs.single()
-        assertEquals(10, vm.state.value.total)
+        assertEquals("a run lists its single ayahs", (1..10).toList(), run.ayahs.map { it.id.value })
 
-        vm.onSetRunCount(ReadContext.Browse, run.range, 3)
-        assertEquals(30, vm.state.value.total)
-        assertEquals(Rank.NOT_HEEDLESS, vm.state.value.rank)
-        assertEquals(UndoKind.COUNT_SET, vm.state.value.notice?.kind)
-        assertEquals(3, vm.state.value.groups.single().runs.single().readings)
+        vm.onDeleteRun(ReadContext.Browse, AyahRange.single(run.ayahs[4].id))
+        assertEquals(9, vm.state.value.total)
+        assertEquals(listOf(4, 5), vm.state.value.groups.single().runs.map { it.range.size })
+        assertEquals(UndoKind.DELETED, vm.state.value.notice?.kind)
 
-        vm.onSetRunCount(ReadContext.Browse, run.range, 1)
-        vm.onSetRunCount(ReadContext.Browse, run.range, 1) // unchanged: nothing to undo
         vm.onUndo()
-        assertEquals(30, vm.state.value.total)
-        assertNull(vm.state.value.notice)
+        assertEquals(10, vm.state.value.total)
+        assertEquals(1, vm.state.value.groups.single().runs.size)
     }
 
     @Test

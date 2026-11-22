@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.mehrdad_abdi.qintar.R
+import io.github.mehrdad_abdi.qintar.domain.model.AyahRange
 import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
 import io.github.mehrdad_abdi.qintar.domain.model.ReadMethod
 import io.github.mehrdad_abdi.qintar.domain.model.Tally
@@ -69,7 +70,6 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarShapes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarType
 import io.github.mehrdad_abdi.qintar.ui.designsystem.RankChip
 import io.github.mehrdad_abdi.qintar.ui.designsystem.SectionHeader
-import io.github.mehrdad_abdi.qintar.ui.designsystem.SetCountDialog
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Sizes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
 import io.github.mehrdad_abdi.qintar.ui.designsystem.ayahCount
@@ -81,12 +81,15 @@ import java.time.format.DateTimeFormatter
 /** Test tag of the screen's scrolling content. */
 const val DAY_DETAIL_TAG = "day-detail-content"
 
+/** Test tags of a run of ayahs and of the delete button of one ayah in an opened run. */
+const val DAY_RUN_TAG = "day-run"
+const val DAY_AYAH_DELETE_TAG = "day-ayah-delete"
+
 /** Test tag of the "Add reading" button. */
 const val DAY_ADD_READING_TAG = "day-add-reading"
 
 /** What a dialog on this screen is about. */
 private sealed interface DayDialog {
-    data class SetCount(val context: ReadContext, val run: EntryRun) : DayDialog
     data class EditTally(val tally: Tally) : DayDialog
 }
 
@@ -114,7 +117,6 @@ fun DayDetailScreen(
 
     val undoLabel = stringResource(R.string.action_undo)
     val messages = mapOf(
-        UndoKind.COUNT_SET to stringResource(R.string.day_snack_count_set),
         UndoKind.DELETED to stringResource(R.string.day_snack_deleted),
         UndoKind.TALLY_CHANGED to stringResource(R.string.day_snack_tally_changed),
         UndoKind.TALLY_DELETED to stringResource(R.string.day_snack_tally_deleted),
@@ -170,17 +172,6 @@ fun DayDetailScreen(
     }
 
     when (val open = dialog) {
-        is DayDialog.SetCount -> SetCountDialog(
-            initialCount = open.run.readings,
-            title = stringResource(R.string.day_set_count_title),
-            supportingText = runText(open.run),
-            max = 9999,
-            onConfirm = { count ->
-                viewModel.onSetRunCount(open.context, open.run.range, count)
-                dialog = null
-            },
-            onDismiss = { dialog = null },
-        )
         is DayDialog.EditTally -> TallyDialog(
             tally = open.tally,
             onConfirm = { count, note ->
@@ -339,15 +330,17 @@ private fun GroupCard(group: EntryGroup, canEdit: Boolean, viewModel: DayDetailV
         group.runs.forEach { run ->
             val text = runText(run)
             val times = if (run.readings > 1) stringResource(R.string.day_run_times, formatNumber(run.readings)) else ""
+            // A run of several ayahs opens to its single ayahs, each of which can be deleted on its own.
+            var open by androidx.compose.runtime.saveable.rememberSaveable(run.range.start.value, run.range.end.value) { androidx.compose.runtime.mutableStateOf(false) }
+            val openable = canEdit && run.range.size > 1
             Row(
                 Modifier
                     .fillMaxWidth()
                     .heightIn(min = Sizes.touchTarget)
                     .then(
-                        if (canEdit) Modifier.clickable(role = Role.Button, onClickLabel = stringResource(R.string.day_set_count_title)) {
-                            onDialog(DayDialog.SetCount(group.context, run))
-                        } else Modifier,
-                    ),
+                        if (openable) Modifier.clickable(role = Role.Button, onClickLabel = stringResource(R.string.day_show_ayahs)) { open = !open } else Modifier,
+                    )
+                    .testTag(DAY_RUN_TAG),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
@@ -356,6 +349,22 @@ private fun GroupCard(group: EntryGroup, canEdit: Boolean, viewModel: DayDetailV
                 if (canEdit) {
                     IconButton(onClick = { viewModel.onDeleteRun(group.context, run.range) }, modifier = Modifier.size(Sizes.touchTarget)) {
                         Icon(Icons.Rounded.Close, stringResource(R.string.day_delete_entry, text), tint = colors.onSurfaceVariant)
+                    }
+                }
+            }
+            if (open) {
+                run.ayahs.forEach { ayah ->
+                    val name = ayahName(ayah.surah, ayah.number)
+                    Row(
+                        Modifier.fillMaxWidth().heightIn(min = Sizes.touchTarget).padding(start = Spacing.lg),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    ) {
+                        Text("$name $times".trim(), style = QintarType.Body, color = colors.onSurfaceVariant, modifier = Modifier.weight(1f))
+                        IconButton(
+                            onClick = { viewModel.onDeleteRun(group.context, AyahRange.single(ayah.id)) },
+                            modifier = Modifier.size(Sizes.touchTarget).testTag(DAY_AYAH_DELETE_TAG),
+                        ) { Icon(Icons.Rounded.Close, stringResource(R.string.day_delete_entry, name), tint = colors.onSurfaceVariant) }
                     }
                 }
             }

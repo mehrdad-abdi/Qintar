@@ -30,7 +30,6 @@
     <string name="bm_group_menu_more">Group actions</string>
     <string name="bm_menu_edit">Edit</string>
     <string name="bm_menu_log">Log a full reading</string>
-    <string name="bm_menu_set_count">Set count…</string>
     <string name="bm_menu_move">Move to group</string>
     <string name="bm_menu_duplicate">Duplicate to another group</string>
     <string name="bm_menu_delete">Delete</string>
@@ -38,7 +37,6 @@
     <string name="bm_group_menu_delete">Delete group</string>
     <string name="bm_snack_logged">Logged a full reading</string>
     <string name="bm_snack_group_logged">Logged a full reading of the group</string>
-    <string name="bm_snack_count_set">Count set</string>
     <string name="bm_snack_deleted">Bookmark deleted</string>
     <string name="bm_move_title">Move to group</string>
     <string name="bm_duplicate_title">Duplicate to</string>
@@ -49,7 +47,6 @@
     <string name="bm_delete_group_message">Its %1$s bookmarks can stay, without a group, or be deleted with it. Your readings are kept either way.</string>
     <string name="bm_delete_group_keep">Keep the bookmarks</string>
     <string name="bm_delete_group_all">Delete them too</string>
-    <string name="bm_set_count_support">Readings today</string>
 
     <!-- Bookmark editor -->
     <string name="bm_editor_new">New bookmark</string>

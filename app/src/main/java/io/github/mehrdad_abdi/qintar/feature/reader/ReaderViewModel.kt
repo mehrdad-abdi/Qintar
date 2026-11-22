@@ -47,6 +47,7 @@ import io.github.mehrdad_abdi.qintar.ui.common.GoToProblem
 import io.github.mehrdad_abdi.qintar.ui.common.RankReachedDetector
 import io.github.mehrdad_abdi.qintar.ui.designsystem.AyahCheckState
 import io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute
+import io.github.mehrdad_abdi.qintar.ui.navigation.DayDetailRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderEntry
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
 import javax.inject.Provider
@@ -86,9 +87,6 @@ sealed interface ReaderTitle {
 
 sealed interface ReaderDialog {
     val row: ReaderRow.Ayah
-
-    /** "Set count…": [current] is today's count in the row's context. */
-    data class SetCount(override val row: ReaderRow.Ayah, val current: Int) : ReaderDialog
 
     /** A khatm tick that would leave [gap] minus the tapped ayah unread behind it (§4.2.1). */
     data class KhatmSkip(override val row: ReaderRow.Ayah, val gap: AyahRange) : ReaderDialog
@@ -590,16 +588,6 @@ class ReaderViewModel @AssistedInject constructor(
         tracker.mark(dialog.row.id, dialog.row.context, ReadMethod.TAP)
     }
 
-    fun onSetCountRequested(row: ReaderRow.Ayah) {
-        _state.update { it.copy(dialog = ReaderDialog.SetCount(row, it.count(row))) }
-    }
-
-    fun onSetCount(count: Int) = act {
-        val dialog = takeDialog<ReaderDialog.SetCount>() ?: return@act
-        tracker.setCount(dialog.row.id, dialog.row.context, clock.today(), count)
-    }
-
-    /** From the start of the unread run through this ayah, one reading each; offers Undo. */
     fun onMarkUpToHere(row: ReaderRow.Ayah) = act {
         val scopeStart = scopeStarts.getOrNull(row.segment) ?: row.id
         val range = bulk.get().upToHere(row.id, row.context, scopeStart)
@@ -808,6 +796,9 @@ class ReaderViewModel @AssistedInject constructor(
     }
 
     // ---- Star -----------------------------------------------------------------------------------
+
+    /** "Today's readings": the list of today's readings, where one can be deleted (owner, 2026-11-22). */
+    fun todayReadingsRoute(): DayDetailRoute = DayDetailRoute(clock.today().toString())
 
     /**
      * Where the star of [row] leads (owner, 2026-11-22): the editor of the bookmark the ayah is in, or

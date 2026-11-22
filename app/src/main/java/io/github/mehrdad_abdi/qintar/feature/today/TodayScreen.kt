@@ -39,6 +39,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import io.github.mehrdad_abdi.qintar.ui.navigation.DayDetailRoute
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -105,6 +107,9 @@ import java.util.Locale
 const val TODAY_CONTENT_TAG = "today-content"
 
 /** Test tag of the "Log reading" button. */
+/** Test tag of the "Today's readings" link. */
+const val TODAY_READINGS_TAG = "today-readings"
+
 const val TODAY_LOG_TAG = "today-log-reading"
 
 /**
@@ -173,7 +178,12 @@ fun TodayScreen(
             }
             Spacer(Modifier.height(Spacing.lg))
             RankSummary(state)
-            Spacer(Modifier.height(Spacing.xl))
+            // Every reading of today, where an unwanted one is deleted (owner, 2026-11-22).
+            TextButton(
+                onClick = { onNavigate(DayDetailRoute(state.day.toString())) },
+                modifier = Modifier.heightIn(min = Sizes.touchTarget).testTag(TODAY_READINGS_TAG),
+            ) { Text(stringResource(R.string.todays_readings), style = QintarType.Label) }
+            Spacer(Modifier.height(Spacing.md))
             StreakCard(state, locale, onClick = { onNavigate(InsightsRoute) })
             Spacer(Modifier.height(Spacing.betweenSections))
             KhatmSection(state, onNavigate, viewModel)

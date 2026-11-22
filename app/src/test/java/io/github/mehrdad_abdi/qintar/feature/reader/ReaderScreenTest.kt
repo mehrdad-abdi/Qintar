@@ -77,17 +77,13 @@ class ReaderScreenTest {
     }
 
     @Test
-    fun `set count from the row menu`() {
+    fun `the row menu offers today's readings, and no set count any more`() {
         open(ReaderRoute.browse(app.ayah(2, 1).value))
 
         menu(0).performClick()
-        compose.onNodeWithText("Set count…").performClick()
-        compose.onNodeWithText("Surah 2 1").assertIsDisplayed()
-        repeat(3) { compose.onNodeWithContentDescription("Increase").performClick() }
-        compose.onNodeWithText("Save").performClick()
-
-        compose.onNode(hasContentDescription("Mark read") and hasStateDescription("read 3 times today")).assertIsDisplayed()
-        assertEquals(3, app.log.events.size)
+        compose.onNodeWithText("Set count…").assertDoesNotExist()
+        compose.onNodeWithText("Today's readings").performClick()
+        assertEquals(io.github.mehrdad_abdi.qintar.ui.navigation.DayDetailRoute("2026-11-15"), navigated.last())
     }
 
     @Test

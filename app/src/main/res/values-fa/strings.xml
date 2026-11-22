@@ -47,8 +47,6 @@
     <string name="read_state_not_read">امروز خوانده نشده</string>
     <string name="read_state_partial">بخشی امروز خوانده شده</string>
     <string name="read_state_done">امروز خوانده شد</string>
-
-    <string name="set_count_title">تنظیم تعداد</string>
     <string name="count_field_label">تعداد</string>
     <string name="count_field_decrease">کم کردن</string>
     <string name="count_field_increase">زیاد کردن</string>
@@ -91,7 +89,6 @@
     <string name="page_divider_hizb">صفحهٔ %1$s · جزء %2$s · حزب %3$s</string>
     <string name="reader_position">صفحهٔ %1$s از %2$s · %3$s٪</string>
     <string name="sajda_label">سجده</string>
-    <string name="ayah_menu_set_count">تعیین تعداد…</string>
     <string name="ayah_menu_mark_up_to_here">علامت‌زدن تا اینجا</string>
     <string name="bulk_marked">%1$s آیه علامت خورد</string>
     <string name="khatm_skip_message">همهٔ %1$s آیه از %2$s تا اینجا خوانده‌شده علامت بخورد؟</string>
@@ -135,4 +132,6 @@
     <string name="hadith_label_fa">فارسی</string>
     <string name="settings_hadith">حدیث رتبه‌ها</string>
     <string name="settings_hadith_summary">هفت رتبه از کجا آمده‌اند</string>
+    <string name="todays_readings">خوانده‌های امروز</string>
+    <string name="day_show_ayahs">نمایش آیه‌ها</string>
 </resources>

@@ -30,13 +30,11 @@
 
     <!-- Day detail -->
     <string name="day_refusal_future">این روز هنوز نرسیده است و تغییر نمی‌کند.</string>
-    <string name="day_snack_count_set">تعداد تغییر کرد</string>
     <string name="day_snack_deleted">مورد حذف شد</string>
     <string name="day_snack_tally_changed">مورد تغییر کرد</string>
     <string name="day_snack_tally_deleted">مورد حذف شد</string>
     <string name="day_add_reading">افزودن قرائت</string>
     <string name="day_invalid_title">این روز را نمی‌توان نشان داد</string>
-    <string name="day_set_count_title">تعیین تعداد</string>
     <string name="day_future_title">این روز هنوز نرسیده است</string>
     <string name="day_future_message">برای روزی در آینده نمی‌توان قرائتی ثبت کرد.</string>
     <string name="day_empty_title">در این روز چیزی خوانده نشده</string>

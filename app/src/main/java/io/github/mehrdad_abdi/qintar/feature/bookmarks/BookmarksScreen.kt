@@ -79,7 +79,6 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.QProgressBar
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarType
 import io.github.mehrdad_abdi.qintar.ui.designsystem.ReadState
 import io.github.mehrdad_abdi.qintar.ui.designsystem.ReadStateIndicator
-import io.github.mehrdad_abdi.qintar.ui.designsystem.SetCountDialog
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Sizes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
 import io.github.mehrdad_abdi.qintar.ui.designsystem.ayahCount
@@ -114,7 +113,6 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
     val messages = mapOf(
         UndoKind.LOGGED to stringResource(R.string.bm_snack_logged),
         UndoKind.GROUP_LOGGED to stringResource(R.string.bm_snack_group_logged),
-        UndoKind.COUNT_SET to stringResource(R.string.bm_snack_count_set),
         UndoKind.DELETED to stringResource(R.string.bm_snack_deleted),
     )
     val undoLabel = stringResource(R.string.action_undo)
@@ -403,7 +401,6 @@ private fun EntryRow(row: BookmarksRow.Entry, vm: BookmarksViewModel, onNavigate
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                     DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_open)) }, onClick = { menu = false; onNavigate(ReaderRoute.bookmark(item.id)) })
                     DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_edit)) }, onClick = { menu = false; onNavigate(BookmarkEditorRoute(bookmarkId = item.id)) })
-                    DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_set_count)) }, onClick = { menu = false; vm.onSetCountRequested(item.id) })
                     DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_move)) }, onClick = { menu = false; vm.onMoveRequested(item.id) })
                     DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_delete)) }, onClick = { menu = false; vm.onDelete(item.id) })
                 }
@@ -470,13 +467,6 @@ private fun EndRow(row: BookmarksRow.End, vm: BookmarksViewModel) {
 private fun BookmarksDialogs(dialog: BookmarksDialog?, viewModel: BookmarksViewModel) {
     when (dialog) {
         null -> Unit
-        is BookmarksDialog.SetCount -> SetCountDialog(
-            initialCount = dialog.current,
-            onConfirm = viewModel::onSetCount,
-            onDismiss = viewModel::onDialogDismissed,
-            title = stringResource(R.string.set_count_title),
-            supportingText = bookmarkTitleText(dialog.title) + " · " + stringResource(R.string.bm_set_count_support),
-        )
         is BookmarksDialog.PickGroup -> AlertDialog(
             onDismissRequest = viewModel::onDialogDismissed,
             title = { Text(stringResource(if (dialog.duplicate) R.string.bm_duplicate_title else R.string.bm_move_title), style = QintarType.Title) },

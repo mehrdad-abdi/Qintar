@@ -28,7 +28,6 @@
     <string name="bm_group_menu_more">کارهای گروه</string>
     <string name="bm_menu_edit">ویرایش</string>
     <string name="bm_menu_log">ثبت یک خواندن کامل</string>
-    <string name="bm_menu_set_count">تنظیم شمار…</string>
     <string name="bm_menu_move">انتقال به گروه</string>
     <string name="bm_menu_duplicate">رونوشت در گروهی دیگر</string>
     <string name="bm_menu_delete">حذف</string>
@@ -36,7 +35,6 @@
     <string name="bm_group_menu_delete">حذف گروه</string>
     <string name="bm_snack_logged">یک خواندن کامل ثبت شد</string>
     <string name="bm_snack_group_logged">یک خواندن کامل گروه ثبت شد</string>
-    <string name="bm_snack_count_set">شمار تنظیم شد</string>
     <string name="bm_snack_deleted">نشانه حذف شد</string>
     <string name="bm_move_title">انتقال به گروه</string>
     <string name="bm_duplicate_title">رونوشت در</string>
@@ -45,7 +43,6 @@
     <string name="bm_delete_group_message">%1$s نشانه‌ی آن می‌تواند بدون گروه بماند یا همراه آن حذف شود. خواندن‌های شما در هر دو حالت می‌ماند.</string>
     <string name="bm_delete_group_keep">نگه داشتن نشانه‌ها</string>
     <string name="bm_delete_group_all">حذف آن‌ها هم</string>
-    <string name="bm_set_count_support">خواندن‌های امروز</string>
 
     <string name="bm_editor_new">نشانه‌ی تازه</string>
     <string name="bm_editor_edit">ویرایش نشانه</string>

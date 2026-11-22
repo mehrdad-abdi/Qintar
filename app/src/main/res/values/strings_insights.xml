@@ -31,13 +31,11 @@
 
     <!-- Day detail -->
     <string name="day_refusal_future">That day has not come yet, so it cannot be changed.</string>
-    <string name="day_snack_count_set">Count changed</string>
     <string name="day_snack_deleted">Entry deleted</string>
     <string name="day_snack_tally_changed">Entry changed</string>
     <string name="day_snack_tally_deleted">Entry deleted</string>
     <string name="day_add_reading">Add reading</string>
     <string name="day_invalid_title">This day cannot be shown</string>
-    <string name="day_set_count_title">Set count</string>
     <string name="day_future_title">This day has not come yet</string>
     <string name="day_future_message">Nothing can be read or logged for a day in the future.</string>
     <string name="day_empty_title">Nothing read on this day</string>

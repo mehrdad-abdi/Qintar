@@ -59,8 +59,11 @@ sealed interface EntryLabel {
 
 /**
  * Consecutive ayahs read the same number of times on the day: "Al-Baqarah 1–7", or "×2" when each ayah
- * was read twice. Editing a run changes the count of each of its ayahs.
+ * was read twice. A run, or one ayah of it, can be deleted.
  */
+/** One ayah of a run. */
+data class EntryAyah(val id: AyahId, val surah: SurahInfo, val number: Int)
+
 data class EntryRun(
     val range: AyahRange,
     /** Readings of each ayah of the run. */
@@ -69,6 +72,8 @@ data class EntryRun(
     val firstAyah: Int,
     val lastSurah: SurahInfo,
     val lastAyah: Int,
+    /** Its ayahs one by one, shown when the run is opened. */
+    val ayahs: List<EntryAyah> = emptyList(),
 ) {
     val total: Int get() = range.size * readings
 }
@@ -87,7 +92,7 @@ enum class DayMessage(@StringRes val text: Int) {
     COUNT_OUT_OF_RANGE(R.string.log_err_count),
 }
 
-enum class UndoKind { COUNT_SET, DELETED, TALLY_CHANGED, TALLY_DELETED }
+enum class UndoKind { DELETED, TALLY_CHANGED, TALLY_DELETED }
 
 /** The snackbar with Undo. [id] tells a new notice from the one already shown. */
 data class UndoNotice(val id: Int, val kind: UndoKind)
@@ -193,16 +198,14 @@ class DayDetailViewModel @AssistedInject constructor(
 
     // ---- edits -----------------------------------------------------------------------------------------
 
-    /** Makes every ayah of [range] read exactly [count] times on this day under [context]; 0 removes them. */
-    fun onSetRunCount(context: ReadContext, range: AyahRange, count: Int) {
+    /** Deletes the readings of [range] (a run, or one ayah of it) on this day under [context], with Undo. */
+    fun onDeleteRun(context: ReadContext, range: AyahRange) {
         val day = _state.value.day ?: return
         act {
-            val batch = tracker.setRangeCount(range, context, day, count)
-            if (batch != null) offerUndo(if (count == 0) UndoKind.DELETED else UndoKind.COUNT_SET) { tracker.undo(batch) }
+            val batch = tracker.setRangeCount(range, context, day, 0)
+            if (batch != null) offerUndo(UndoKind.DELETED) { tracker.undo(batch) }
         }
     }
-
-    fun onDeleteRun(context: ReadContext, range: AyahRange) = onSetRunCount(context, range, 0)
 
     /** Removes everything that [context] contributed to the day, as one Undo. */
     fun onDeleteGroup(context: ReadContext) {
@@ -299,7 +302,9 @@ class DayDetailViewModel @AssistedInject constructor(
                 val last = AyahId(end)
                 val ref1 = quran.ref(first)
                 val ref2 = quran.ref(last)
-                out += EntryRun(AyahRange(first, last), readings, quran.surahOf(first), ref1.ayah, quran.surahOf(last), ref2.ayah)
+                val range = AyahRange(first, last)
+                val ayahs = range.map { id -> EntryAyah(id, quran.surahOf(id), quran.ref(id).ayah) }
+                out += EntryRun(range, readings, quran.surahOf(first), ref1.ayah, quran.surahOf(last), ref2.ayah, ayahs)
             }
             for ((ayah, count) in perAyah) {
                 if (start >= 0 && ayah == end + 1 && count == readings) {

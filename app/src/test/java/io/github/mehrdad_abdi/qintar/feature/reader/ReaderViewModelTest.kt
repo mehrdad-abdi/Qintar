@@ -62,37 +62,9 @@ class ReaderViewModelTest {
     }
 
     @Test
-    fun `set count raises, lowers and clears today's count of one ayah`() = runTest {
-        val reader = browse()
-        val ayah = app.ayah(2, 255)
-        reader.onCheck(reader.row(ayah))
-
-        reader.onSetCountRequested(reader.row(ayah))
-        assertEquals("pre-filled with today's count", ReaderDialog.SetCount(reader.row(ayah), 1), reader.state.value.dialog)
-        reader.onSetCount(100)
-
-        assertNull(reader.state.value.dialog)
-        assertEquals(100, reader.countOf(ayah))
-        assertEquals(100, dayTotal())
-
-        reader.onSetCountRequested(reader.row(ayah))
-        reader.onSetCount(3)
-        assertEquals(3, reader.countOf(ayah))
-
-        reader.onSetCountRequested(reader.row(ayah))
-        reader.onSetCount(0)
-        assertEquals(0, reader.countOf(ayah))
-        assertEquals(0, dayTotal())
-    }
-
-    @Test
-    fun `dismissing the set count dialog changes nothing`() = runTest {
-        val reader = browse()
-        reader.onSetCountRequested(reader.row(app.ayah(2, 2)))
-        reader.onDialogDismissed()
-        reader.onSetCount(50)
-
-        assertEquals(0, dayTotal())
+    fun `today's readings opens the list of today's readings`() = runTest {
+        // Owner, 2026-11-22: an unwanted check is deleted there; the ayah's "Set count" is gone.
+        assertEquals(io.github.mehrdad_abdi.qintar.ui.navigation.DayDetailRoute("2026-11-15"), browse().todayReadingsRoute())
     }
 
     // ---- Mark up to here -------------------------------------------------------------------------
@@ -382,15 +354,12 @@ class ReaderViewModelTest {
         val ayah = app.ayah(2, 1)
         assertNull("opening at 12 is not an achievement", reader.state.value.reachedRank)
 
-        reader.onSetCountRequested(reader.row(ayah))
-        reader.onSetCount(5)
-        reader.onSetCountRequested(reader.row(ayah))
-        reader.onSetCount(12)
+        app.tracker.setCount(ayah, ReadContext.Browse, app.clock.today(), 5)
+        app.tracker.setCount(ayah, ReadContext.Browse, app.clock.today(), 12)
 
         assertNull(reader.state.value.reachedRank)
 
-        reader.onSetCountRequested(reader.row(ayah))
-        reader.onSetCount(120)
+        app.tracker.setCount(ayah, ReadContext.Browse, app.clock.today(), 120)
         assertEquals("a bulk jump shows the highest rank crossed", Rank.QANIT, reader.state.value.reachedRank)
     }
 

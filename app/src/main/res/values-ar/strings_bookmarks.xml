@@ -28,7 +28,6 @@
     <string name="bm_group_menu_more">إجراءات المجموعة</string>
     <string name="bm_menu_edit">تعديل</string>
     <string name="bm_menu_log">تسجيل قراءة كاملة</string>
-    <string name="bm_menu_set_count">ضبط العدد…</string>
     <string name="bm_menu_move">نقل إلى مجموعة</string>
     <string name="bm_menu_duplicate">نسخ إلى مجموعة أخرى</string>
     <string name="bm_menu_delete">حذف</string>
@@ -36,7 +35,6 @@
     <string name="bm_group_menu_delete">حذف المجموعة</string>
     <string name="bm_snack_logged">سُجّلت قراءة كاملة</string>
     <string name="bm_snack_group_logged">سُجّلت قراءة كاملة للمجموعة</string>
-    <string name="bm_snack_count_set">ضُبط العدد</string>
     <string name="bm_snack_deleted">حُذفت العلامة</string>
     <string name="bm_move_title">نقل إلى مجموعة</string>
     <string name="bm_duplicate_title">نسخ إلى</string>
@@ -45,7 +43,6 @@
     <string name="bm_delete_group_message">يمكن أن تبقى علاماتها (%1$s) بلا مجموعة أو أن تُحذف معها. تبقى قراءاتك في الحالتين.</string>
     <string name="bm_delete_group_keep">إبقاء العلامات</string>
     <string name="bm_delete_group_all">حذفها أيضًا</string>
-    <string name="bm_set_count_support">قراءات اليوم</string>
 
     <string name="bm_editor_new">علامة جديدة</string>
     <string name="bm_editor_edit">تعديل العلامة</string>

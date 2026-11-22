@@ -210,21 +210,6 @@ class ComponentBehaviourTest {
     }
 
     @Test
-    fun `the set count dialog returns the chosen count on Save and nothing on Cancel`() {
-        val saved = mutableListOf<Int>()
-        var dismissed = 0
-        compose.setContent {
-            QintarTheme { SetCountDialog(initialCount = 2, onConfirm = { saved += it }, onDismiss = { dismissed++ }) }
-        }
-        compose.onNodeWithContentDescription("Increase").performClick()
-        compose.onNodeWithText("Save").performClick()
-        assertEquals(listOf(3), saved)
-        compose.onNodeWithText("Cancel").performClick()
-        assertEquals(1, dismissed)
-        assertEquals(listOf(3), saved)
-    }
-
-    @Test
     fun `tapping a weekday chip reports its index`() {
         val toggled = mutableListOf<Int>()
         val names = listOf("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")

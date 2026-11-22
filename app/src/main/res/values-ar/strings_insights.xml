@@ -30,13 +30,11 @@
 
     <!-- Day detail -->
     <string name="day_refusal_future">لم يأتِ هذا اليوم بعد، فلا يمكن تعديله.</string>
-    <string name="day_snack_count_set">تغيّر العدد</string>
     <string name="day_snack_deleted">حُذف الإدخال</string>
     <string name="day_snack_tally_changed">تغيّر الإدخال</string>
     <string name="day_snack_tally_deleted">حُذف الإدخال</string>
     <string name="day_add_reading">إضافة قراءة</string>
     <string name="day_invalid_title">تعذّر عرض هذا اليوم</string>
-    <string name="day_set_count_title">تحديد العدد</string>
     <string name="day_future_title">لم يأتِ هذا اليوم بعد</string>
     <string name="day_future_message">لا يمكن تسجيل قراءة ليوم في المستقبل.</string>
     <string name="day_empty_title">لم تُقرأ آيات في هذا اليوم</string>

@@ -111,14 +111,12 @@ data class ListAudio(val bookmarkId: Long, val ayah: AyahId)
 
 data class ListScrollRequest(val row: Int, val token: Int)
 
-enum class UndoKind { LOGGED, GROUP_LOGGED, COUNT_SET, DELETED }
+enum class UndoKind { LOGGED, GROUP_LOGGED, DELETED }
 
 /** The snackbar with Undo. [id] tells a new notice from the one already shown. */
 data class UndoNotice(val id: Int, val kind: UndoKind, val batch: Batch? = null, val bookmark: Bookmark? = null)
 
 sealed interface BookmarksDialog {
-    data class SetCount(val bookmarkId: Long, val title: BookmarkTitle, val current: Int) : BookmarksDialog
-
     /** Choose the group to move the bookmark to, or to copy it into when [duplicate]. */
     data class PickGroup(val bookmarkId: Long, val duplicate: Boolean, val choices: List<GroupChoice>, val canUngroup: Boolean) : BookmarksDialog
 
@@ -392,19 +390,6 @@ class BookmarksViewModel @Inject constructor(
         val bookmark = bookmarkOf(bookmarkId) ?: return@act
         val batch = tracker.markRange(bookmark.range, ReadContext.Bookmark(bookmark.id), ReadMethod.BULK, RangeMode.ADD)
         notify(UndoKind.LOGGED, batch = batch)
-    }
-
-    fun onSetCountRequested(bookmarkId: Long) {
-        val item = itemOf(bookmarkId) ?: return
-        _state.update { it.copy(dialog = BookmarksDialog.SetCount(bookmarkId, item.title, item.state.progress.fullReadings)) }
-    }
-
-    /** Every ayah of the passage gets exactly [count] readings today. */
-    fun onSetCount(count: Int) = act {
-        val dialog = takeDialog<BookmarksDialog.SetCount>() ?: return@act
-        val bookmark = bookmarkOf(dialog.bookmarkId) ?: return@act
-        val batch = tracker.setRangeCount(bookmark.range, ReadContext.Bookmark(bookmark.id), clock.today(), count)
-        if (batch != null) notify(UndoKind.COUNT_SET, batch = batch)
     }
 
     /** Deletes the bookmark; Undo [BookmarkLibrary.restore]s it. Its readings were never touched. */

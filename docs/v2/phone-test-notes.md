@@ -52,3 +52,6 @@ Decisions for 11–13 (owner, 2026-11-22): one list, groups then built-in Ungrou
 | 17 | Done (setting, off by default). |
 | 18 | Done: owner's Google Cloud TTS recording (سُبْحَانَ رَبِّيَ الْأَعْلَى وَبِحَمْدِهِ + sajda dua), plays after a sajda ayah then waits; setting on by default. |
 | 19 | Done: Revisit per bookmark. |
+| 20 | change | Reader, Bookmarks list, Day detail | Remove "Set count" (an unwanted check is deleted instead). "Today's readings" on Today and in the ayah menu opens the day's list, where a run opens to its ayahs and one can be deleted. | Undo deletes the batch's events (no faking). |
+| 21 | change | Bookmarks list | Visual design: make it consistent with the app and a bit nicer. | |
+| 22 | change | Go to | Accept Persian and Arabic input: ج12 / ج۱۲ = juz 12 (also ص for page, س for surah?), with a small hint. | |

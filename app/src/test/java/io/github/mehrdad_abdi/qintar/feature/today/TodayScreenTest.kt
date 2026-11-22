@@ -3,6 +3,7 @@ package io.github.mehrdad_abdi.qintar.feature.today
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -67,6 +68,13 @@ class TodayScreenTest {
         compose.onNodeWithText("No streak yet").performScrollTo().performClick()
 
         assertEquals(listOf(BookmarksRoute, ReadRoute, SettingsRoute, InsightsRoute), navigated)
+    }
+
+    @Test
+    fun `today's readings opens the list of today's readings`() {
+        open()
+        compose.onNodeWithTag(TODAY_READINGS_TAG).performScrollTo().performClick()
+        assertEquals(listOf<Any>(io.github.mehrdad_abdi.qintar.ui.navigation.DayDetailRoute("2026-11-15")), navigated)
     }
 
     @Test
