@@ -1,121 +1,107 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.roborazzi)
 }
 
 android {
-    namespace = "io.github.mehrdad_abdi.quranbookmarks"
+    namespace = "io.github.mehrdad_abdi.qintar"
     compileSdk = 36
 
     defaultConfig {
+        // Kept from v1 so that v2 installs as an update and can migrate v1 data.
         applicationId = "io.github.mehrdad_abdi.quranbookmarks"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.1"
-
+        versionCode = 200
+        versionName = "2.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
+    }
+
+    // The release key comes from the environment (CI secrets, see docs/v2/RELEASING.md).
+    // Without it the release build is left unsigned so that it can still be compiled and checked.
+    val keystoreFile = System.getenv("QINTAR_KEYSTORE_FILE")
+    signingConfigs {
+        if (keystoreFile != null) {
+            create("release") {
+                storeFile = file(keystoreFile)
+                storePassword = System.getenv("QINTAR_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("QINTAR_KEY_ALIAS")
+                keyPassword = System.getenv("QINTAR_KEY_PASSWORD")
+            }
         }
     }
 
     buildTypes {
+        debug {
+            // Lets a debug build sit next to an installed release (and next to v1).
+            // `-Pqintar.v1UpgradeTest=true` drops the suffix, so that a debug build installs over a
+            // debug build of v1 (same debug key) to test the in-place upgrade (docs/v2/RELEASING.md).
+            if (providers.gradleProperty("qintar.v1UpgradeTest").orNull != "true") {
+                applicationIdSuffix = ".debug"
+            }
+        }
         release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            signingConfig = signingConfigs.findByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
-
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
-    buildFeatures {
-        compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
-    }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
+    kotlinOptions { jvmTarget = "17" }
+    buildFeatures { compose = true; buildConfig = true }
+    androidResources { generateLocaleConfig = false }
+    testOptions { unitTests { isIncludeAndroidResources = true } }
+    packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
 dependencies {
-    // Core Android
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.core.splashscreen)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+    implementation(project(":domain"))
+    implementation(project(":data"))
 
-    // Jetpack Compose
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.compose.foundation)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
-    implementation(libs.activity.compose)
+    implementation(libs.lifecycle.runtime.compose)
     implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.process)
     implementation(libs.navigation.compose)
-
-    // Room
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    kapt(libs.room.compiler)
-
-    // Hilt
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
-    implementation(libs.hilt.work)
-
-    // Network
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.gson)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging)
-    implementation(libs.gson)
-
-    // Image Loading
-    implementation(libs.coil)
-
-    // ExoPlayer
-    implementation(libs.exoplayer)
-
-    // WorkManager
-    implementation(libs.work.runtime)
-
-    // Coroutines
-    implementation(libs.coroutines.core)
-    implementation(libs.coroutines.android)
-
-    // Testing
-    testImplementation(libs.junit)
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.mockito.kotlin)
-    testImplementation(libs.coroutines.test)
-    testImplementation(libs.turbine)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.compose.ui.test.junit4)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.session)
+    implementation(libs.media3.datasource)
+    implementation(libs.media3.database)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
+
+    testImplementation(testFixtures(project(":domain")))
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.junit)
+    testImplementation(platform(libs.compose.bom))
+    testImplementation(libs.compose.ui.test.junit4)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.roborazzi.junit.rule)
 }

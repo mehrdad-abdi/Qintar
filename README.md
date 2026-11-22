@@ -1,301 +1,101 @@
 # Qintar
 
-> **قال رسول الله (ص):**
->
-> من قَرَأَ عَشْرَ آیاتٍ فی لَیْلَةٍ لَمْ یُکْتَبْ مِنَ الْغافِلینَ 🔹،
-> وَمَنْ‌ قَرَأَ خَمْسینَ آیَةً کُتِبَ مِنَ الذّاکِرینَ 🔺،‌
-> وَمَنْ قَرَأَ‌ مِائَة آیةٍ کتب من القانِتینَ 🥉،
-> وَمَنْ‌ قَرَأَ مِائتی آیَةٍ کُتِبَ مِنَ الْخاشِعینَ 🥈،
-> وَمَنْ قَرَأَ ثَلاثَ مِئَةِ آیةٍ کُتِبَ مِنَ الْفائِزینَ 🥇،
-> وَمَنْ قَرَأَ خَمْسَ مِائَةِ آیةٍ کُتِبَ مِنَ المُجْتَهدینَ 🎖️،
-> وَمَنْ قَرَأَ ألْفَ آیةٍ کُتِبَ لَهُ قِنْطارٌ مِنْ بِرًْ 👑
-> القِنطارُ خَمْسَهَ عَشَرَ ألفَ (خَمْسونَ الفَ) مِثْقالٍ أرْبَعَةٌ وَعِشْرونَ قیراطاً أصْغَرُها مِثْلُ جَبَلِ اُحُدٍ وَأَکْبَرُها مابَیْنَ السماءِ وَالارض
->
-> *"The Messenger of Allah (peace be upon him and his family and companions) said:*
-> *Whoever recites ten verses in a night will not be written among the heedless,*
-> *whoever recites fifty verses will be written among those who remember Allah,*
-> *whoever recites one hundred verses will be written among the devout,*
-> *whoever recites two hundred verses will be written among the humble,*
-> *whoever recites three hundred verses will be written among the winners,*
-> *whoever recites five hundred verses will be written among the strivers,*
-> *and whoever recites one thousand verses will be rewarded with a Qintar of virtue."*
+Qintar is an Android app that keeps an honest daily count of the Quran ayahs you read and shows
+which of seven ranks the day reached. Read in the app, listen to a recitation, or read from a paper
+mushaf and log it: every ayah counts the same.
 
-A modern Android app inspired by this Hadith, helping you build consistent Quran reading habits through gamification, personalized bookmarks, automatic daily tracking, and spiritual progress badges.
+It works offline, has no account and no analytics, and nothing you read leaves your phone unless
+you export a backup yourself. English, فارسی and العربية, with right-to-left layouts.
 
-## Overview
+## The seven ranks
 
-Qintar is a comprehensive Quran companion app that helps you build consistent reading habits through bookmarks, daily tracking, and motivating progress badges. Organize your favorite passages, track your daily reading achievements, and work towards spiritual milestones inspired by authentic Hadith.
+The ladder follows a narration about nightly recitation: whoever recites ten ayahs in a night is not
+written among the heedless, and whoever recites a thousand is given a *qintar* of reward.
 
-### Why Qintar?
+| Ayahs in a day | Rank |
+|---:|---|
+| 10 | Not among the heedless (غیر غافل) |
+| 50 | Dhakir · the remembering (ذاکر) |
+| 100 | Qanit · the devout (قانت) |
+| 200 | Khashi‘ · the humble (خاشع) |
+| 300 | Fa’iz · the victorious (فائز) |
+| 500 | Mujtahid · the striver (مجتهد) |
+| 1000 | Qintar (صاحب قنطار) |
 
-- **Daily Reading Tracking**: Automatically track your daily Quran reading with beautiful progress badges
-- **Spiritual Milestones**: Seven badge levels from "Bismillah" to "Qintar" based on daily ayah counts
-- **Flexible Bookmarking**: Save individual ayahs, ranges, complete surahs, or specific pages
-- **Visual Experience**: High-quality Arabic calligraphy images for authentic reading
-- **Audio Playback**: Professional audio with reciter selection and playback controls
-- **Statistics & Calendar**: View reading streaks, 30-day charts, and monthly badge calendar
-- **Offline Access**: Automatic content caching for uninterrupted study
-- **Multiple Reading Modes**: Bookmarks, Random Ayah, and Khatm (complete Quran) reading
+Ranks, streaks and totals are always computed from the reading log; nothing derived is stored.
 
-## Core Features
+## Features
 
-### 📊 Daily Reading Tracking & Badges
-- **Automatic Progress Tracking**: Every ayah you read is automatically tracked
-- **Seven Badge Levels** (based on the Hadith above):
-  - 🔹 **Not Ghafil** (10 ayahs) - Not among the heedless
-  - 🔺 **Zakir** (50 ayahs) - Among those who remember Allah
-  - 🥉 **Qanit** (100 ayahs) - Among the devout
-  - 🥈 **Khashie** (200 ayahs) - Among the humble
-  - 🥇 **Faez** (300 ayahs) - Among the winners
-  - 🎖️ **Mujtahid** (500 ayahs) - Among the strivers
-  - 👑 **Qintar** (1000 ayahs) - Rewarded with a Qintar of virtue
-- **Reading Streaks**: Track your consistency with daily streak counters
-- **Statistics Dashboard**: 30-day bar charts, total ayahs read, best day, and average per day
-- **Badge Calendar**: Monthly view showing your daily achievements with visual badges
-- **Last 7 Days View**: Quick glance at recent reading activity
+- **Today**: the day's count and rank, distance to the next rank or your daily goal, a 7-day streak
+  strip, the khatm to continue, and the bookmarks scheduled for now.
+- **Reader**: one continuous, vertically scrolling text in the Uthmani script (Amiri Quran font),
+  per-ayah check that counts a reading (tap again for repeated readings), "Mark page", "Mark up to
+  here", jump to surah / juz / page / ayah, adjustable text size, optional line breaks at pause
+  marks, keep-screen-on, and an always-visible pill with today's count.
+- **Khatms**: any number at once, started from the beginning or from any position, with an optional
+  pages-per-day goal and projected finish, progress by surah, juz and the whole Quran, coverage per
+  juz, and "first unread".
+- **Bookmarks and groups**: an ayah, range, surah, page or juz, with a name and a description, a
+  number of readings per day, and a schedule (days of the week, a time window, or once). Groups
+  have their own schedule and can be read as one passage. Views: due now, by group, all.
+- **Audio**: ayah-by-ayah recitation from nine reciters, played in the background with lock-screen
+  and notification controls, repeat an ayah or a passage, speed control; listened ayahs can count
+  as read. Audio is cached for offline use, and a passage can be downloaded ahead.
+- **Insights**: totals, active days, averages, best day and streaks over 7 days, 30 days, a year
+  or all time; a daily chart; days at each rank; a month calendar, and the detail of any day, where
+  readings can be added or removed after the fact.
+- **Log reading**: add a passage, surah, pages, juz or just a number of ayahs to today or any earlier day.
+- **Reminders**: a daily reminder at a chosen time (skipped once the goal is reached) and a streak
+  reminder if fewer than ten ayahs have been read that day.
+- **Backup**: export everything to a JSON file and import it again (merge or replace) through the
+  system file picker. Android Auto Backup keeps the reading log and settings as well.
+- **Upgrading from Qintar 1**: bookmarks, tags (as groups), daily readings, the khatm position and
+  settings are carried over on the first start; v1 backup files can be imported too.
 
-### 🔖 Flexible Bookmark Management
-- **Multiple Types**: Save individual ayahs, ayah ranges, complete surahs, or specific pages
-- **Personal Notes**: Add descriptions to bookmarks (up to 500 characters)
-- **Full CRUD Operations**: Create, read, update, and delete bookmarks easily
-- **Smart Organization**: Bookmarks organized by creation date
+## Data sources and licences
 
-### 📖 Rich Reading Experience
-- **Visual Arabic Text**: High-resolution calligraphy images from Islamic Network CDN
-- **Audio Playback**: Professional reciters with play/pause/stop controls
-- **Multiple Reading Modes**:
-  - **Bookmark Reading**: Read your saved passages
-  - **Random Ayah/Page**: Get a random verse or page for variety
-  - **Khatm Reading**: Read the complete Quran (604 pages) with page navigation
-- **Auto-Scroll**: Synchronized scrolling with audio playback
-- **Jump Navigation**: Quickly jump to any surah, juz, or page number
+- **Quran text**: [Tanzil Quran Text](https://tanzil.net) (Uthmani, version 1.1), © 2007-2026
+  Tanzil Project, licensed under
+  [Creative Commons Attribution 3.0](https://creativecommons.org/licenses/by/3.0/). The text is
+  shown exactly as published and is not modified. Structure (surahs, juz, hizb, pages, sajdas) is
+  Tanzil's metadata. The database is built reproducibly from pinned sources by
+  [`tools/quran-data`](tools/quran-data/README.md).
+- **Fonts**: [Amiri Quran](https://github.com/aliftype/amiri) for the Quran text and
+  [Vazirmatn](https://github.com/rastikerdar/vazirmatn) for the interface, both under the
+  [SIL Open Font License 1.1](https://openfontlicense.org). The licence texts ship in the app
+  (Settings → Licences).
+- **Audio**: recitations are streamed from `cdn.islamic.network` (the Islamic Network CDN behind
+  alquran.cloud) when you play them, and cached on the device. Nothing else is sent; requests carry
+  no identifier, only a fixed user agent.
 
-### 🎵 Audio Features
-- **Reciter Selection**: Choose from multiple professional reciters
-- **Offline Playback**: Automatic caching of audio files for offline listening
-- **Playback Controls**: Play, pause, stop with intuitive controls
+## Building
 
-### 🔔 Daily Notifications
-- **Smart Reminders**: Customizable daily notifications
-- **Badge Motivation**: Reminders encourage you to earn your daily badge
-- **Flexible Scheduling**: Set your preferred notification time
+Requirements: JDK 17 and the Android SDK (compile SDK 36). The app runs on Android 8.0 (API 26) and later.
 
-### 💾 Backup & Restore
-- **Export Data**: Export all bookmarks and reading history
-- **Import Data**: Restore from backup files
-- **Data Portability**: Take your progress with you
-
-## Technical Architecture
-
-### Technology Stack
-- **Platform**: Native Android (Kotlin)
-- **UI Framework**: Jetpack Compose (Modern Android UI)
-- **Database**: Room (SQLite wrapper) for offline storage
-- **Image Loading**: Coil with intelligent caching
-- **Audio Playback**: ExoPlayer for professional audio experience
-- **Background Tasks**: WorkManager for downloads and notifications
-- **Networking**: Retrofit for API communication
-
-### API Integration
-**Data Source**: [alquran.cloud](https://alquran.cloud) - Free Quran API
-
-- **Image CDN**: `https://cdn.islamic.network/quran/images/{surah}_{ayah}.png`
-- **High-Res Images**: `https://cdn.islamic.network/quran/images/high-resolution/{surah}_{ayah}.png`
-- **Audio CDN**: `https://cdn.islamic.network/quran/audio/{bitrate}/{reciter}/{verse}.mp3`
-- **Metadata API**: `https://api.alquran.cloud/v1/` for verse information and available reciters
-
-### Database Schema
-```
-BookmarkGroup:
-- id, name, description, color
-- reciterEdition (selected audio reciter)
-- notificationSettings (custom schedule)
-
-Bookmark:
-- id, groupId, type (AYAH/RANGE/SURAH/PAGE)
-- startSurah, startAyah, endSurah, endAyah
-- description (personal notes)
-
-CachedContent:
-- id, surah, ayah
-- imagePath (local cached image)
-- audioPath (local cached audio)
-- metadata (verse information)
-```
-
-## Development Setup
-
-### Prerequisites
-- **Android Studio** (recommended) or compatible IDE
-- **Android SDK** API Level 24+ (Android 7.0+)
-- **Java 17** (Required for Android Gradle Plugin 8.13.0)
-- **Kotlin** support
-- **Internet connection** for initial content download
-
-### Environment Setup
 ```bash
-# Java 17 setup (via Homebrew on macOS)
-export JAVA_HOME=/usr/local/opt/openjdk@17
-export PATH=/usr/local/opt/openjdk@17/bin:$PATH
+./gradlew :app:assembleDebug                      # debug APK, app id ...quranbookmarks.debug
+./gradlew :app:assembleRelease                    # unsigned unless the signing variables are set
 ```
 
-### Getting Started
-1. Clone the repository
-   ```bash
-   git clone https://github.com/mehrdad-abdi/Qintar.git
-   cd Qintar
-   ```
+Signing and publishing are described in [`docs/v2/RELEASING.md`](docs/v2/RELEASING.md).
 
-2. Open in Android Studio
-   - File → Open → Select project directory
-   - Let Android Studio sync dependencies
+## Testing
 
-3. Build and Run
-   ```bash
-   # Build the project
-   ./gradlew assembleDebug --no-daemon
-
-   # Run tests
-   ./gradlew test --no-daemon
-
-   # Install on device
-   ./gradlew installDebug
-   ```
-
-### Development Status
-
-#### ✅ All Core Features Completed!
-
-**Reading & Tracking:**
-- ✅ Daily ayah reading tracking with automatic badge progression
-- ✅ Seven Hadith-based badge levels (10, 50, 100, 200, 300, 500, 1000 ayahs)
-- ✅ Badge icons: 🔹 → 🔺 → 🥉 → 🥈 → 🥇 → 🎖️ → 👑
-- ✅ Reading streak calculation and display
-- ✅ Statistics dashboard with 30-day charts
-- ✅ Badge calendar with monthly view
-- ✅ Last 7 days quick view
-
-**Bookmark Management:**
-- ✅ Create bookmarks (ayah, range, surah, page)
-- ✅ Edit and delete bookmarks
-- ✅ Personal notes for each bookmark
-- ✅ Full CRUD operations
-
-**Reading Experience:**
-- ✅ Bookmark reading screen with Arabic text and audio
-- ✅ Random ayah/page selection
-- ✅ Khatm reading (complete Quran 604 pages)
-- ✅ Jump navigation (surah, juz, page)
-- ✅ Auto-scroll synchronized with audio
-
-**Audio & Media:**
-- ✅ Multiple reciter selection
-- ✅ Audio playback controls
-- ✅ Offline caching with WorkManager
-- ✅ Background audio playback
-
-**Settings & Personalization:**
-- ✅ Theme selection (Light/Dark/System)
-- ✅ Primary color customization
-- ✅ Multilingual support (English, Arabic, Persian)
-- ✅ Daily notification scheduling
-- ✅ Backup and restore functionality
-
-**Technical:**
-- ✅ Clean architecture (Domain/Data/Presentation layers)
-- ✅ Jetpack Compose UI
-- ✅ Room database with offline-first approach
-- ✅ Hilt dependency injection
-- ✅ Comprehensive unit tests
-- ✅ Reactive data with Kotlin Flow
-
-### Project Structure
-```
-app/
-├── src/main/
-│   ├── java/com/quran/bookmarks/
-│   │   ├── data/          # Database, API, Repository
-│   │   ├── domain/        # Business logic, Use cases
-│   │   ├── presentation/  # UI, ViewModels
-│   │   └── di/           # Dependency Injection
-│   ├── res/
-│   │   ├── values/       # Strings, Colors, Dimensions
-│   │   └── drawable/     # Icons and graphics
-│   └── AndroidManifest.xml
-└── build.gradle
+```bash
+./gradlew :domain:test :data:testDebugUnitTest :app:testDebugUnitTest   # all unit tests (JVM + Robolectric)
+./gradlew :app:verifyRoborazziDebug                                     # screenshot comparison
+./gradlew :app:lintDebug
+python3 -I tools/quran-data/build_quran_db.py --check                   # the Quran database is reproducible
 ```
 
-## What Makes Qintar Special?
+Screenshot references live in `app/src/test/screenshots/` (light and dark, English and Persian);
+re-record them with `./gradlew :app:recordRoborazziDebug` after an intended UI change. Pull requests
+run all of the above in GitHub Actions.
 
-### Hadith-Inspired Badge System
-Unlike other Quran apps, Qintar's badge system is directly inspired by an authentic Hadith that rewards readers based on the number of ayahs read daily. This gamification approach motivates consistent reading while staying true to Islamic traditions.
+## Project layout
 
-### Comprehensive Progress Tracking
-- **Daily Tracking**: Automatic tracking of every ayah you read
-- **Visual Calendar**: See your entire month's reading activity at a glance
-- **Meaningful Metrics**: Streaks, totals, averages, and best days
-- **Badge Progression**: Visual representation of spiritual growth
-
-### Flexible Reading Experience
-- **Bookmarks**: Save and organize your favorite passages
-- **Random Mode**: Discover new verses with random ayah/page selection
-- **Khatm Mode**: Read the complete Quran with page-by-page navigation
-- **Offline First**: All content cached for uninterrupted access
-
-### Modern Architecture
-- **Native Android**: Built with latest Jetpack Compose
-- **Clean Code**: Follows clean architecture principles
-- **Well-Tested**: Comprehensive unit test coverage
-- **Multilingual**: Full support for English, Arabic, and Persian
-
-## Future Roadmap
-
-### Potential Enhancements
-- 📊 **Advanced Analytics**: Deeper insights into reading patterns and habits
-- 🌙 **Prayer Times Integration**: Combine reading with prayer time reminders
-- 📝 **Translation Support**: Display verse translations alongside Arabic text
-- 🎯 **Reading Goals**: Set and track custom reading goals
-- 🔍 **Search Functionality**: Search within your bookmarks and notes
-- 👥 **Community Features**: Share achievements and inspire others (optional)
-- 🌐 **Cloud Sync**: Sync data across multiple devices
-- 🎨 **Custom Themes**: More color schemes and customization options
-
-**Note**: The app is feature-complete and fully functional. Future enhancements will be based on community feedback and requests.
-
-## Contributing
-
-We welcome contributions! Please read our contributing guidelines:
-
-1. **Code Style**: Follow Kotlin coding conventions
-2. **Architecture**: Maintain clean architecture principles
-3. **Testing**: Include unit tests for new features
-4. **Documentation**: Update README for significant changes
-
-### Issue Reporting
-- Use GitHub Issues for bug reports and feature requests
-- Provide detailed reproduction steps
-- Include device information and Android version
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- **Quran API**: [alquran.cloud](https://alquran.cloud) - Free Quran API and Islamic Network for high-quality Arabic calligraphy images
-- **Development**: [Claude Code](https://claude.com/claude-code) - AI-assisted development tool used to build this entire project
-- **Inspiration**: The Hadith of Prophet Muhammad (ﷺ) about the rewards of Quran recitation
-
-## About This Project
-
-**Qintar** was built entirely through AI-assisted development with Claude Code. From architecture design to implementation, from UI/UX to testing, every aspect of this app represents a collaboration between human vision and AI capability.
-
-**Repository**: [github.com/mehrdad-abdi/Qintar](https://github.com/mehrdad-abdi/Qintar)
-
----
-
-**Built with ❤️ in Antwerp 🇧🇪**
-
-**For the Muslim community and all people**
-
-*May this app help you strengthen your connection with the Quran and find peace in its verses.*
+- `domain/` — pure Kotlin: rules for counting, ranks, streaks, khatms, schedules, backups.
+- `data/` — Room databases, preferences, backup codec, the carry-over from version 1.
+- `app/` — Jetpack Compose UI, playback, reminders.
+- `tools/quran-data/` — the generator for the bundled Quran database.
+- `docs/v2/DESIGN.md` — the product and technical design.

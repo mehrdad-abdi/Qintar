@@ -1,0 +1,2 @@
+# Pinned by SHA-256: never let git rewrite line endings.
+source/** -text

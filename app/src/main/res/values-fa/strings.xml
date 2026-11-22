@@ -1,284 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App Name -->
     <string name="app_name">قنطار</string>
 
-    <!-- Common -->
-    <string name="back">بازگشت</string>
-    <string name="settings">تنظیمات</string>
-    <string name="refresh">بروزرسانی</string>
-    <string name="cancel">لغو</string>
-    <string name="save">ذخیره</string>
-    <string name="delete">حذف</string>
-    <string name="edit">ویرایش</string>
-    <string name="create">ایجاد</string>
-    <string name="loading">در حال بارگذاری…</string>
-    <string name="error_generic">خطایی رخ داد</string>
+    <string name="tab_today">امروز</string>
+    <string name="tab_read">قرائت</string>
+    <string name="tab_bookmarks">نشان‌ها</string>
+    <string name="tab_insights">آمار</string>
 
-    <!-- Today's Progress Screen -->
-    <string name="screen_today_title">پیشرفت امروز</string>
-    <string name="ayahs_today">آیات امروز</string>
-    <string name="current_badge">نشان فعلی:</string>
-    <string name="button_continue_reading">خواندن نشانه‌ها</string>
-    <string name="button_random_reading">خواندن تصادفی</string>
-    <string name="badge_max_achieved">🎉 بالاترین نشان به دست آمد!</string>
-    <string name="badge_progress_format">%1$d آیه دیگر تا رسیدن به %2$s</string>
+    <string name="screen_reader">قرائت</string>
+    <string name="screen_khatm_detail">ختم</string>
+    <string name="screen_bookmark_editor">نشان</string>
+    <string name="screen_group_editor">گروه</string>
+    <string name="screen_day_detail">روز</string>
+    <string name="screen_settings">تنظیمات</string>
+    <string name="screen_onboarding">خوش آمدید</string>
+    <string name="placeholder_message">این صفحه به‌زودی آماده می‌شود.</string>
 
-    <!-- Streaks -->
-    <string name="streaks">سابقه تداوم</string>
-    <string name="overall_reading_streak">📊 سابقه کلی خواندن</string>
-    <string name="days_format">%d روز</string>
+    <string name="rank_name_not_heedless">غیر غافل</string>
+    <string name="rank_name_dhakir">ذاکر</string>
+    <string name="rank_name_qanit">قانت</string>
+    <string name="rank_name_khashi">خاشع</string>
+    <string name="rank_name_faiz">فائز</string>
+    <string name="rank_name_mujtahid">مجتهد</string>
+    <string name="rank_name_qintar">صاحب قنطار</string>
+    <string name="rank_short_not_heedless">غیر غافل</string>
+    <string name="rank_short_dhakir">ذاکر</string>
+    <string name="rank_short_qanit">قانت</string>
+    <string name="rank_short_khashi">خاشع</string>
+    <string name="rank_short_faiz">فائز</string>
+    <string name="rank_short_mujtahid">مجتهد</string>
+    <string name="rank_short_qintar">صاحب قنطار</string>
+    <string name="rank_distance">%1$s تا %2$s</string>
+    <string name="rank_reached">به «%1$s» رسیدید</string>
+    <string name="rank_ladder_description">رتبهٔ %1$s از %2$s: %3$s</string>
+    <string name="rank_ladder_none_description">هنوز به رتبه‌ای نرسیده‌اید</string>
 
-    <!-- Last 7 Days -->
-    <string name="last_7_days">7 روز گذشته</string>
-    <string name="view_calendar">مشاهده تقویم</string>
+    <string name="today_pill_count">%1$s امروز</string>
 
-    <!-- All-Time Stats -->
-    <string name="all_time_stats">آمار کلی</string>
-    <string name="view_more">مشاهده بیشتر</string>
-    <string name="total_ayahs">مجموع آیات</string>
-    <string name="best_day">بهترین روز</string>
-    <string name="ayahs_format">%d آیه</string>
+    <string name="action_read">بخوان</string>
+    <string name="action_save">ذخیره</string>
+    <string name="action_cancel">انصراف</string>
+    <string name="action_back">بازگشت</string>
+    <string name="state_expanded">باز</string>
+    <string name="state_collapsed">بسته</string>
 
-    <!-- Hadith Screen -->
-    <string name="screen_hadith_title">حدیث درباره خواندن قرآن</string>
-    <string name="hadith_arabic_title">عربی</string>
-    <string name="hadith_translation_english">ترجمه انگلیسی</string>
-    <string name="hadith_translation_farsi">ترجمه فارسی</string>
+    <string name="read_state_not_read">امروز خوانده نشده</string>
+    <string name="read_state_partial">بخشی امروز خوانده شده</string>
+    <string name="read_state_done">امروز خوانده شد</string>
 
-    <!-- Settings Screen -->
-    <string name="settings_audio">صدا</string>
-    <string name="settings_reciter">قاری</string>
-    <string name="settings_notifications">اعلان‌ها</string>
-    <string name="settings_daily_reminder">یادآوری روزانه</string>
-    <string name="settings_daily_reminder_desc">دریافت یادآوری‌های روزانه خواندن قرآن</string>
-    <string name="settings_reminder_time">زمان یادآوری</string>
-    <string name="settings_appearance">ظاهر</string>
-    <string name="settings_theme">تم</string>
-    <string name="settings_theme_light">روشن</string>
-    <string name="settings_theme_dark">تاریک</string>
-    <string name="settings_theme_system">پیش‌فرض سیستم</string>
-    <string name="settings_primary_color">رنگ اصلی</string>
-    <string name="settings_language">زبان</string>
-    <string name="settings_data">داده‌ها</string>
-    <string name="settings_backup_restore">پشتیبان‌گیری و بازیابی</string>
-    <string name="settings_backup_restore_desc">صادر یا وارد کردن داده‌های شما</string>
-    <string name="dialog_select_theme">انتخاب تم</string>
-    <string name="dialog_select_color">انتخاب رنگ اصلی</string>
-    <string name="dialog_select_language">انتخاب زبان</string>
+    <string name="set_count_title">تنظیم تعداد</string>
+    <string name="count_field_label">تعداد</string>
+    <string name="count_field_decrease">کم کردن</string>
+    <string name="count_field_increase">زیاد کردن</string>
+    <string name="times_n">×%1$s</string>
 
-    <!-- Add Bookmark Screen -->
-    <string name="screen_add_bookmark_title">افزودن نشانه</string>
-    <string name="bookmark_type">نوع نشانه</string>
-    <string name="bookmark_type_ayah">آیه واحد</string>
-    <string name="bookmark_type_range">محدوده آیات</string>
-    <string name="bookmark_type_surah">سوره کامل</string>
-    <string name="bookmark_type_page">مرجع صفحه</string>
-    <string name="bookmark_type_ayah_desc">نشانه‌گذاری یک آیه خاص</string>
-    <string name="bookmark_type_range_desc">نشانه‌گذاری چند آیه متوالی</string>
-    <string name="bookmark_type_surah_desc">نشانه‌گذاری یک سوره کامل</string>
-    <string name="bookmark_type_page_desc">نشانه‌گذاری با شماره صفحه</string>
-    <string name="select_surah">انتخاب سوره</string>
-    <string name="ayah_number">شماره آیه</string>
-    <string name="start_ayah">آیه شروع</string>
-    <string name="end_ayah">آیه پایان</string>
-    <string name="page_number">شماره صفحه</string>
-    <string name="notes_optional">یادداشت‌ها (اختیاری)</string>
-    <string name="notes_placeholder">یادداشت‌های شخصی درباره این نشانه را اضافه کنید…</string>
-    <string name="button_create_bookmark">ایجاد نشانه</string>
-    <string name="complete_surah_note">سوره کامل نشانه‌گذاری خواهد شد</string>
-    <string name="bookmark_preview">پیش‌نمایش</string>
+    <string name="ayah_state_unread">امروز خوانده نشده</string>
+    <string name="ayah_state_read_today">امروز خوانده شده</string>
+    <string name="ayah_state_read_times">امروز %1$s بار خوانده شده</string>
+    <string name="ayah_state_covered_earlier">در روزهای پیش خوانده شده</string>
+    <string name="ayah_action_mark_read">علامت خوانده‌شده</string>
+    <string name="ayah_action_bookmark">نشان کردن</string>
+    <string name="ayah_bookmarked">نشان شده</string>
+    <string name="ayah_action_play">پخش</string>
+    <string name="ayah_action_pause">مکث</string>
+    <string name="ayah_action_more">کارهای بیشتر</string>
+    <string name="ayah_action_details">جزئیات آیه</string>
 
-    <!-- Edit Bookmark Screen -->
-    <string name="screen_edit_bookmark_title">ویرایش نشانه</string>
-    <string name="button_save_changes">ذخیره تغییرات</string>
-    <string name="button_delete_bookmark">حذف نشانه</string>
-    <string name="button_update_bookmark">به‌روزرسانی نشانه</string>
+    <string name="position_bar_open">تغییر موقعیت</string>
+    <string name="player_play">پخش صوت</string>
+    <string name="player_pause">مکث صوت</string>
+    <string name="player_close">بستن پخش‌کننده</string>
+    <string name="player_speed">سرعت پخش %1$s</string>
 
-    <!-- Statistics Screen -->
-    <string name="screen_statistics_title">آمار</string>
-    <string name="last_30_days">30 روز گذشته</string>
-    <string name="summary_30_days">خلاصه 30 روز</string>
-    <string name="days_read">روزهای خوانده شده</string>
-    <string name="average_per_day">میانگین/روز</string>
-    <string name="no_reading_data">هنوز داده خواندنی وجود ندارد</string>
-    <string name="badge_distribution">توزیع نشان‌ها</string>
-    <string name="no_badges_earned">هنوز نشانی کسب نشده است. برای کسب نشان شروع به خواندن کنید!</string>
-    <string name="days_count_format">%d روز</string>
-    <string name="no_data_available">داده‌ای موجود نیست</string>
-
-    <!-- Calendar Screen -->
-    <string name="screen_calendar_title">تقویم نشان‌ها</string>
-    <string name="today">امروز</string>
-    <string name="previous_month">ماه قبل</string>
-    <string name="next_month">ماه بعد</string>
-    <string name="day_sun">یکشنبه</string>
-    <string name="day_mon">دوشنبه</string>
-    <string name="day_tue">سه‌شنبه</string>
-    <string name="day_wed">چهارشنبه</string>
-    <string name="day_thu">پنج‌شنبه</string>
-    <string name="day_fri">جمعه</string>
-    <string name="day_sat">شنبه</string>
-    <string name="ayahs_count_short">%d آیه</string>
-    <string name="no_reading_recorded">خواندنی ثبت نشده است</string>
-    <string name="badge_levels">سطوح نشان</string>
-    <string name="badge_threshold_format">%d+ آیه</string>
-
-    <!-- Backup Screen -->
-    <string name="screen_backup_title">پشتیبان‌گیری و بازیابی</string>
-    <string name="about_backup">درباره پشتیبان‌گیری</string>
-    <string name="backup_description">نشانه‌ها، فعالیت خواندن و تنظیمات خود را به فایل JSON صادر کنید. می‌توانید آن‌ها را بعداً یا روی دستگاه دیگری بازیابی کنید.</string>
-    <string name="export_data">صادر کردن داده‌ها</string>
-    <string name="export_all_data">صادر کردن تمام داده‌ها</string>
-    <string name="export_bookmarks_only">صادر کردن فقط نشانه‌ها</string>
-    <string name="import_data">وارد کردن داده‌ها</string>
-    <string name="import_from_file">وارد کردن از فایل</string>
-    <string name="import_note">توجه: وارد کردن با \'جایگزینی همه\' تمام داده‌های موجود را حذف می‌کند. از \'ادغام\' برای ترکیب با داده‌های موجود استفاده کنید.</string>
-    <string name="import_backup_title">وارد کردن پشتیبان</string>
-    <string name="backup_summary_title">خلاصه پشتیبان:</string>
-    <string name="import_strategy_title">استراتژی واردات:</string>
-    <string name="import_merge">ادغام با داده‌های موجود</string>
-    <string name="import_merge_desc">افزودن موارد جدید، نگه‌داشتن موجود</string>
-    <string name="import_replace_all">جایگزینی تمام داده‌ها</string>
-    <string name="import_replace_all_desc">حذف موجود، وارد کردن همه</string>
-    <string name="import_bookmarks_only">فقط نشانه‌ها</string>
-    <string name="import_bookmarks_only_desc">فقط نشانه‌ها را وارد کنید</string>
-    <string name="button_import">وارد کردن</string>
-    <string name="backup_exported">پشتیبان با موفقیت صادر شد</string>
-    <string name="backup_imported">پشتیبان با موفقیت وارد شد</string>
-    <string name="backup_summary_bookmarks">نشانه‌ها: %d</string>
-    <string name="backup_summary_activity">فعالیت خواندن: %d روز</string>
-    <string name="backup_summary_ayahs">مجموع آیات خوانده شده: %d</string>
-    <string name="backup_summary_created">ایجاد شده: %s</string>
-    <string name="backup_summary_version">نسخه برنامه: %s</string>
-    <string name="backup_export">صدور داده‌ها</string>
-    <string name="backup_export_desc">ذخیره نمایه‌ها و نشانه‌های شما</string>
-    <string name="backup_import">وارد کردن داده‌ها</string>
-    <string name="backup_import_desc">بازیابی از فایل پشتیبان</string>
-    <string name="backup_success">پشتیبان با موفقیت ایجاد شد</string>
-    <string name="restore_success">داده‌ها با موفقیت بازیابی شدند</string>
-    <string name="backup_error">ایجاد پشتیبان با خطا مواجه شد</string>
-    <string name="restore_error">بازیابی داده‌ها با خطا مواجه شد</string>
-
-    <!-- Random Mode Screen -->
-    <string name="screen_random_title">خواندن تصادفی</string>
-    <string name="dismiss">بستن</string>
-    <string name="choose_reading_mode">انتخاب حالت خواندن</string>
-    <string name="select_how_read_today">انتخاب کنید امروز چگونه می‌خواهید بخوانید</string>
-    <string name="random_ayah">آیه تصادفی</string>
-    <string name="random_page">صفحه تصادفی</string>
-    <string name="random_mode_single">آیه تصادفی</string>
-    <string name="random_mode_range">محدوده تصادفی</string>
-    <string name="random_mode_single_desc">خواندن یک آیه تصادفی</string>
-    <string name="random_mode_range_desc">خواندن چند آیه تصادفی</string>
-
-    <!-- Bookmarks Screen -->
-    <string name="screen_bookmarks_title">نشانه‌ها</string>
-    <string name="tab_all">همه</string>
-    <string name="add_bookmark">افزودن نشانه</string>
-    <string name="empty_bookmarks">هنوز نشانه‌ای وجود ندارد</string>
-    <string name="empty_bookmarks_desc">اولین نشانه خود را برای شروع اضافه کنید</string>
-    <string name="empty_bookmarks_message">هنوز نشانه‌ای وجود ندارد. برای افزودن + را بزنید!</string>
-    <string name="empty_bookmarks_title">هنوز نشانه‌ای وجود ندارد</string>
-    <string name="button_add_first_bookmark">اولین نشانه خود را اضافه کنید</string>
-
-    <!-- Reading Screen -->
-    <string name="screen_reading_title">خواندن</string>
-    <string name="playback_speed">سرعت پخش</string>
-    <string name="play">پخش</string>
-    <string name="pause">توقف</string>
-    <string name="select_reciter">انتخاب قاری</string>
-    <string name="retry">تلاش مجدد</string>
-    <string name="no_verses_display">آیه‌ای برای نمایش وجود ندارد</string>
-    <string name="close">بستن</string>
-
-    <!-- Profile Screens -->
-    <string name="add_profile">افزودن نمایه</string>
-    <string name="edit_profile">ویرایش نمایه</string>
-    <string name="profile_name">نام نمایه</string>
-    <string name="delete_profile">حذف نمایه</string>
-
-    <!-- Reciter Selection -->
-    <string name="reciter_selected">قاری با موفقیت انتخاب شد</string>
-    <string name="screen_reciter_title">انتخاب قاری</string>
-    <string name="play_sample">پخش نمونه</string>
-    <string name="selected">انتخاب شده</string>
-
-    <!-- Time Picker -->
-    <string name="select_reminder_time">انتخاب زمان یادآوری</string>
-    <string name="ok">تأیید</string>
-
-    <!-- Surah Dropdown -->
-    <string name="open_surah_selection">باز کردن انتخاب سوره</string>
-    <string name="search_surahs">جستجوی سوره‌ها…</string>
-    <string name="search">جستجو</string>
-    <string name="clear_search">پاک کردن جستجو</string>
-    <string name="surahs_found">%d سوره یافت شد</string>
-    <string name="ayahs_in_surah">%d آیه</string>
-
-    <!-- Bookmark Header -->
-    <string name="delete_bookmark">حذف نشانه</string>
-    <string name="delete_bookmark_confirm">آیا مطمئن هستید که می‌خواهید این نشانه را حذف کنید؟</string>
-
-    <!-- Notifications -->
-    <string name="notification_title">قنطار - وقت خواندن</string>
-    <string name="notification_message">گنج معنوی خود را جمع کنید. قرآن بخوانید و نشان روزانه خود را کسب کنید!</string>
-    <string name="notification_channel_name">یادآوری‌های خواندن روزانه</string>
-    <string name="notification_channel_description">اعلان‌ها برای یادآوری خواندن نشانه‌های شما</string>
-
-    <!-- Errors -->
-    <string name="error_invalid_ayah">شماره آیه نامعتبر است</string>
-    <string name="error_invalid_range">محدوده آیات نامعتبر است</string>
-    <string name="error_select_surah">لطفاً یک سوره انتخاب کنید</string>
-
-    <!-- Badge Names -->
-    <string name="badge_none">بسم الله</string>
-    <string name="badge_ghair_ghafil">غیر غافل</string>
-    <string name="badge_dhakir">ذاکر</string>
-    <string name="badge_qanit">قانت</string>
-    <string name="badge_khashie">خاشع</string>
-    <string name="badge_faez">فائز</string>
-    <string name="badge_mujtahid">مجتهد</string>
-    <string name="badge_sahib_qantar">صاحب القنطار</string>
-
-    <!-- Khatm Reading Screen -->
-    <string name="screen_khatm_title">خواندن ختم</string>
-    <string name="button_khatm_reading">خواندن ختم</string>
-    <string name="page_indicator">صفحه %1$d / 604</string>
-    <string name="jump_to">پرش به</string>
-    <string name="tab_page">صفحه</string>
-    <string name="tab_juz">جزء</string>
-    <string name="tab_surah">سوره</string>
-    <string name="enter_page_number">شماره صفحه را وارد کنید (1-604)</string>
-    <string name="select_juz">انتخاب جزء (1-30)</string>
-    <string name="invalid_page">شماره صفحه نامعتبر</string>
-    <string name="play_all_page">پخش همه</string>
-    <string name="juz_format">جزء %d</string>
-
-    <!-- About Screen -->
-    <string name="screen_about_title">درباره</string>
-    <string name="about_app_description">یک برنامه مدرن اندروید الهام گرفته از حدیث، که به شما کمک می‌کند عادت‌های مداوم خواندن قرآن را از طریق نشانه‌های شخصی، پیگیری خودکار روزانه و نشان‌های پیشرفت معنوی بسازید.</string>
-    <string name="about_hadith_title">حدیث الهام‌بخش</string>
-    <string name="about_hadith_arabic">من قَرَأَ عَشْرَ آیاتٍ فی لَیْلَةٍ لَمْ یُکْتَبْ مِنَ الْغافِلینَ 🔹، وَمَنْ‌ قَرَأَ خَمْسینَ آیَةً کُتِبَ مِنَ الذّاکِرینَ 🔺،‌ وَمَنْ قَرَأَ‌ مِائَة آیةٍ کتب من القانِتینَ 🥉، وَمَنْ‌ قَرَأَ مِائتی آیَةٍ کُتِبَ مِنَ الْخاشِعینَ 🥈، وَمَنْ قَرَأَ ثَلاثَ مِئَةِ آیةٍ کُتِبَ مِنَ الْفائِزینَ 🥇، وَمَنْ قَرَأَ خَمْسَ مِائَةِ آیةٍ کُتِبَ مِنَ المُجْتَهدینَ 🎖️، وَمَنْ قَرَأَ ألْفَ آیةٍ کُتِبَ لَهُ قِنْطارٌ مِنْ بِرًْ 👑</string>
-    <string name="about_hadith_translation">رسول خدا (صلی الله علیه و آله و صحبه و سلم) فرمودند: کسی که در یک شب ده آیه بخواند از غافلان نوشته نمی‌شود، کسی که پنجاه آیه بخواند از ذاکران نوشته می‌شود، کسی که صد آیه بخواند از قانتان نوشته می‌شود، کسی که دویست آیه بخواند از خاشعان نوشته می‌شود، کسی که سیصد آیه بخواند از فایزان نوشته می‌شود، کسی که پانصد آیه بخواند از مجتهدان نوشته می‌شود، و کسی که هزار آیه بخواند برایش یک قنطار از نیکی نوشته می‌شود.</string>
-    <string name="about_open_source">متن باز</string>
-    <string name="about_open_source_desc">این برنامه متن باز و رایگان برای همه مردم است.</string>
-    <string name="about_built_with_claude">ساخته شده با Claude Code</string>
-    <string name="about_built_with_claude_desc">این برنامه به طور کامل از طریق توسعه با کمک هوش مصنوعی با Claude Code ساخته شده است.</string>
-    <string name="about_github_repo">صفحه GitHub</string>
-    <string name="about_visit_github">بازدید در GitHub</string>
-    <string name="about_license">مجوز</string>
-    <string name="about_license_desc">مجوز MIT - آزاد برای استفاده، تغییر و توزیع</string>
-    <string name="about_acknowledgments">قدردانی‌ها</string>
-    <string name="about_api_provider">API قرآن: alquran.cloud</string>
-    <string name="about_api_provider_desc">شبکه اسلامی برای داده‌های قرآن</string>
-    <string name="about_version">نسخه</string>
-    <string name="about_powered_by">قدرت گرفته از Claude Code 🤖</string>
-    <string name="about_footer_built">ساخته شده با ❤️ در آنتورپ 🇧🇪</string>
-    <string name="about_footer_for">برای جامعه مسلمانان و همه مردم</string>
-    <string name="about_claude_code">Claude Code</string>
-    <string name="about_claude_code_desc">توسعه مبتنی بر هوش مصنوعی</string>
-    <string name="about_github_url">https://github.com/mehrdad-abdi/Qintar</string>
-    <string name="about_alquran_url">https://alquran.cloud</string>
-    <string name="about_claude_url">https://claude.com/claude-code</string>
-    <string name="about_version_name">1.0.0</string>
+    <!-- Today and Reader features -->
+    <string name="khatm_default_name">ختم من</string>
+    <string name="khatm_migrated_name">ختم نسخهٔ پیشین</string>
+    <string name="action_undo">واگرد</string>
+    <string name="action_remove">حذف</string>
+    <string name="action_continue">ادامه</string>
+    <string name="ayah_name">%1$s %2$s</string>
+    <string name="ayah_label">%1$s، آیهٔ %2$s</string>
+    <string name="surah_facts">%1$s آیه · %2$s</string>
+    <string name="revelation_meccan">مکی</string>
+    <string name="revelation_medinan">مدنی</string>
+    <string name="bookmark_title_range">%1$s %2$s–%3$s</string>
+    <string name="bookmark_title_across">%1$s – %2$s</string>
+    <string name="page_n">صفحهٔ %1$s</string>
+    <string name="juz_n">جزء %1$s</string>
+    <string name="page_divider">صفحهٔ %1$s · جزء %2$s</string>
+    <string name="page_divider_hizb">صفحهٔ %1$s · جزء %2$s · حزب %3$s</string>
+    <string name="reader_position">صفحهٔ %1$s از %2$s · %3$s٪</string>
+    <string name="sajda_label">سجده</string>
+    <string name="ayah_menu_set_count">تعیین تعداد…</string>
+    <string name="ayah_menu_mark_up_to_here">علامت‌زدن تا اینجا</string>
+    <string name="bulk_marked">%1$s آیه علامت خورد</string>
+    <string name="khatm_skip_message">همهٔ %1$s آیه از %2$s تا اینجا خوانده‌شده علامت بخورد؟</string>
+    <string name="khatm_skip_mark_n">علامت‌زدن %1$s آیه</string>
+    <string name="khatm_skip_only_this">فقط همین آیه</string>
+    <string name="unstar_confirm_title">این نشانک حذف شود؟</string>
+    <string name="unstar_confirm_message">این نشانک توضیح، برنامه یا گروه دارد و آن‌ها هم با آن حذف می‌شوند.</string>
+    <string name="reader_not_found_title">چیزی برای خواندن اینجا نیست</string>
+    <string name="reader_not_found_message">این ختم، نشانک یا گروه دیگر وجود ندارد.</string>
+    <string name="rank_distance_goal">%1$s تا %2$s، هدف شما</string>
+    <string name="rank_distance_first">%1$s آیه تا نخستین مرتبه</string>
+    <string name="ring_of_next">از %1$s</string>
+    <string name="today_streak_none">هنوز پیوستگی‌ای نیست</string>
+    <string name="today_streak_days">پیوستگی %1$s روزه</string>
+    <string name="today_streak_at_risk">پیوستگی %1$s روزه · امروز بخوانید تا بماند</string>
+    <string name="week_day_description">%1$s، %2$s آیه</string>
+    <string name="percent">%1$s٪</string>
+    <string name="today_label">امروز</string>
+    <string name="today_continue_khatm">ادامهٔ ختم</string>
+    <string name="khatm_today_pages">%1$s از %2$s صفحه</string>
+    <string name="khatm_whole_quran">همهٔ قرآن</string>
+    <string name="today_no_khatm_title">هنوز ختمی ندارید</string>
+    <string name="today_no_khatm_message">ختم جای شما را هنگام خواندن قرآن از آغاز تا پایان نگه می‌دارد.</string>
+    <string name="today_start_khatm">شروع ختم</string>
+    <string name="today_available_now">اکنون در دسترس</string>
+    <string name="today_n_left">%1$s مانده</string>
+    <string name="today_ungrouped">بدون گروه</string>
+    <string name="today_nothing_due">اکنون چیزی در نوبت نیست.</string>
+    <string name="today_no_routine_title">برنامه‌ای تنظیم نشده</string>
+    <string name="today_no_routine_message">به یک نشانک یا گروه برنامه بدهید تا روال روزانه بسازید.</string>
+    <string name="today_open_bookmarks">بازکردن نشانک‌ها</string>
+    <string name="today_browse_quran">مرور قرآن</string>
+    <plurals name="ayahs_n">
+        <item quantity="one">%1$s آیه</item>
+        <item quantity="other">%1$s آیه</item>
+    </plurals>
+    <string name="progress_of">%1$s / %2$s</string>
 </resources>
