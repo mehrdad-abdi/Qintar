@@ -114,12 +114,12 @@
     <string name="today_no_khatm_title">لا ختمة بعد</string>
     <string name="today_no_khatm_message">الختمة تحفظ موضعك وأنت تقرأ القرآن من أوله إلى آخره.</string>
     <string name="today_start_khatm">ابدأ ختمة</string>
-    <string name="today_available_now">متاح الآن</string>
+    <string name="today_available_now">علامات اليوم</string>
     <string name="today_n_left">%1$s متبقية</string>
     <string name="today_ungrouped">بلا مجموعة</string>
-    <string name="today_nothing_due">لا شيء مطلوب الآن.</string>
-    <string name="today_no_routine_title">لا شيء مجدول</string>
-    <string name="today_no_routine_message">حدّد جدولاً لعلامة أو مجموعة لتبني ورداً يومياً.</string>
+    <string name="today_nothing_due">قُرئت كل العلامات اليوم.</string>
+    <string name="today_no_bookmarks_title">لا علامات بعد</string>
+    <string name="today_no_bookmarks_message">احفظ ما تقرؤه كل يوم علاماتٍ؛ يظهر هنا ما بقي منها اليوم.</string>
     <string name="today_open_bookmarks">فتح العلامات</string>
     <string name="today_browse_quran">تصفح القرآن</string>
     <plurals name="ayahs_n">

@@ -129,12 +129,12 @@
     <string name="today_no_khatm_title">No khatm yet</string>
     <string name="today_no_khatm_message">A khatm keeps your place as you read the Quran from beginning to end.</string>
     <string name="today_start_khatm">Start a khatm</string>
-    <string name="today_available_now">Available now</string>
+    <string name="today_available_now">Bookmarks to read today</string>
     <string name="today_n_left">%1$s left</string>
     <string name="today_ungrouped">Ungrouped</string>
-    <string name="today_nothing_due">Nothing is due right now.</string>
-    <string name="today_no_routine_title">Nothing scheduled</string>
-    <string name="today_no_routine_message">Give a bookmark or a group a schedule to build a daily routine.</string>
+    <string name="today_nothing_due">Every bookmark is read today.</string>
+    <string name="today_no_bookmarks_title">No bookmarks yet</string>
+    <string name="today_no_bookmarks_message">Keep the passages you read every day as bookmarks; the ones still to read today appear here.</string>
     <string name="today_open_bookmarks">Open bookmarks</string>
     <string name="today_browse_quran">Browse the Quran</string>
     <plurals name="ayahs_n">

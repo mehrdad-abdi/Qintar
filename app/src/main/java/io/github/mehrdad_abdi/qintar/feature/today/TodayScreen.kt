@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.EventRepeat
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Settings
@@ -354,21 +355,15 @@ private fun trailing(item: BookmarkState): String {
 }
 
 @Composable
-private fun window(group: GroupState): String? = group.group.schedule?.window?.let {
-    val format = DateTimeFormatter.ofPattern("HH:mm", Locale.ROOT)
-    localizeDigits("${format.format(it.from)}–${format.format(it.to)}")
-}
-
-@Composable
 private fun NowSection(state: TodayUiState, onNavigate: (Any) -> Unit) {
     val colors = MaterialTheme.colorScheme
     if (state.now.isEmpty()) {
-        if (!state.hasRoutine) {
+        if (!state.hasBookmarks) {
             QCard(Modifier.fillMaxWidth()) {
                 EmptyState(
-                    title = stringResource(R.string.today_no_routine_title),
-                    message = stringResource(R.string.today_no_routine_message),
-                    icon = Icons.Outlined.EventRepeat,
+                    title = stringResource(R.string.today_no_bookmarks_title),
+                    message = stringResource(R.string.today_no_bookmarks_message),
+                    icon = Icons.Outlined.BookmarkBorder,
                     actionLabel = stringResource(R.string.today_open_bookmarks),
                     onAction = { onNavigate(BookmarksRoute) },
                 )
@@ -395,7 +390,6 @@ private fun NowSection(state: TodayUiState, onNavigate: (Any) -> Unit) {
                 GroupHeader(
                     name = group.group.name,
                     state = readState(group.progress.started, group.progress.done),
-                    window = window(group),
                     onRead = { onNavigate(ReaderRoute.group(group.group.id)) },
                 )
             } else if (state.now.size > 1) {

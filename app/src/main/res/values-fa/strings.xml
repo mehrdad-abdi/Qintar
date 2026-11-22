@@ -114,12 +114,12 @@
     <string name="today_no_khatm_title">هنوز ختمی ندارید</string>
     <string name="today_no_khatm_message">ختم جای شما را هنگام خواندن قرآن از آغاز تا پایان نگه می‌دارد.</string>
     <string name="today_start_khatm">شروع ختم</string>
-    <string name="today_available_now">اکنون در دسترس</string>
+    <string name="today_available_now">نشان‌های امروز</string>
     <string name="today_n_left">%1$s مانده</string>
     <string name="today_ungrouped">بدون گروه</string>
-    <string name="today_nothing_due">اکنون چیزی در نوبت نیست.</string>
-    <string name="today_no_routine_title">برنامه‌ای تنظیم نشده</string>
-    <string name="today_no_routine_message">به یک نشانک یا گروه برنامه بدهید تا روال روزانه بسازید.</string>
+    <string name="today_nothing_due">همهٔ نشان‌ها امروز خوانده شده‌اند.</string>
+    <string name="today_no_bookmarks_title">هنوز نشانی ندارید</string>
+    <string name="today_no_bookmarks_message">بخش‌هایی را که هر روز می‌خوانید نشان کنید؛ آن‌هایی که امروز مانده‌اند اینجا می‌آیند.</string>
     <string name="today_open_bookmarks">بازکردن نشانک‌ها</string>
     <string name="today_browse_quran">مرور قرآن</string>
     <plurals name="ayahs_n">

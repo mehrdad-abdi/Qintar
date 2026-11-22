@@ -94,8 +94,8 @@ data class TodayUiState(
     val otherKhatms: List<KhatmCardState> = emptyList(),
     val now: List<NowSectionState> = emptyList(),
     val remainingNow: Int = 0,
-    /** Whether any bookmark or group has a schedule: decides which empty state "Now" shows. */
-    val hasRoutine: Boolean = false,
+    /** Whether there is any bookmark: decides which empty state the bookmarks card shows. */
+    val hasBookmarks: Boolean = false,
 )
 
 /**
@@ -168,6 +168,9 @@ class TodayViewModel(
     ): TodayUiState {
         val firstDay = userPrefs.weekStart.firstDay(systemFirstDay())
         val cards = active.map { it.toCard(index) }
+        val unread = (board.groups.map { it to it.bookmarks } + (null to board.ungrouped))
+            .map { (group, items) -> group to items.filter { !it.progress.done } }
+            .filter { it.second.isNotEmpty() }
         return TodayUiState(
             loading = false,
             day = day,
@@ -179,11 +182,13 @@ class TodayViewModel(
             },
             khatm = cards.firstOrNull(),
             otherKhatms = cards.drop(1),
-            now = board.now.map { section ->
-                NowSectionState(section.group, section.items.map { NowItem(it, BookmarkTitles.of(it.bookmark, index)) })
+            // Bookmarks not read today, under their group, then Ungrouped. Schedules are hidden for
+            // now (owner, 2026-11-22), so a schedule neither adds nor hides one here.
+            now = unread.map { (group, items) ->
+                NowSectionState(group, items.map { NowItem(it, BookmarkTitles.of(it.bookmark, index)) })
             },
-            remainingNow = board.remainingNow,
-            hasRoutine = board.all.any { it.schedule != null },
+            remainingNow = unread.sumOf { it.second.size },
+            hasBookmarks = board.all.isNotEmpty(),
         )
     }
 

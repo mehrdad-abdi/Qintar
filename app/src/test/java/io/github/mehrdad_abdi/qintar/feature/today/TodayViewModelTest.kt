@@ -54,7 +54,7 @@ class TodayViewModelTest {
         assertFalse(state.streak.atRisk)
         assertNull("start a khatm", state.khatm)
         assertTrue(state.now.isEmpty())
-        assertFalse("give a bookmark a schedule", state.hasRoutine)
+        assertFalse("no bookmarks yet", state.hasBookmarks)
     }
 
     @Test
@@ -215,39 +215,25 @@ class TodayViewModelTest {
     // ---- Available now ---------------------------------------------------------------------------
 
     @Test
-    fun `scheduled bookmarks that are due and not done are listed under their group`() = runTest {
-        val morning = app.library.createGroup("Morning", schedule = Schedule.daily(TimeWindow(LocalTime.of(8, 0), LocalTime.of(12, 0))))
+    fun `bookmarks not read today are listed under their group, schedule or not`() = runTest {
+        // Schedules are hidden (owner, 2026-11-22): Today lists what is left to read today.
+        val morning = app.library.createGroup("Morning", schedule = Schedule.daily(TimeWindow(LocalTime.of(18, 0), LocalTime.of(20, 0))))
         val kursi = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)).copy(groupId = morning.id))
-        val kahf = app.library.create(BookmarkDrafts.surah(18, app.index).copy(schedule = Schedule.daily()))
-        app.library.create(BookmarkDrafts.surah(36, app.index))
+        val kahf = app.library.create(BookmarkDrafts.surah(18, app.index))
+        val yasin = app.library.create(BookmarkDrafts.surah(36, app.index))
         val vm = today()
         val state = vm.state.value
 
-        assertTrue(state.hasRoutine)
-        assertEquals(2, state.remainingNow)
+        assertTrue(state.hasBookmarks)
+        assertEquals(3, state.remainingNow)
         assertEquals(listOf("Morning", null), state.now.map { it.group?.group?.name })
         assertEquals(listOf(kursi.id), state.now[0].items.map { it.state.bookmark.id })
-        assertEquals(listOf(kahf.id), state.now[1].items.map { it.state.bookmark.id })
-        assertTrue(state.now[1].items.single().title is BookmarkTitle.Surah)
+        assertEquals(listOf(kahf.id, yasin.id), state.now[1].items.map { it.state.bookmark.id })
+        assertTrue(state.now[1].items.first().title is BookmarkTitle.Surah)
 
         app.tracker.mark(app.ayah(2, 255), ReadContext.Bookmark(kursi.id), ReadMethod.TAP)
 
-        assertEquals("a bookmark that is done leaves the list", 1, vm.state.value.remainingNow)
-        assertEquals(listOf(kahf.id), vm.state.value.now.flatMap { it.items }.map { it.state.bookmark.id })
-    }
-
-    @Test
-    fun `a window that opens later appears when its time comes`() = runTest {
-        val evening = Schedule.daily(TimeWindow(LocalTime.of(18, 0), LocalTime.of(22, 0)))
-        app.library.create(BookmarkDrafts.surah(67, app.index).copy(schedule = evening))
-        val vm = today()
-
-        assertTrue("09:00: not yet", vm.state.value.now.isEmpty())
-        assertTrue("but there is a routine, so no 'nothing scheduled'", vm.state.value.hasRoutine)
-
-        app.clock.setTime(18, 30)
-        ticks.emit(Unit)
-
-        assertEquals(1, vm.state.value.remainingNow)
+        assertEquals("a bookmark read today leaves the list", 2, vm.state.value.remainingNow)
+        assertEquals(listOf(kahf.id, yasin.id), vm.state.value.now.flatMap { it.items }.map { it.state.bookmark.id })
     }
 }
