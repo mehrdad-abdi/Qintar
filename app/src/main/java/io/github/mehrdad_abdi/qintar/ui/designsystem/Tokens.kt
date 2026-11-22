@@ -38,6 +38,9 @@ object Sizes {
     val icon = 24.dp
     val iconSmall = 20.dp
 
+    /** The tinted circle of a small play button inside its touch target (Bookmarks list). */
+    val playCircle = 34.dp
+
     /** Rank mark in calendar cells: the smallest size at which ranks must stay distinguishable. */
     val rankMarkSmall = 16.dp
     val rankMark = 24.dp

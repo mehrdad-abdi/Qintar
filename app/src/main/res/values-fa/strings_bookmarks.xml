@@ -125,4 +125,5 @@
     <string name="bm_mark_read">علامت خوانده‌شده</string>
     <string name="grp_add_members">افزودن نشان‌ها</string>
     <string name="grp_add_members_none">همهٔ نشان‌ها در این گروه هستند.</string>
+    <string name="bm_filter_count">%1$s · %2$s</string>
 </resources>

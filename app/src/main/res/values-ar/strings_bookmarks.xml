@@ -125,4 +125,5 @@
     <string name="bm_mark_read">تعليم كمقروءة</string>
     <string name="grp_add_members">إضافة علامات</string>
     <string name="grp_add_members_none">كل العلامات في هذه المجموعة بالفعل.</string>
+    <string name="bm_filter_count">%1$s · %2$s</string>
 </resources>

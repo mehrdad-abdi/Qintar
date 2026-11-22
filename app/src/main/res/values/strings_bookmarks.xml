@@ -140,4 +140,5 @@
     <string name="bm_mark_read">Mark read</string>
     <string name="grp_add_members">Add bookmarks</string>
     <string name="grp_add_members_none">Every bookmark is already in this group.</string>
+    <string name="bm_filter_count">%1$s · %2$s</string>
 </resources>

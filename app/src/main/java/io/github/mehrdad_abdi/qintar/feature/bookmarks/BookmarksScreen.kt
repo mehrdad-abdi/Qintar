@@ -57,6 +57,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import io.github.mehrdad_abdi.qintar.ui.designsystem.Radii
+import io.github.mehrdad_abdi.qintar.ui.designsystem.QintarShapes
+import io.github.mehrdad_abdi.qintar.ui.designsystem.Hairline
+import io.github.mehrdad_abdi.qintar.ui.designsystem.cardSegment
+import io.github.mehrdad_abdi.qintar.ui.designsystem.CardSegment
+import io.github.mehrdad_abdi.qintar.ui.designsystem.BasmalaRow
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.rounded.DoneAll
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -148,7 +157,7 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
             Text(stringResource(R.string.tab_bookmarks), style = QintarType.Title, color = colors.onSurface, modifier = Modifier.weight(1f))
             AddMenu(onNavigate)
         }
-        FilterRow(state.filter, viewModel::onFilter)
+        FilterRow(state, viewModel::onFilter)
         Box(Modifier.weight(1f).fillMaxWidth()) {
             if (!state.loading) {
                 if (!state.hasBookmarks && state.groups.isEmpty()) {
@@ -171,18 +180,17 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize().testTag(BOOKMARKS_LIST_TAG),
-                        contentPadding = PaddingValues(bottom = Spacing.lg),
+                        contentPadding = PaddingValues(start = Spacing.screen, end = Spacing.screen, top = Spacing.xs, bottom = Spacing.xxl),
                     ) {
-                        itemsIndexed(state.rows, key = { _, row -> row.key }) { _, row ->
+                        itemsIndexed(state.rows, key = { _, row -> row.key }) { index, row ->
                             when (row) {
-                                is BookmarksRow.Section -> SectionRow(row, viewModel, onNavigate)
+                                is BookmarksRow.Section -> SectionRow(row, viewModel, onNavigate, first = index == 0)
                                 is BookmarksRow.Entry -> EntryRow(row, viewModel, onNavigate)
-                                is BookmarksRow.Basmala -> io.github.mehrdad_abdi.qintar.ui.designsystem.BasmalaRow(
-                                    Modifier.padding(top = Spacing.md),
-                                    fontSizeSp = state.fontSp,
-                                )
-                                is BookmarksRow.Ayah -> InlineAyah(row, state, viewModel)
-                                is BookmarksRow.End -> EndRow(row, viewModel)
+                                is BookmarksRow.Basmala -> InCard(CardSegment.MIDDLE) {
+                                    BasmalaRow(Modifier.padding(top = Spacing.lg), fontSizeSp = state.fontSp)
+                                }
+                                is BookmarksRow.Ayah -> InCard(CardSegment.MIDDLE, divider = true) { InlineAyah(row, state, viewModel) }
+                                is BookmarksRow.End -> InCard(CardSegment.BOTTOM, divider = true) { EndRow(row, viewModel) }
                             }
                         }
                     }
@@ -215,10 +223,11 @@ private fun AddMenu(onNavigate: (Any) -> Unit) {
 }
 
 @Composable
-private fun FilterRow(filter: BookmarksFilter, onFilter: (BookmarksFilter) -> Unit) {
+private fun FilterRow(state: BookmarksUiState, onFilter: (BookmarksFilter) -> Unit) {
+    val unread = state.all.count { !it.state.progress.done }
     val labels = mapOf(
-        BookmarksFilter.ALL to stringResource(R.string.bm_filter_all),
-        BookmarksFilter.UNREAD to stringResource(R.string.bm_filter_unread),
+        BookmarksFilter.ALL to stringResource(R.string.bm_filter_count, stringResource(R.string.bm_filter_all), formatNumber(state.all.size)),
+        BookmarksFilter.UNREAD to stringResource(R.string.bm_filter_count, stringResource(R.string.bm_filter_unread), formatNumber(unread)),
     )
     Row(
         Modifier.fillMaxWidth().padding(horizontal = Spacing.screen, vertical = Spacing.xs),
@@ -226,7 +235,7 @@ private fun FilterRow(filter: BookmarksFilter, onFilter: (BookmarksFilter) -> Un
     ) {
         BookmarksFilter.entries.forEach { entry ->
             FilterChip(
-                selected = entry == filter,
+                selected = entry == state.filter,
                 onClick = { onFilter(entry) },
                 label = { Text(labels.getValue(entry), style = QintarType.Label) },
             )
@@ -238,6 +247,16 @@ private fun readState(done: Boolean, started: Boolean) = when {
     done -> ReadState.Done
     started -> ReadState.Partial
     else -> ReadState.NotRead
+}
+
+/** A row drawn as part of a bookmark's card; [divider] draws a hairline above it, inside the card. */
+@Composable
+private fun InCard(segment: CardSegment, divider: Boolean = false, content: @Composable () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Column(Modifier.fillMaxWidth().cardSegment(segment, colors.surface, colors.outlineVariant)) {
+        if (divider) Hairline(Modifier.padding(horizontal = Spacing.card))
+        content()
+    }
 }
 
 /** Two lines of a long description; a tap shows all of it, another folds it again. */
@@ -259,7 +278,8 @@ private fun ExpandableDescription(text: String, color: Color, modifier: Modifier
     ) {
         Text(
             text,
-            style = QintarType.Label.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Normal),
+            // The user's own words, in any language: their direction comes from the text itself.
+            style = QintarType.Body.copy(textDirection = androidx.compose.ui.text.style.TextDirection.Content),
             color = color,
             maxLines = if (expanded) Int.MAX_VALUE else 2,
             overflow = TextOverflow.Ellipsis,
@@ -270,50 +290,74 @@ private fun ExpandableDescription(text: String, color: Color, modifier: Modifier
                 stringResource(if (expanded) R.string.bm_description_less else R.string.bm_description_more),
                 style = QintarType.Label,
                 color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = Spacing.xxs),
             )
         }
     }
 }
 
+/** The fold arrow, turning with the state. */
+@Composable
+private fun FoldArrow(expanded: Boolean, tint: Color) {
+    val turn by androidx.compose.animation.core.animateFloatAsState(if (expanded) 180f else 0f, label = "fold")
+    Icon(Icons.Rounded.ExpandMore, contentDescription = null, tint = tint, modifier = Modifier.rotate(turn))
+}
+
+/** A small tinted round play button inside a full touch target. */
+@Composable
+private fun PlayButton(description: String, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Box(
+        Modifier
+            .size(Sizes.touchTarget)
+            .clip(QintarShapes.Pill)
+            .clickable(role = Role.Button, onClickLabel = description, onClick = onClick)
+            .semantics { contentDescription = description },
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(Modifier.size(Sizes.playCircle).clip(QintarShapes.Pill).background(colors.primaryContainer), contentAlignment = Alignment.Center) {
+            Icon(Icons.Rounded.PlayArrow, contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(Sizes.iconSmall))
+        }
+    }
+}
+
+
 // ---- Section (a group or Ungrouped) --------------------------------------------------------------
 
+/** A group as a section of the list, like Today's sections: title, "2 of 5 done", play, menu. */
 @Composable
-private fun SectionRow(row: BookmarksRow.Section, vm: BookmarksViewModel, onNavigate: (Any) -> Unit) {
+private fun SectionRow(row: BookmarksRow.Section, vm: BookmarksViewModel, onNavigate: (Any) -> Unit, first: Boolean) {
     val colors = MaterialTheme.colorScheme
     val group = row.group
     val done = row.bookmarkCount > 0 && row.doneCount == row.bookmarkCount
     val name = group?.state?.group?.name ?: stringResource(R.string.bm_ungrouped)
     val expandedText = stringResource(if (row.expanded) R.string.state_expanded else R.string.state_collapsed)
     var menu by remember { mutableStateOf(false) }
-    val ink = if (done) colors.onPrimaryContainer else colors.onSurface
-    Column(Modifier.fillMaxWidth().background(if (done) colors.primaryContainer else colors.surfaceContainer)) {
+    Column(Modifier.fillMaxWidth().padding(top = if (first) Spacing.sm else Spacing.betweenSections, bottom = Spacing.xs)) {
         Row(
             Modifier
                 .fillMaxWidth()
+                .clip(QintarShapes.Inner)
                 .clickable(role = Role.Button) { vm.onToggleSection(row.sectionKey) }
                 .semantics { stateDescription = expandedText }
-                .heightIn(min = Sizes.touchTarget)
-                .padding(start = Spacing.screen, end = Spacing.xs),
+                .heightIn(min = Sizes.touchTarget),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Icon(if (row.expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, contentDescription = null, tint = ink)
-            Spacer(Modifier.size(Spacing.sm))
             Column(Modifier.weight(1f)) {
-                Text(name, style = QintarType.BodyStrong, color = ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
+                Text(name, style = QintarType.Title, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
                 if (row.bookmarkCount > 0) {
-                    Text(
-                        stringResource(R.string.bm_group_progress, formatNumber(row.doneCount), formatNumber(row.bookmarkCount)),
-                        style = QintarType.Caption,
-                        color = if (done) colors.onPrimaryContainer else colors.onSurfaceVariant,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                        if (done) ReadStateIndicator(ReadState.Done, size = Sizes.iconSmall)
+                        Text(
+                            stringResource(R.string.bm_group_progress, formatNumber(row.doneCount), formatNumber(row.bookmarkCount)),
+                            style = QintarType.Caption,
+                            color = if (done) colors.primary else colors.onSurfaceVariant,
+                        )
+                    }
                 }
             }
-            if (done) ReadStateIndicator(ReadState.Done)
-            if (row.bookmarkCount > 0) {
-                IconButton(onClick = { vm.onPlaySection(row.sectionKey) }, modifier = Modifier.size(Sizes.touchTarget)) {
-                    Icon(Icons.Rounded.PlayArrow, stringResource(R.string.bm_play_group, name), tint = ink)
-                }
-            }
+            if (row.bookmarkCount > 0) PlayButton(stringResource(R.string.bm_play_group, name)) { vm.onPlaySection(row.sectionKey) }
             if (group != null) {
                 Box {
                     IconButton(onClick = { menu = true }, modifier = Modifier.size(Sizes.touchTarget)) {
@@ -334,20 +378,17 @@ private fun SectionRow(row: BookmarksRow.Section, vm: BookmarksViewModel, onNavi
                     }
                 }
             }
+            FoldArrow(row.expanded, colors.onSurfaceVariant)
         }
         group?.state?.group?.description?.let {
-            ExpandableDescription(
-                it,
-                if (done) colors.onPrimaryContainer else colors.onSurfaceVariant,
-                Modifier.fillMaxWidth().padding(start = Spacing.screen, end = Spacing.screen, bottom = Spacing.sm),
-            )
+            ExpandableDescription(it, colors.onSurfaceVariant, Modifier.fillMaxWidth().padding(top = Spacing.xxs))
         }
         if (row.expanded && row.bookmarkCount == 0) {
             Text(
                 stringResource(R.string.bm_group_empty),
                 style = QintarType.Body,
                 color = colors.onSurfaceVariant,
-                modifier = Modifier.padding(start = Spacing.screen, end = Spacing.screen, bottom = Spacing.sm),
+                modifier = Modifier.padding(top = Spacing.sm),
             )
         }
     }
@@ -355,6 +396,11 @@ private fun SectionRow(row: BookmarksRow.Section, vm: BookmarksViewModel, onNavi
 
 // ---- Bookmark ------------------------------------------------------------------------------------
 
+/**
+ * A bookmark as a card: read-state ring, title, "7 ayahs" or today's progress, play and menu; its
+ * description below. Opened, its ayahs and "Mark read" continue the same card. Read today, the card
+ * (or its head, when open) turns primaryContainer, as everywhere a bookmark is read (R-BMK-8).
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun EntryRow(row: BookmarksRow.Entry, vm: BookmarksViewModel, onNavigate: (Any) -> Unit) {
@@ -366,34 +412,35 @@ private fun EntryRow(row: BookmarksRow.Entry, vm: BookmarksViewModel, onNavigate
     val done = state == ReadState.Done
     val ink = if (done) colors.onPrimaryContainer else colors.onSurface
     val quiet = if (done) colors.onPrimaryContainer else colors.onSurfaceVariant
+    val title = bookmarkTitleText(item.title)
     val expandedText = stringResource(if (row.expanded) R.string.state_expanded else R.string.state_collapsed)
     var menu by remember { mutableStateOf(false) }
-    Column(Modifier.fillMaxWidth().background(if (done) colors.primaryContainer else colors.background)) {
-        HorizontalDivider(color = colors.outlineVariant, thickness = Sizes.hairline)
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .combinedClickable(role = Role.Button, onLongClick = { menu = true }) { vm.onToggleBookmark(item.id) }
-                .semantics { stateDescription = expandedText }
-                .heightIn(min = Sizes.touchTarget)
-                .padding(start = Spacing.screen, end = Spacing.xs, top = Spacing.xs),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(if (row.expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, contentDescription = null, tint = quiet)
-            Spacer(Modifier.size(Spacing.sm))
+    Column(
+        Modifier
+            .padding(top = Spacing.sm)
+            .fillMaxWidth()
+            .cardSegment(
+                if (row.expanded) CardSegment.TOP else CardSegment.SINGLE,
+                if (done) colors.primaryContainer else colors.surface,
+                if (done) colors.primaryContainer else colors.outlineVariant,
+            )
+            .clip(if (row.expanded) androidx.compose.foundation.shape.RoundedCornerShape(topStart = Radii.card, topEnd = Radii.card) else QintarShapes.Card)
+            .combinedClickable(role = Role.Button, onLongClick = { menu = true }) { vm.onToggleBookmark(item.id) }
+            .semantics { stateDescription = expandedText }
+            .padding(start = Spacing.card, end = Spacing.xs, top = Spacing.md, bottom = Spacing.xxs),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            ReadStateIndicator(state, progress = progress.fraction)
             Column(Modifier.weight(1f)) {
-                Text(bookmarkTitleText(item.title), style = QintarType.BodyStrong, color = ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                val meta = if (progress.started && !done) {
-                    stringResource(R.string.progress_of, formatNumber(progress.readings), formatNumber(progress.required))
-                } else {
-                    ayahCount(bookmark.range.size)
+                Text(title, style = QintarType.BodyStrong, color = ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                val meta = when {
+                    done -> stringResource(R.string.bm_read_today)
+                    progress.started -> stringResource(R.string.progress_of, formatNumber(progress.readings), formatNumber(progress.required))
+                    else -> ayahCount(bookmark.range.size)
                 }
                 Text(meta, style = QintarType.Caption, color = quiet)
             }
-            if (done) ReadStateIndicator(ReadState.Done)
-            IconButton(onClick = { vm.onPlayBookmark(item.id) }, modifier = Modifier.size(Sizes.touchTarget)) {
-                Icon(Icons.Rounded.PlayArrow, stringResource(R.string.bm_play_bookmark, bookmarkTitleText(item.title)), tint = ink)
-            }
+            PlayButton(stringResource(R.string.bm_play_bookmark, title)) { vm.onPlayBookmark(item.id) }
             Box {
                 IconButton(onClick = { menu = true }, modifier = Modifier.size(Sizes.touchTarget)) {
                     Icon(Icons.Rounded.MoreVert, stringResource(R.string.bm_menu_more), tint = quiet)
@@ -407,12 +454,11 @@ private fun EntryRow(row: BookmarksRow.Entry, vm: BookmarksViewModel, onNavigate
             }
         }
         bookmark.description?.let {
-            ExpandableDescription(it, quiet, Modifier.fillMaxWidth().padding(start = Spacing.screen + Spacing.xl, end = Spacing.screen, bottom = Spacing.xs))
+            ExpandableDescription(it, quiet, Modifier.fillMaxWidth().padding(top = Spacing.sm, end = Spacing.md))
         }
-        if (state == ReadState.Partial) {
-            QProgressBar(progress.fraction, Modifier.fillMaxWidth().padding(horizontal = Spacing.screen, vertical = Spacing.xs), height = Spacing.xxs)
-        } else {
-            Spacer(Modifier.height(Spacing.xs))
+        // A quiet hint that the card opens to its ayahs.
+        Row(Modifier.fillMaxWidth().height(Spacing.lg), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            FoldArrow(row.expanded, quiet)
         }
     }
 }
@@ -441,20 +487,22 @@ private fun InlineAyah(row: BookmarksRow.Ayah, state: BookmarksUiState, vm: Book
     )
 }
 
-/** The foot of an expanded bookmark: "Mark read" for all its ayahs, or that it is read today. */
+/** The foot of an opened bookmark's card: "Mark read" for all its ayahs, or that it is read today. */
 @Composable
 private fun EndRow(row: BookmarksRow.End, vm: BookmarksViewModel) {
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = Spacing.screen, vertical = Spacing.sm),
-        horizontalArrangement = Arrangement.End,
+        Modifier.fillMaxWidth().padding(horizontal = Spacing.card, vertical = Spacing.md),
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (row.done) {
-            Text(stringResource(R.string.bm_read_today), style = QintarType.Label, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.size(Spacing.sm))
             ReadStateIndicator(ReadState.Done)
+            Spacer(Modifier.size(Spacing.sm))
+            Text(stringResource(R.string.bm_read_today), style = QintarType.Label, color = MaterialTheme.colorScheme.primary)
         } else {
-            FilledTonalButton(onClick = { vm.onMarkBookmarkRead(row.bookmarkId) }) {
+            FilledTonalButton(onClick = { vm.onMarkBookmarkRead(row.bookmarkId) }, modifier = Modifier.heightIn(min = Sizes.touchTarget)) {
+                Icon(Icons.Rounded.DoneAll, contentDescription = null, modifier = Modifier.size(Sizes.iconSmall))
+                Spacer(Modifier.size(Spacing.sm))
                 Text(stringResource(R.string.bm_mark_read), style = QintarType.Label)
             }
         }

@@ -65,6 +65,7 @@ class BookmarksScreensTest {
         openTab()
         compose.onNodeWithText("Morning").assertIsDisplayed()
         compose.onNodeWithText("0 of 1 done").assertIsDisplayed()
+        compose.onNodeWithText("All · 1").assertIsDisplayed()
         compose.onNodeWithText("Read after every prayer").assertIsDisplayed()
         compose.onNodeWithText("Mark read").assertDoesNotExist()
         compose.onNodeWithText("1 ayah").performClick()
@@ -106,7 +107,8 @@ class BookmarksScreensTest {
         openTab()
         compose.onNodeWithText("1 ayah").performClick()
         compose.onNodeWithText("Mark read").performClick()
-        compose.onNodeWithText("Unread").performClick()
+        compose.onNodeWithText("Unread · 0").assertIsDisplayed()
+        compose.onNodeWithText("Unread ·", substring = true).performClick()
         compose.onNodeWithText("Every bookmark is read today.").assertIsDisplayed()
     }
 
