@@ -6,12 +6,12 @@
     <string name="read_tab_juz">جزء</string>
     <string name="read_tab_page">صفحه</string>
     <string name="read_goto_label">برو به…</string>
-    <string name="read_goto_hint">۲:۲۵۵، p300، j12</string>
+    <string name="read_goto_hint">۲:۲۵۵، ص۳۰۰، ج۱۲</string>
     <string name="read_goto_action">برو</string>
     <string name="read_goto_surah_label">شمارهٔ آیهٔ تنها مربوط به</string>
     <string name="read_goto_surah_none">سوره‌ای انتخاب نشده</string>
     <string name="goto_error_empty">جایی برای رفتن بنویسید.</string>
-    <string name="goto_error_unrecognized">مثلاً ۲:۲۵۵، p300 یا j12 را امتحان کنید.</string>
+    <string name="goto_error_unrecognized">مثلاً ۲:۲۵۵، ص۳۰۰ یا ج۱۲ را امتحان کنید.</string>
     <string name="goto_error_needs_surah">نخست سوره‌ای انتخاب کنید یا سوره:آیه بنویسید.</string>
     <string name="goto_error_surah">قرآن ۱۱۴ سوره دارد.</string>
     <string name="goto_error_ayah">این سوره چنین آیه‌ای ندارد.</string>
@@ -85,4 +85,5 @@
     <string name="reader_log_full_reading">ثبت یک خواندن کامل</string>
     <string name="reader_log_group_reading">ثبت یک خواندن کامل گروه</string>
     <string name="reader_header_readings">%1$s / %2$s امروز</string>
+    <string name="goto_help">آیه ۲:۲۵۵ · صفحه ص۳۰۰ · جزء ج۱۲</string>
 </resources>

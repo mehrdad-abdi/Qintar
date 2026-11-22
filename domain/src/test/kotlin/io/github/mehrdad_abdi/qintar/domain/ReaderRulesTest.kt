@@ -166,6 +166,22 @@ class ReaderRulesTest {
     }
 
     @Test
+    fun `Persian and Arabic keyboards work too - ج for juz, ص for page, with any digits`() {
+        // Owner, 2026-11-22: ج12 jumps to juz 12.
+        assertEquals(GoToResult.Juz(12, index.juzRange(12).start), parse("ج12"))
+        assertEquals(GoToResult.Juz(12, index.juzRange(12).start), parse("ج۱۲"))
+        assertEquals(GoToResult.Juz(12, index.juzRange(12).start), parse("ج ١٢"))
+        assertEquals(GoToResult.Juz(30, index.juzRange(30).start), parse("جزء30"))
+        assertEquals(GoToResult.Juz(30, index.juzRange(30).start), parse("جزء ۳۰"))
+        assertEquals(GoToResult.Page(300, index.pageRange(300).start), parse("ص300"))
+        assertEquals(GoToResult.Page(300, index.pageRange(300).start), parse("ص۳۰۰"))
+        assertEquals(GoToResult.Page(300, index.pageRange(300).start), parse("صفحه ۳۰۰"))
+        assertEquals(GoToResult.Page(300, index.pageRange(300).start), parse("صفحة ٣٠٠"))
+        assertEquals(GoToResult.Invalid(Reason.JUZ_OUT_OF_RANGE), parse("ج31"))
+        assertEquals("an Arabic or Persian colon-like separator", app.ayah(2, 255), parse("۲/۲۵۵").target)
+    }
+
+    @Test
     fun `numbers outside the mushaf are refused with the reason`() {
         assertEquals(GoToResult.Invalid(Reason.SURAH_OUT_OF_RANGE), parse("115:1"))
         assertEquals(GoToResult.Invalid(Reason.SURAH_OUT_OF_RANGE), parse("0:1"))

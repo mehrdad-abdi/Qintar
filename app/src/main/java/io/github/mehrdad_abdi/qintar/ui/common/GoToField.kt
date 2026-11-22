@@ -74,7 +74,8 @@ fun GoToField(
             placeholder = { Text(placeholder) },
             singleLine = true,
             isError = problem != null,
-            supportingText = problem?.let { { Text(stringResource(it.message)) } },
+            // A tiny hint of the forms, in the user's own script; the error takes its place.
+            supportingText = { Text(stringResource(problem?.message ?: R.string.goto_help)) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
             keyboardActions = KeyboardActions(onGo = { onSubmit() }),
             shape = QintarShapes.Inner,

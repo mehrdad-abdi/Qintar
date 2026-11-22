@@ -64,6 +64,9 @@ class ReadViewModelTest {
         assertEquals(ReaderRoute.browse(app.index.pageRange(123).start.value), read.goTo("p۱۲۳"))
         assertEquals(ReaderRoute.browse(app.index.juzRange(12).start.value), read.goTo("j١٢"))
         assertEquals(kursi, read.goTo("۲۵۵", surah = 2))
+        // Owner, 2026-11-22: the Persian and Arabic letters, too.
+        assertEquals(ReaderRoute.browse(app.index.juzRange(12).start.value), read.goTo("ج12"))
+        assertEquals(ReaderRoute.browse(app.index.pageRange(300).start.value), read.goTo("ص۳۰۰"))
     }
 
     @Test
