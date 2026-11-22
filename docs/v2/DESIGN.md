@@ -401,7 +401,7 @@ interface DayClock {
 - `rankFor(count)` = highest rank whose threshold ≤ count. Rank is always derived from the day total, never stored.
 - Before 10 there is no rank. The UI says how many remain to the first one; it does not invent a rank 0 name.
 - Arabic strings use Arabic letters (ي ك), Persian strings use Persian letters (ی ک). v1 mixed them (F13).
-- *Decision (owner):* a vetted presentation of the hadith's Arabic text with citation is not part of 2.0; narrations as content arrive with the hadith feed in version 3 (§1.4). In 2.0 the ladder is explained in the app's own words (rank names, thresholds, one sentence saying it follows a narration about nightly recitation), and v1's hadith screen and its string are not carried over. *Owner to confirm* (Q2) that this is what was meant.
+- *Decision (owner, revised 2026-11-22, §12):* the hadith itself is shown: the first onboarding page has the Bismillah and the hadith in Arabic, English and Persian, and Settings → About shows it again. The earlier reading of Q2 (no hadith screen in 2.0) was wrong. Narrations as content (the hadith feed) remain version 3.
 
 ### 4.5 Streaks (R-RNK-3)
 
@@ -1319,7 +1319,7 @@ Each has a default that will be implemented unless changed.
 | # | Question | Default taken |
 |---|---|---|
 | Q1 | Issue #6 has no description. The finding is that v1's text uses the Farsi yeh everywhere and is meant for a font v1 never shipped, and that Arabic UI strings are typed with Persian letters. Is that the problem you saw? | Yes: fixed by Tanzil text + Amiri Quran font + the letter test. You confirm on the M1 rendering screenshot. |
-| Q2 | You said the hadith text can wait for version 3. Taken to mean: 2.0 explains the ladder in its own words and has no hadith screen; narrations live in bookmark descriptions; the hadith feed is v3. Right? Also, are the English rank names in §4.4 acceptable? | Yes, as described in §4.4. |
+| Q2 | You said the hadith text can wait for version 3. Taken to mean: 2.0 explains the ladder in its own words and has no hadith screen; narrations live in bookmark descriptions; the hadith feed is v3. Right? Also, are the English rank names in §4.4 acceptable? | Rank names yes. The hadith part was misread: the hadith of the ranks is shown in onboarding and About (2026-11-22, §12). |
 | Q3 | The hadith says "in a night". Should the reading day start at midnight, or later (for example 03:00)? | Midnight, with a "Day starts at" setting. |
 | Q4 | *Resolved by the group and schedule design (§4.7):* read items leave the "available now" list for the day; "once" stops recurring after one done day. | — |
 | Q5 | Show sajda type (obligatory / recommended) from Tanzil's metadata, or only "Sajdah"? | Show the type. |
@@ -1334,6 +1334,25 @@ Each has a default that will be implemented unless changed.
 | Q10 | Vazirmatn for all UI text including English, or Inter for Latin? | Vazirmatn everywhere. |
 
 ---
+
+## 12. Changes after the 2.0.0 phone test (owner, 2026-11-22)
+
+The owner tested 2.0.0 on a phone. These decisions replace what the sections named say; where the
+two disagree, this section wins. The full list of findings is in `phone-test-notes.md`.
+
+| Topic | Decision | Replaces |
+|---|---|---|
+| Hadith | First onboarding page (also for users carried over from v1): Bismillah, then the hadith in Arabic, English and Persian, whatever the app language. Settings → About shows it again. Source (book) to be added. | §4.4 decision, Q2 |
+| Groups | A group is a set of bookmarks, not a time slot. A bookmark is in at most one group; bookmarks without one are listed under a built-in **Ungrouped** (not a stored group). The group editor adds bookmarks (taking them from their old group). | §4.7 groups, §5.6 Groups view |
+| Schedules, readings per day | Hidden in the UI, kept in the model and code (`SHOW_SCHEDULES`, `SHOW_REPEAT_TARGET`). `Bookmark.repeatTarget` is deprecated; new bookmarks get 1. Today and the Bookmarks list ignore schedules. | R-BMK-7/10, §4.7 schedules, §5.6 |
+| Bookmarks tab | One list, no views: filter **All / Unread**; groups (custom order) then Ungrouped. Two levels fold: a group hides its bookmarks, a bookmark hides its ayahs, which are read in place (tick, play) and end with **Mark read**. On open, groups are open and bookmarks closed. Under Unread a bookmark read on the screen stays until the screen is left. Long descriptions show two lines and expand. "Read today" counts only readings made from the bookmark. | §5.6 Now / Groups / All |
+| Bookmark playback | Play on a bookmark or group goes on through every following bookmark of the list (across groups; under Unread skipping read ones). The list follows the recited ayah and opens its bookmark; the mini player returns to the list (`ReaderEntry.BOOKMARKS`). | §7.8 scope of a play |
+| Bookmark editor | Kinds: Ayah, Range, Surah, Page (no Juz). A range is one surah and two ayahs. The preview shows the first ayahs, the number left out, then the last ayah. | §5.6 Add / Edit |
+| Star | The ayah star opens the bookmark editor filled with the ayah (or the bookmark the ayah is in). A filled star marks any ayah inside a bookmark. | R-BMK-2 |
+| Reader marking | Inside a bookmark there is no Mark page: the bookmark ends with one **Mark read**. In a khatm and in free reading each surah ends with **Mark surah read**, besides Mark page. | §5.4 page divider |
+| Surah list | The bar under a surah shows its coverage in the current khatm (none without a khatm), in place of the divider. | §5.3 surah row |
+| Revisit | Per bookmark: never read from the bookmark first, then the ones read longest ago; a tap opens it. | §4.8 |
+| Audio | Setting **Stop before sajda ayahs** (off by default): playback stops before a sajda ayah and plays it when the listener taps play. A sajda dhikr after the ayah is planned (needs a recording). | §7.8 |
 
 ## Appendix A — Sources checked on 2026-11-15
 

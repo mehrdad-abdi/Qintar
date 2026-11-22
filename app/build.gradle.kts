@@ -17,8 +17,8 @@ android {
         applicationId = "io.github.mehrdad_abdi.quranbookmarks"
         minSdk = 26
         targetSdk = 36
-        versionCode = 200
-        versionName = "2.0.0"
+        versionCode = 201
+        versionName = "2.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
