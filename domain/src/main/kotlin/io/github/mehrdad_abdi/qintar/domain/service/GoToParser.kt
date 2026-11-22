@@ -35,18 +35,21 @@ sealed interface GoToResult {
 }
 
 /**
- * "Go to…" (§5.3): `2:255`, `255` within a chosen surah, `p300`, `j12`.
+ * "Go to…" (§5.3): `2:255`, `255` within a chosen surah, `s36`, `p300`, `j12`. Every form works
+ * whatever the app's language.
  *
  * Digits may be Latin, Arabic-Indic or Persian, since the field is typed with whatever keyboard the
  * user has; `p` and `j` are accepted in either case, and spaces are ignored. On a Persian or Arabic
  * keyboard (owner, 2026-11-22): `ج12` or `جزء ۱۲` is a juz, `ص300`, `صفحه ۳۰۰` or `صفحة ٣٠٠` a page,
+ * `س36`, `سوره ۳۶` or `سورة ٣٦` a surah,
  * and `/` may stand for the colon.
  */
 object GoToParser {
     private val SURAH_AYAH = Regex("""(\p{Nd}+)[:/](\p{Nd}+)""")
     private val NUMBER = Regex("""\p{Nd}+""")
-    private val PREFIXED = Regex("""(p|j|ج|جزء|ص|صفحه|صفحة)(\p{Nd}+)""", RegexOption.IGNORE_CASE)
+    private val PREFIXED = Regex("""(p|j|s|ج|جزء|ص|صفحه|صفحة|س|سوره|سورة)(\p{Nd}+)""", RegexOption.IGNORE_CASE)
     private val PAGE_PREFIXES = setOf("p", "ص", "صفحه", "صفحة")
+    private val SURAH_PREFIXES = setOf("s", "س", "سوره", "سورة")
 
     fun parse(input: String, currentSurah: Int?, index: QuranIndex): GoToResult {
         val text = input.filterNot { it.isWhitespace() }
@@ -57,6 +60,7 @@ object GoToParser {
         }
         PREFIXED.matchEntire(text)?.let { match ->
             val n = number(match.groupValues[2])
+            if (match.groupValues[1].lowercase() in SURAH_PREFIXES) return ayah(n, 1, index)
             return if (match.groupValues[1].lowercase() in PAGE_PREFIXES) {
                 if (n != null && n in 1..Quran.PAGE_COUNT) {
                     GoToResult.Page(n, index.pageRange(n).start)

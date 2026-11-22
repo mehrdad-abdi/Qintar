@@ -182,6 +182,18 @@ class ReaderRulesTest {
     }
 
     @Test
+    fun `a surah by its number, with any keyboard in any app language`() {
+        // Owner, 2026-11-22: s36 (or س36) opens Ya-Sin at its first ayah; Latin forms work in a Persian app too.
+        assertEquals(GoToResult.Ayah(AyahRef(36, 1), app.ayah(36, 1)), parse("s36"))
+        assertEquals(app.ayah(36, 1), parse("S36").target)
+        assertEquals(app.ayah(36, 1), parse("س۳۶").target)
+        assertEquals(app.ayah(36, 1), parse("سوره ۳۶").target)
+        assertEquals(app.ayah(36, 1), parse("سورة ٣٦").target)
+        assertEquals(GoToResult.Invalid(Reason.SURAH_OUT_OF_RANGE), parse("s115"))
+        assertEquals(GoToResult.Invalid(Reason.SURAH_OUT_OF_RANGE), parse("s0"))
+    }
+
+    @Test
     fun `numbers outside the mushaf are refused with the reason`() {
         assertEquals(GoToResult.Invalid(Reason.SURAH_OUT_OF_RANGE), parse("115:1"))
         assertEquals(GoToResult.Invalid(Reason.SURAH_OUT_OF_RANGE), parse("0:1"))
