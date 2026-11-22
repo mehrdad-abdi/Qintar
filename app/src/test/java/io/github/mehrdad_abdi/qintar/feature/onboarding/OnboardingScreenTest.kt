@@ -39,6 +39,13 @@ class OnboardingScreenTest {
         val app = DomainFixture()
         open(app)
 
+        // The tour opens with the Bismillah and the hadith the ranks come from, in three languages.
+        compose.onNodeWithTag(OnboardingTags.HADITH).assertIsDisplayed()
+        compose.onNodeWithText("الْغَافِلِينَ", substring = true).assertExists()
+        compose.onNodeWithText("heedless", substring = true).assertExists()
+        compose.onNodeWithText("غافلان", substring = true).assertExists()
+        compose.onNodeWithTag(OnboardingTags.NEXT).performClick()
+
         compose.onNodeWithText("Welcome").assertIsDisplayed()
         compose.onNodeWithText("Read a little every day").assertIsDisplayed()
         compose.onNodeWithTag(OnboardingTags.NEXT).performClick()
@@ -79,14 +86,17 @@ class OnboardingScreenTest {
     fun `back returns to the previous page`() {
         open(DomainFixture())
         compose.onNodeWithTag(OnboardingTags.NEXT).performClick()
+        compose.onNodeWithTag(OnboardingTags.NEXT).performClick()
         compose.onNodeWithTag(OnboardingTags.BACK).performClick()
         compose.onNodeWithText("Read a little every day").assertIsDisplayed()
     }
 
     @Test
-    fun `a migrated user gets one what's new page`() {
+    fun `a migrated user gets the hadith and one what's new page`() {
         val app = DomainFixture(initialPrefs = UserPrefs(legacyMigrationState = LegacyMigrationState.MIGRATED))
         open(app)
+        compose.onNodeWithTag(OnboardingTags.HADITH).assertIsDisplayed()
+        compose.onNodeWithTag(OnboardingTags.NEXT).performClick()
 
         compose.onNodeWithText("Welcome to Qintar 2").assertIsDisplayed()
         compose.onNodeWithTag(OnboardingTags.NEXT).assertDoesNotExist()
@@ -103,8 +113,7 @@ class OnboardingScreenTest {
             .grantPermissions(android.Manifest.permission.POST_NOTIFICATIONS)
         val app = DomainFixture()
         open(app)
-        compose.onNodeWithTag(OnboardingTags.NEXT).performClick()
-        compose.onNodeWithTag(OnboardingTags.NEXT).performClick()
+        repeat(3) { compose.onNodeWithTag(OnboardingTags.NEXT).performClick() }
         compose.onNodeWithTag(OnboardingTags.REMINDER).performScrollTo().performClick()
         compose.waitForIdle()
         assertTrue("the reminder is on", app.prefs.current.reminderEnabled)

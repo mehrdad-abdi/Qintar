@@ -49,10 +49,15 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `the full tour has three pages that can be walked both ways`() {
+    fun `the full tour opens on the hadith, then three pages, walked both ways`() {
         val vm = DomainFixture().onboardingViewModel()
         assertEquals(OnboardingMode.FULL, vm.state.value.mode)
-        assertEquals(listOf(OnboardingPage.RANKS, OnboardingPage.LANGUAGE, OnboardingPage.GOAL_AND_REMINDER), vm.state.value.pages)
+        assertEquals(
+            listOf(OnboardingPage.HADITH, OnboardingPage.RANKS, OnboardingPage.LANGUAGE, OnboardingPage.GOAL_AND_REMINDER),
+            vm.state.value.pages,
+        )
+        assertEquals(OnboardingPage.HADITH, vm.state.value.page)
+        vm.next()
         assertEquals(OnboardingPage.RANKS, vm.state.value.page)
         assertFalse(vm.state.value.isLast)
 
@@ -64,6 +69,7 @@ class OnboardingViewModelTest {
         assertEquals("cannot go past the end", OnboardingPage.GOAL_AND_REMINDER, vm.state.value.page)
         vm.back()
         assertEquals(OnboardingPage.LANGUAGE, vm.state.value.page)
+        vm.back()
         vm.back()
         vm.back()
         assertEquals(0, vm.state.value.pageIndex)
@@ -92,11 +98,12 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `someone whose v1 data was carried over sees one what's new page`() {
+    fun `someone whose v1 data was carried over sees the hadith and one what's new page`() {
         for (state in listOf(LegacyMigrationState.MIGRATED, LegacyMigrationState.ACKNOWLEDGED)) {
             val vm = DomainFixture(initialPrefs = UserPrefs(legacyMigrationState = state)).onboardingViewModel()
             assertEquals(OnboardingMode.WHATS_NEW, vm.state.value.mode)
-            assertEquals(listOf(OnboardingPage.WHATS_NEW), vm.state.value.pages)
+            assertEquals(listOf(OnboardingPage.HADITH, OnboardingPage.WHATS_NEW), vm.state.value.pages)
+            vm.next()
             assertTrue(vm.state.value.isLast)
         }
         val fresh = DomainFixture(initialPrefs = UserPrefs(legacyMigrationState = LegacyMigrationState.NOT_NEEDED)).onboardingViewModel()

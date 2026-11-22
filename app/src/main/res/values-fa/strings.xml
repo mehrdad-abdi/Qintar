@@ -129,4 +129,10 @@
     <string name="progress_of">%1$s / %2$s</string>
     <string name="reader_mark_bookmark">علامت خوانده‌شده</string>
     <string name="reader_mark_surah">علامت خواندن سوره %1$s</string>
+    <string name="hadith_intro">هفت رتبهٔ قنطار از این روایت دربارهٔ تلاوت قرآن در شب گرفته شده است.</string>
+    <string name="hadith_label_ar">عربی</string>
+    <string name="hadith_label_en">انگلیسی</string>
+    <string name="hadith_label_fa">فارسی</string>
+    <string name="settings_hadith">حدیث رتبه‌ها</string>
+    <string name="settings_hadith_summary">هفت رتبه از کجا آمده‌اند</string>
 </resources>

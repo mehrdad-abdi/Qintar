@@ -133,4 +133,10 @@
     <string name="progress_of">%1$s / %2$s</string>
     <string name="reader_mark_bookmark">تعليم كمقروءة</string>
     <string name="reader_mark_surah">تعليم سورة %1$s كمقروءة</string>
+    <string name="hadith_intro">مراتب قنطار السبع مأخوذة من هذه الرواية في تلاوة القرآن ليلًا.</string>
+    <string name="hadith_label_ar">العربية</string>
+    <string name="hadith_label_en">الإنجليزية</string>
+    <string name="hadith_label_fa">الفارسية</string>
+    <string name="settings_hadith">حديث المراتب</string>
+    <string name="settings_hadith_summary">من أين جاءت المراتب السبع</string>
 </resources>

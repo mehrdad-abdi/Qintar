@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 /** What the first launch shows: the full tour, or for someone whose v1 data was carried over one page. */
 enum class OnboardingMode { FULL, WHATS_NEW }
 
-enum class OnboardingPage { RANKS, LANGUAGE, GOAL_AND_REMINDER, WHATS_NEW }
+enum class OnboardingPage { HADITH, RANKS, LANGUAGE, GOAL_AND_REMINDER, WHATS_NEW }
 
 data class OnboardingUiState(
     val loading: Boolean = true,
@@ -33,7 +33,12 @@ data class OnboardingUiState(
     val finished: Boolean = false,
 ) {
     val pages: List<OnboardingPage>
-        get() = if (mode == OnboardingMode.WHATS_NEW) listOf(OnboardingPage.WHATS_NEW) else listOf(OnboardingPage.RANKS, OnboardingPage.LANGUAGE, OnboardingPage.GOAL_AND_REMINDER)
+        // Both open with the hadith the ranks come from (owner, 2026-11-22).
+        get() = if (mode == OnboardingMode.WHATS_NEW) {
+            listOf(OnboardingPage.HADITH, OnboardingPage.WHATS_NEW)
+        } else {
+            listOf(OnboardingPage.HADITH, OnboardingPage.RANKS, OnboardingPage.LANGUAGE, OnboardingPage.GOAL_AND_REMINDER)
+        }
 
     val page: OnboardingPage get() = pages[pageIndex.coerceIn(pages.indices)]
     val isLast: Boolean get() = pageIndex >= pages.lastIndex

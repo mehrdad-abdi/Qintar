@@ -63,6 +63,7 @@ object OnboardingTags {
     const val DONE = "onboarding-done"
     const val LANGUAGE_PREFIX = "onboarding-language-"
     const val REMINDER = "onboarding-reminder"
+    const val HADITH = "onboarding-hadith"
 }
 
 /**
@@ -93,6 +94,7 @@ fun OnboardingScreen(onFinished: () -> Unit, viewModel: OnboardingViewModel = hi
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
             when (state.page) {
+                OnboardingPage.HADITH -> io.github.mehrdad_abdi.qintar.ui.common.HadithText(Modifier.testTag(OnboardingTags.HADITH))
                 OnboardingPage.RANKS -> RanksPage()
                 OnboardingPage.LANGUAGE -> LanguagePage(state.language, viewModel::setLanguage)
                 OnboardingPage.GOAL_AND_REMINDER -> GoalAndReminderPage(state, viewModel)

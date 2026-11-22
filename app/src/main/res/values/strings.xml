@@ -144,4 +144,10 @@
     <string name="progress_of">%1$s / %2$s</string>
     <string name="reader_mark_bookmark">Mark read</string>
     <string name="reader_mark_surah">Mark %1$s read</string>
+    <string name="hadith_intro">The seven ranks of Qintar come from this narration about reciting the Quran at night.</string>
+    <string name="hadith_label_ar">Arabic</string>
+    <string name="hadith_label_en">English</string>
+    <string name="hadith_label_fa">Persian</string>
+    <string name="settings_hadith">The hadith of the ranks</string>
+    <string name="settings_hadith_summary">Where the seven ranks come from</string>
 </resources>

@@ -107,6 +107,7 @@ object SettingsTags {
     const val PLAYBACK_SPEED = "setting-playback-speed"
     const val COUNT_LISTENED = "setting-count-listened"
     const val STOP_BEFORE_SAJDA = "setting-stop-before-sajda"
+    const val HADITH = "setting-hadith"
     const val WIFI_ONLY = "setting-wifi-only"
     const val CLEAR_AUDIO = "setting-clear-audio"
     const val EXPORT = "setting-export"
@@ -615,6 +616,11 @@ private fun AboutSection(onOpenLicences: () -> Unit) = Section(stringResource(R.
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+    RowDivider()
+    // The hadith of the ranks, to read again (owner, 2026-11-22).
+    var hadith by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    ActionRow(stringResource(R.string.settings_hadith), stringResource(R.string.settings_hadith_summary), SettingsTags.HADITH) { hadith = !hadith }
+    if (hadith) io.github.mehrdad_abdi.qintar.ui.common.HadithText(Modifier.padding(bottom = Spacing.md), withBasmala = true)
     RowDivider()
     Column(Modifier.fillMaxWidth().padding(vertical = Spacing.sm)) {
         Text(stringResource(R.string.settings_privacy_title), style = QintarType.Body)

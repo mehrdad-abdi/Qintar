@@ -135,6 +135,14 @@ class SettingsScreensTest {
     }
 
     @Test
+    fun `about has the hadith the ranks come from, to read again`() {
+        open()
+        tag(SettingsTags.HADITH).performScrollTo().performClick()
+        compose.onNodeWithText("will not be written among the heedless", substring = true).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("الْغَافِلِينَ", substring = true).assertExists()
+    }
+
+    @Test
     fun `the licences screen reads the texts shipped with the app`() {
         compose.setContent { QintarTheme { LicencesScreen(onBack = {}) } }
         compose.waitUntil(5_000) { compose.onAllNodesWithTextCount("Vazirmatn-OFL") > 0 }
