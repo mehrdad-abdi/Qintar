@@ -2,6 +2,7 @@ package io.github.mehrdad_abdi.qintar.playback
 
 import io.github.mehrdad_abdi.qintar.domain.model.AyahId
 import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
+import io.github.mehrdad_abdi.qintar.domain.model.SajdaType
 import io.github.mehrdad_abdi.qintar.domain.model.Segment
 import io.github.mehrdad_abdi.qintar.domain.quran.QuranIndex
 
@@ -20,6 +21,8 @@ data class QueueEntry(
     val surah: Int,
     val segment: Int,
     val context: ReadContext,
+    /** An ayah with a sajda: playback can wait before it (§7.8, "Stop before sajda ayahs"). */
+    val sajda: Boolean = false,
 ) {
     val mediaId: String get() = if (kind == QueueKind.AYAH) "ayah:${ayah.value}" else "basmala:$surah"
 
@@ -77,6 +80,23 @@ class PlaybackQueue(val entries: List<QueueEntry>) {
         }
     }
 
+    /** What happens when the entry at [cursor] has played to its end. */
+    sealed interface Step {
+        data class Play(val cursor: Cursor) : Step
+
+        /** Stop, ready at [cursor]: a sajda ayah, played when the listener asks for it. */
+        data class WaitAt(val cursor: Cursor) : Step
+
+        data object End : Step
+    }
+
+    /** [after], except that with [stopBeforeSajda] a sajda ayah is not entered by itself. */
+    fun step(cursor: Cursor, repeat: RepeatSettings, stopBeforeSajda: Boolean): Step {
+        val next = after(cursor, repeat) ?: return Step.End
+        val entry = entries[next.index]
+        return if (stopBeforeSajda && entry.sajda && next.index != cursor.index) Step.WaitAt(next) else Step.Play(next)
+    }
+
     /** "Next": the following entry, whatever repeats are left; null at the end of the scope. */
     fun next(cursor: Cursor): Cursor? = if (cursor.index + 1 < entries.size) Cursor(cursor.index + 1) else null
 
@@ -103,7 +123,7 @@ class PlaybackQueue(val entries: List<QueueEntry>) {
                     if (basmala && ref.ayah == 1 && index.surah(ref.surah).hasBasmala) {
                         entries += QueueEntry(QueueKind.BASMALA, id, ref.surah, s, segment.context)
                     }
-                    entries += QueueEntry(QueueKind.AYAH, id, ref.surah, s, segment.context)
+                    entries += QueueEntry(QueueKind.AYAH, id, ref.surah, s, segment.context, sajda = index.sajdaOf(id) != SajdaType.NONE)
                 }
             }
             return PlaybackQueue(entries)

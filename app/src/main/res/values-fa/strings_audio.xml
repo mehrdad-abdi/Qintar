@@ -45,4 +45,6 @@
     <string name="reciter_shaatree">ابوبکر الشاطری</string>
     <string name="reciter_hudhaify">علی الحذیفی</string>
     <string name="reciter_parhizgar">شهریار پرهیزگار</string>
+    <string name="settings_stop_before_sajda">توقف پیش از آیه‌های سجده</string>
+    <string name="settings_stop_before_sajda_summary">پخش پیش از آیهٔ سجده می‌ایستد؛ هر وقت آماده بودید آن را پخش کنید</string>
 </resources>

@@ -95,6 +95,8 @@ class SettingsViewModel @Inject constructor(
     fun setAudioQuality(bitrate: Int) = edit { it.copy(audioQuality = Reciters.of(it.reciterId).bitrateFor(bitrate)) }
     fun setPlaybackSpeed(speed: Float) = edit { it.copy(playbackSpeed = speed.coerceIn(PlaybackService.MIN_SPEED, PlaybackService.MAX_SPEED)) }
     fun setCountListened(value: Boolean) = edit { it.copy(countListened = value) }
+
+    fun setStopBeforeSajda(value: Boolean) = edit { it.copy(stopBeforeSajda = value) }
     fun setWifiOnlyDownloads(value: Boolean) = edit { it.copy(wifiOnlyDownloads = value) }
 
     fun clearAudio() {

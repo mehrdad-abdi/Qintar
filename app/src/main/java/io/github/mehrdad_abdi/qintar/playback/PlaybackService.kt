@@ -84,6 +84,9 @@ class PlaybackService : MediaSessionService() {
     private var queue: PlaybackQueue? = null
     private var quran: QuranIndex? = null
     private var cursor: Cursor? = null
+
+    /** A sajda ayah playback stopped before ("Stop before sajda ayahs"); "play" starts there. */
+    private var waitingAt: Cursor? = null
     private var origin: PlaybackOrigin? = null
     private var repeat = RepeatSettings()
     private var settings = UserPrefs()
@@ -121,7 +124,7 @@ class PlaybackService : MediaSessionService() {
         val before = settings
         settings = value
         exo.setPlaybackSpeed(value.playbackSpeed.coerceIn(MIN_SPEED, MAX_SPEED))
-        if (before.reciterId != value.reciterId || before.audioQuality != value.audioQuality) {
+        if (before.reciterId != value.reciterId || before.audioQuality != value.audioQuality || before.stopBeforeSajda != value.stopBeforeSajda) {
             // From the next ayah on; the one being played is not interrupted.
             refreshLookahead()
             publishExtras()
@@ -167,7 +170,7 @@ class PlaybackService : MediaSessionService() {
     /** Puts the entry at [at] and the one that follows it into the player. */
     private fun load(at: Cursor, play: Boolean) {
         val queue = queue ?: return
-        val items = listOfNotNull(at, queue.after(at, repeat)).map(::mediaItem)
+        val items = listOfNotNull(at, following(queue, at)).map(::mediaItem)
         cursor = at
         exo.setMediaItems(items, /* resetPosition = */ true)
         exo.prepare()
@@ -189,8 +192,16 @@ class PlaybackService : MediaSessionService() {
         if (exo.mediaItemCount == 0) return
         val at = exo.currentMediaItemIndex
         if (exo.mediaItemCount > at + 1) exo.removeMediaItems(at + 1, exo.mediaItemCount)
-        queue.after(cursor, repeat)?.let { exo.addMediaItem(mediaItem(it)) }
+        following(queue, cursor)?.let { exo.addMediaItem(mediaItem(it)) }
     }
+
+    /** What the player plays after [at] by itself; before a sajda ayah (when asked) nothing: it waits. */
+    private fun following(queue: PlaybackQueue, at: Cursor): Cursor? =
+        when (val step = queue.step(at, repeat, settings.stopBeforeSajda)) {
+            is PlaybackQueue.Step.Play -> step.cursor.also { waitingAt = null }
+            is PlaybackQueue.Step.WaitAt -> { waitingAt = step.cursor; null }
+            PlaybackQueue.Step.End -> { waitingAt = null; null }
+        }
 
     private fun skipToNext() {
         val queue = queue ?: return
@@ -205,8 +216,10 @@ class PlaybackService : MediaSessionService() {
         if (before == null || exo.currentPosition > RESTART_THRESHOLD_MS) exo.seekTo(0) else load(before, exo.playWhenReady)
     }
 
-    /** "Play" after the end of the scope: from its beginning. */
+    /** "Play" after the player stopped: at the sajda ayah it waited before, else from the scope's beginning. */
     private fun restart() {
+        val wait = waitingAt
+        if (wait != null) return load(wait, play = true)
         if ((queue?.size ?: 0) > 0) load(Cursor(0), play = true)
     }
 

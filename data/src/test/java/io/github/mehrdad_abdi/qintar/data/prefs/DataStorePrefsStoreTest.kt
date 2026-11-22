@@ -67,6 +67,7 @@ class DataStorePrefsStoreTest {
         audioQuality = 128,
         playbackSpeed = 1.25f,
         countListened = false,
+        stopBeforeSajda = true,
         wifiOnlyDownloads = false,
         reminderEnabled = true,
         reminderTime = LocalTime.of(5, 45),

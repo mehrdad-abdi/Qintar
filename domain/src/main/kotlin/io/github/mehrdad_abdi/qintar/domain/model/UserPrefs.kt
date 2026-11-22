@@ -64,6 +64,8 @@ data class UserPrefs(
     val audioQuality: Int = DEFAULT_AUDIO_QUALITY,
     val playbackSpeed: Float = 1f,
     val countListened: Boolean = true,
+    /** Playback pauses before a sajda ayah until the listener plays it. */
+    val stopBeforeSajda: Boolean = false,
     val wifiOnlyDownloads: Boolean = true,
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime = LocalTime.of(20, 0),

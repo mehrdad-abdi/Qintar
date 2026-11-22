@@ -106,6 +106,7 @@ object SettingsTags {
     const val AUDIO_QUALITY = "setting-audio-quality"
     const val PLAYBACK_SPEED = "setting-playback-speed"
     const val COUNT_LISTENED = "setting-count-listened"
+    const val STOP_BEFORE_SAJDA = "setting-stop-before-sajda"
     const val WIFI_ONLY = "setting-wifi-only"
     const val CLEAR_AUDIO = "setting-clear-audio"
     const val EXPORT = "setting-export"
@@ -475,6 +476,14 @@ private fun AudioSection(prefs: UserPrefs, audioBytes: Long?, vm: SettingsViewMo
         SettingsTags.COUNT_LISTENED,
         summary = stringResource(R.string.settings_count_listened_summary),
         onChange = vm::setCountListened,
+    )
+    RowDivider()
+    SwitchSetting(
+        stringResource(R.string.settings_stop_before_sajda),
+        prefs.stopBeforeSajda,
+        SettingsTags.STOP_BEFORE_SAJDA,
+        summary = stringResource(R.string.settings_stop_before_sajda_summary),
+        onChange = vm::setStopBeforeSajda,
     )
     RowDivider()
     SwitchSetting(stringResource(R.string.settings_wifi_only), prefs.wifiOnlyDownloads, SettingsTags.WIFI_ONLY, onChange = vm::setWifiOnlyDownloads)

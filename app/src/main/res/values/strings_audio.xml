@@ -50,4 +50,6 @@
     <string name="reciter_shaatree">Abu Bakr Ash-Shaatree</string>
     <string name="reciter_hudhaify">Ali Al-Hudhaify</string>
     <string name="reciter_parhizgar">Shahriar Parhizgar</string>
+    <string name="settings_stop_before_sajda">Stop before sajda ayahs</string>
+    <string name="settings_stop_before_sajda_summary">Playback waits before an ayah of sajda; play it when you are ready</string>
 </resources>

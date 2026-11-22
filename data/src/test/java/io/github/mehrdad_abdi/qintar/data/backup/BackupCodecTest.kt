@@ -67,6 +67,7 @@ class BackupCodecTest {
         audioQuality = 128,
         playbackSpeed = 1.5f,
         countListened = false,
+        stopBeforeSajda = true,
         wifiOnlyDownloads = false,
         reminderEnabled = true,
         reminderTime = LocalTime.of(6, 5),

@@ -6,6 +6,7 @@ import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
 import io.github.mehrdad_abdi.qintar.domain.model.Segment
 import io.github.mehrdad_abdi.qintar.domain.testing.QuranFixture
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -151,5 +152,21 @@ class PlaybackQueueTest {
     @Test
     fun `an ayah is never repeated zero times`() {
         assertThrows(IllegalArgumentException::class.java) { RepeatSettings(ayahTimes = 0) }
+    }
+
+    // ---- stop before a sajda ayah (owner, 2026-11-22) ------------------------------------------
+
+    @Test
+    fun `with the setting on, playback waits before a sajda ayah and goes on when it is played`() {
+        val alaq = Segment(ReadContext.Browse, index.surahRange(96))
+        val q = queue(alaq)
+        val before = q.indexOf(0, ayah(96, 18))!!
+        val sajda = q.indexOf(0, ayah(96, 19))!!
+        assertTrue(q[sajda].sajda)
+
+        assertEquals("off: it simply follows", Cursor(sajda), q.after(Cursor(before), RepeatSettings()))
+        assertEquals(PlaybackQueue.Step.WaitAt(Cursor(sajda)), q.step(Cursor(before), RepeatSettings(), stopBeforeSajda = true))
+        assertEquals(PlaybackQueue.Step.Play(Cursor(sajda)), q.step(Cursor(before), RepeatSettings(), stopBeforeSajda = false))
+        assertEquals("started on the sajda ayah itself, it plays to the end", PlaybackQueue.Step.End, q.step(Cursor(sajda), RepeatSettings(), stopBeforeSajda = true))
     }
 }
