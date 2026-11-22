@@ -7,29 +7,32 @@ both `versionCode` and `versionName` in `app/build.gradle.kts`.
 
 ## One-time setup: the signing key
 
-An APK can only update an installed copy that was signed with the same key. If v1 APKs were
-handed out, reuse that key. Otherwise create one and keep the file and passwords somewhere safe:
-losing them means users must uninstall to update.
+An APK can only update an installed copy that was signed with the same key. The release key is
+`~/keys/qintar-release.jks` (alias `qintar`). Keep the file and its password in a password manager
+and a copy off this computer: losing either means users must uninstall to update. Google Play
+refuses debug-signed uploads, so never release with a debug key.
 
-    keytool -genkeypair -v -keystore qintar.jks -alias qintar -keyalg RSA -keysize 4096 -validity 10000
+The scripts in `tools/release/` need only the keystore and its password (they ask for it; it is
+never printed or saved):
 
-Add these repository secrets (Settings → Secrets and variables → Actions):
-
-| Secret | Value |
+| Script | What it does |
 |---|---|
-| `QINTAR_KEYSTORE_BASE64` | output of `base64 -w0 qintar.jks` |
-| `QINTAR_KEYSTORE_PASSWORD` | the keystore password |
-| `QINTAR_KEY_ALIAS` | `qintar` (or the alias you chose) |
-| `QINTAR_KEY_PASSWORD` | the key password |
+| `tools/release/new-release-key.sh` | creates the key (once; refuses to overwrite) |
+| `tools/release/set-github-secrets.sh` | checks the password, then uploads the four repository secrets the release workflow uses (`QINTAR_KEYSTORE_BASE64`, `QINTAR_KEYSTORE_PASSWORD`, `QINTAR_KEY_ALIAS`, `QINTAR_KEY_PASSWORD`) |
+| `tools/release/build-signed.sh` | builds the signed APK and the Play bundle (`.aab`) locally and prints the signature |
 
-## Building a signed APK locally
+Each takes an optional keystore path (and `build-signed.sh` an alias) to use another key.
 
-    export QINTAR_KEYSTORE_FILE=/path/to/qintar.jks
-    export QINTAR_KEYSTORE_PASSWORD=... QINTAR_KEY_ALIAS=qintar QINTAR_KEY_PASSWORD=...
-    ./gradlew :app:assembleRelease
+Without the signing variables `assembleRelease` still succeeds but produces an unsigned APK, which
+is what the pull-request workflow builds to prove that the release configuration compiles.
 
-Without those variables `assembleRelease` still succeeds but produces an unsigned APK, which is
-what the pull-request workflow builds to prove that the release configuration compiles.
+## Smoke-test every release build on a device
+
+Release builds are shrunk by R8, which renames classes; debug builds and unit tests do not see
+that. Two release-only crashes were found this way (navigation enum arguments, DataStore protobuf
+fields; see `app/proguard-rules.pro`). Install the signed APK on an emulator or phone and at least:
+open Today, start a khatm, open the reader and tick an ayah, play audio, open Read, Bookmarks,
+Insights and Settings, change a setting.
 
 ## Before a release that users of version 1 will install
 
