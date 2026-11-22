@@ -157,7 +157,12 @@ class PlaybackService : MediaSessionService() {
             // The index is loaded at app start; this waits only in a process that was just created.
             val (index, built) = withContext(io) {
                 val index = index.get()
-                index to PlaybackQueue.build(request.segments, index, basmala = !Reciters.of(settings.reciterId).ayahOneIncludesBasmala)
+                index to PlaybackQueue.build(
+                    request.segments,
+                    index,
+                    basmala = !Reciters.of(settings.reciterId).ayahOneIncludesBasmala,
+                    sajdaDhikr = settings.sajdaDhikr,
+                )
             }
             val at = built.startAt(request.startSegment, request.startAyah) ?: return@launch
             quran = index
@@ -249,7 +254,9 @@ class PlaybackService : MediaSessionService() {
         val entry = queue!![cursor.index]
         val language = resources.configuration.locales[0].language
         val surah = quran?.surah(entry.surah)?.displayName(language).orEmpty()
-        val title = if (entry.kind == QueueKind.BASMALA) {
+        val title = if (entry.kind == QueueKind.SAJDA_DHIKR) {
+            getString(R.string.audio_title_sajda_dhikr)
+        } else if (entry.kind == QueueKind.BASMALA) {
             getString(R.string.audio_title_basmala, surah)
         } else {
             val number = quran?.ref(entry.ayah)?.ayah ?: 0
@@ -257,7 +264,14 @@ class PlaybackService : MediaSessionService() {
         }
         return MediaItem.Builder()
             .setMediaId(entry.mediaId)
-            .setUri(source.url(settings.reciterId, entry.audioAyah, settings.audioQuality))
+            .setUri(
+                if (entry.kind == QueueKind.SAJDA_DHIKR) {
+                    // Bundled with the app, so it plays offline.
+                    "android.resource://$packageName/${R.raw.sajda_dhikr}"
+                } else {
+                    source.url(settings.reciterId, entry.audioAyah, settings.audioQuality)
+                },
+            )
             .setMediaMetadata(
                 MediaMetadata.Builder()
                     .setTitle(title)

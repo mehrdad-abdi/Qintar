@@ -38,6 +38,8 @@ data class NowPlaying(
     val context: ReadContext,
     /** Which play of this ayah in a row (1 unless the ayah repeats). */
     val play: Int = 1,
+    /** The sajda dhikr after [ayah]; never counted. */
+    val dhikr: Boolean = false,
 )
 
 enum class PlaybackProblem {

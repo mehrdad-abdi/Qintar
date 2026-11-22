@@ -97,6 +97,8 @@ class SettingsViewModel @Inject constructor(
     fun setCountListened(value: Boolean) = edit { it.copy(countListened = value) }
 
     fun setStopBeforeSajda(value: Boolean) = edit { it.copy(stopBeforeSajda = value) }
+
+    fun setSajdaDhikr(value: Boolean) = edit { it.copy(sajdaDhikr = value) }
     fun setWifiOnlyDownloads(value: Boolean) = edit { it.copy(wifiOnlyDownloads = value) }
 
     fun clearAudio() {

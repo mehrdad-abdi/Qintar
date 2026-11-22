@@ -6,7 +6,8 @@ import io.github.mehrdad_abdi.qintar.domain.model.SajdaType
 import io.github.mehrdad_abdi.qintar.domain.model.Segment
 import io.github.mehrdad_abdi.qintar.domain.quran.QuranIndex
 
-enum class QueueKind { AYAH, BASMALA }
+/** SAJDA_DHIKR: the bundled sajda dhikr, after a sajda ayah; [QueueEntry.ayah] is that ayah. */
+enum class QueueKind { AYAH, BASMALA, SAJDA_DHIKR }
 
 /**
  * One thing the player plays.
@@ -24,7 +25,12 @@ data class QueueEntry(
     /** An ayah with a sajda: playback can wait before it (§7.8, "Stop before sajda ayahs"). */
     val sajda: Boolean = false,
 ) {
-    val mediaId: String get() = if (kind == QueueKind.AYAH) "ayah:${ayah.value}" else "basmala:$surah"
+    val mediaId: String
+        get() = when (kind) {
+            QueueKind.AYAH -> "ayah:${ayah.value}"
+            QueueKind.BASMALA -> "basmala:$surah"
+            QueueKind.SAJDA_DHIKR -> "sajda-dhikr:${ayah.value}"
+        }
 
     /** The ayah whose audio file is played: the basmala is the recitation of 1:1. */
     val audioAyah: AyahId get() = if (kind == QueueKind.BASMALA) AyahId.FIRST else ayah
@@ -93,6 +99,8 @@ class PlaybackQueue(val entries: List<QueueEntry>) {
     /** [after], except that with [stopBeforeSajda] a sajda ayah is not entered by itself. */
     fun step(cursor: Cursor, repeat: RepeatSettings, stopBeforeSajda: Boolean): Step {
         val next = after(cursor, repeat) ?: return Step.End
+        // After the sajda dhikr the player stops: the listener does the sajda, then plays on.
+        if (entries[cursor.index].kind == QueueKind.SAJDA_DHIKR) return Step.WaitAt(next)
         val entry = entries[next.index]
         return if (stopBeforeSajda && entry.sajda && next.index != cursor.index) Step.WaitAt(next) else Step.Play(next)
     }
@@ -114,8 +122,9 @@ class PlaybackQueue(val entries: List<QueueEntry>) {
     companion object {
         /**
          * @param basmala false for a reciter whose ayah-1 files already begin with the basmala.
+         * @param sajdaDhikr the sajda dhikr after each sajda ayah.
          */
-        fun build(segments: List<Segment>, index: QuranIndex, basmala: Boolean = true): PlaybackQueue {
+        fun build(segments: List<Segment>, index: QuranIndex, basmala: Boolean = true, sajdaDhikr: Boolean = false): PlaybackQueue {
             val entries = ArrayList<QueueEntry>(segments.sumOf { it.range.size } + 8)
             segments.forEachIndexed { s, segment ->
                 for (id in segment.range) {
@@ -123,7 +132,9 @@ class PlaybackQueue(val entries: List<QueueEntry>) {
                     if (basmala && ref.ayah == 1 && index.surah(ref.surah).hasBasmala) {
                         entries += QueueEntry(QueueKind.BASMALA, id, ref.surah, s, segment.context)
                     }
-                    entries += QueueEntry(QueueKind.AYAH, id, ref.surah, s, segment.context, sajda = index.sajdaOf(id) != SajdaType.NONE)
+                    val sajda = index.sajdaOf(id) != SajdaType.NONE
+                    entries += QueueEntry(QueueKind.AYAH, id, ref.surah, s, segment.context, sajda = sajda)
+                    if (sajda && sajdaDhikr) entries += QueueEntry(QueueKind.SAJDA_DHIKR, id, ref.surah, s, segment.context)
                 }
             }
             return PlaybackQueue(entries)

@@ -47,4 +47,9 @@
     <string name="reciter_parhizgar">شهریار پرهیزگار</string>
     <string name="settings_stop_before_sajda">توقف پیش از آیه‌های سجده</string>
     <string name="settings_stop_before_sajda_summary">پخش پیش از آیهٔ سجده می‌ایستد؛ هر وقت آماده بودید آن را پخش کنید</string>
+    <string name="audio_title_sajda_dhikr">ذکر سجده</string>
+    <string name="settings_sajda_dhikr">ذکر سجده پس از آیه‌های سجده</string>
+    <string name="settings_sajda_dhikr_summary">پس از آیهٔ سجده ذکر سجده پخش می‌شود و پخش تا وقتی ادامه دهید می‌ایستد</string>
+    <string name="settings_sajda_dhikr_credit">صدای ذکر سجده</string>
+    <string name="settings_sajda_dhikr_credit_body">Google Cloud Text-to-Speech</string>
 </resources>

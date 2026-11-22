@@ -41,7 +41,7 @@ Decisions for 11–13 (owner, 2026-11-22): one list, groups then built-in Ungrou
 | # | Status |
 |---|---|
 | 1 | Not reproduced: the player bar and the highlight come from the same player state. Watch for it while testing. |
-| 2 | Done. Hadith source (book) still to be supplied by the owner. |
+| 2 | Done; owner checked the texts. Hadith source (book) still to be supplied by the owner. |
 | 3 | Not reproduced in a test (switch on → saved, time shown). Needs the exact symptom; the test stays as a guard. |
 | 4 | Done: bar = coverage in the current khatm, in place of the divider. |
 | 5 | Done: star opens the editor; filled star = ayah in a bookmark, opens that bookmark. |
@@ -50,5 +50,5 @@ Decisions for 11–13 (owner, 2026-11-22): one list, groups then built-in Ungrou
 | 11, 12, 13, 16 | Done (first version of the list, to refine after testing). |
 | 14, 15 | Done (list and reader). |
 | 17 | Done (setting, off by default). |
-| 18 | Open: needs the dhikr text and a recording. |
+| 18 | Done: owner's Google Cloud TTS recording (سُبْحَانَ رَبِّيَ الْأَعْلَى وَبِحَمْدِهِ + sajda dua), plays after a sajda ayah then waits; setting on by default. |
 | 19 | Done: Revisit per bookmark. |

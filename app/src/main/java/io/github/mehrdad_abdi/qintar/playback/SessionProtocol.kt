@@ -35,6 +35,7 @@ object SessionProtocol {
     private const val RECITER = "reciter"
     private const val CLOSED = "closed"
     private const val ITEM_BASMALA = "basmala"
+    private const val ITEM_DHIKR = "dhikr"
     private const val ITEM_AYAH = "ayah"
     private const val ITEM_SURAH = "surah"
     private const val ITEM_SEGMENT = "segment"
@@ -130,6 +131,7 @@ object SessionProtocol {
 
     fun itemExtras(entry: QueueEntry, cursor: Cursor): Bundle = Bundle().apply {
         putBoolean(ITEM_BASMALA, entry.kind == QueueKind.BASMALA)
+        putBoolean(ITEM_DHIKR, entry.kind == QueueKind.SAJDA_DHIKR)
         putInt(ITEM_AYAH, entry.ayah.value)
         putInt(ITEM_SURAH, entry.surah)
         putInt(ITEM_SEGMENT, entry.segment)
@@ -150,6 +152,7 @@ object SessionProtocol {
             basmala = extras.getBoolean(ITEM_BASMALA),
             context = context,
             play = extras.getInt(ITEM_PLAY, 1),
+            dhikr = extras.getBoolean(ITEM_DHIKR),
         )
     }
 
@@ -161,4 +164,4 @@ object SessionProtocol {
 }
 
 /** What the counter needs to know of an item. */
-fun NowPlaying.playingItem() = PlayingItem(ayah.takeUnless { basmala }, context)
+fun NowPlaying.playingItem() = PlayingItem(ayah.takeUnless { basmala || dhikr }, context)

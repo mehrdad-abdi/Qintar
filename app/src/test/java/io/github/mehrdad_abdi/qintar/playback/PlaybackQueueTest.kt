@@ -169,4 +169,31 @@ class PlaybackQueueTest {
         assertEquals(PlaybackQueue.Step.Play(Cursor(sajda)), q.step(Cursor(before), RepeatSettings(), stopBeforeSajda = false))
         assertEquals("started on the sajda ayah itself, it plays to the end", PlaybackQueue.Step.End, q.step(Cursor(sajda), RepeatSettings(), stopBeforeSajda = true))
     }
+
+    @Test
+    fun `with the sajda dhikr on, it follows a sajda ayah and playback then waits for the listener`() {
+        val alaq = Segment(ReadContext.Browse, AyahRange(ayah(96, 18), ayah(97, 2)))
+        val q = PlaybackQueue.build(listOf(alaq), index, basmala = true, sajdaDhikr = true)
+        val sajda = q.indexOf(0, ayah(96, 19))!!
+        val dhikr = q[sajda + 1]
+        assertEquals(QueueKind.SAJDA_DHIKR, dhikr.kind)
+        assertEquals("it belongs to the sajda ayah", ayah(96, 19), dhikr.ayah)
+
+        assertEquals(PlaybackQueue.Step.Play(Cursor(sajda + 1)), q.step(Cursor(sajda), RepeatSettings(), stopBeforeSajda = false))
+        assertEquals(
+            "after the dhikr: stop, ready at what follows",
+            PlaybackQueue.Step.WaitAt(Cursor(sajda + 2)),
+            q.step(Cursor(sajda + 1), RepeatSettings(), stopBeforeSajda = false),
+        )
+        assertEquals(QueueKind.BASMALA, q[sajda + 2].kind)
+
+        val off = PlaybackQueue.build(listOf(alaq), index, basmala = true, sajdaDhikr = false)
+        assertTrue(off.entries.none { it.kind == QueueKind.SAJDA_DHIKR })
+    }
+
+    @Test
+    fun `the dhikr is never counted as a reading`() {
+        val item = NowPlaying(ayah(96, 19), 96, 0, basmala = false, context = ReadContext.Browse, dhikr = true)
+        assertEquals(null, item.playingItem().ayah)
+    }
 }

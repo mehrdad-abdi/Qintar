@@ -52,4 +52,9 @@
     <string name="reciter_parhizgar">Shahriar Parhizgar</string>
     <string name="settings_stop_before_sajda">Stop before sajda ayahs</string>
     <string name="settings_stop_before_sajda_summary">Playback waits before an ayah of sajda; play it when you are ready</string>
+    <string name="audio_title_sajda_dhikr">Sajda dhikr</string>
+    <string name="settings_sajda_dhikr">Sajda dhikr after sajda ayahs</string>
+    <string name="settings_sajda_dhikr_summary">After a sajda ayah the sajda dhikr plays, then playback waits until you play on</string>
+    <string name="settings_sajda_dhikr_credit">Sajda dhikr voice</string>
+    <string name="settings_sajda_dhikr_credit_body">Google Cloud Text-to-Speech</string>
 </resources>

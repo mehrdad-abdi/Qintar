@@ -47,4 +47,9 @@
     <string name="reciter_parhizgar">شهريار برهيزكار</string>
     <string name="settings_stop_before_sajda">التوقف قبل آيات السجدة</string>
     <string name="settings_stop_before_sajda_summary">يتوقف التشغيل قبل آية السجدة؛ شغِّلها حين تكون مستعدًا</string>
+    <string name="audio_title_sajda_dhikr">ذكر السجدة</string>
+    <string name="settings_sajda_dhikr">ذكر السجدة بعد آيات السجدة</string>
+    <string name="settings_sajda_dhikr_summary">بعد آية السجدة يُشغَّل ذكر السجدة ثم يتوقف التشغيل حتى تتابع</string>
+    <string name="settings_sajda_dhikr_credit">صوت ذكر السجدة</string>
+    <string name="settings_sajda_dhikr_credit_body">Google Cloud Text-to-Speech</string>
 </resources>

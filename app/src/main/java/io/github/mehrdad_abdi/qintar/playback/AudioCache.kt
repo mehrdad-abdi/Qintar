@@ -10,6 +10,7 @@ import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.CacheDataSource
@@ -64,8 +65,11 @@ class Media3AudioCache @Inject constructor(
     // Nothing of the user goes out: a fixed agent, no cookies, no extra headers.
     private val http = DefaultHttpDataSource.Factory().setUserAgent(USER_AGENT).setAllowCrossProtocolRedirects(false)
 
-    /** Reads from the cache, loads what is missing from the network and keeps it. */
-    fun dataSourceFactory(): DataSource.Factory = cacheDataSourceFactory()
+    /**
+     * Reads from the cache, loads what is missing from the network and keeps it. Audio bundled with
+     * the app (the sajda dhikr, an android.resource URI) is read directly, never cached.
+     */
+    fun dataSourceFactory(): DataSource.Factory = DefaultDataSource.Factory(context, cacheDataSourceFactory())
 
     private fun cacheDataSourceFactory() = CacheDataSource.Factory()
         .setCache(cache)

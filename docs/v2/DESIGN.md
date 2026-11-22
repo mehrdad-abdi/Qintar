@@ -1352,7 +1352,7 @@ two disagree, this section wins. The full list of findings is in `phone-test-not
 | Reader marking | Inside a bookmark there is no Mark page: the bookmark ends with one **Mark read**. In a khatm and in free reading each surah ends with **Mark surah read**, besides Mark page. | §5.4 page divider |
 | Surah list | The bar under a surah shows its coverage in the current khatm (none without a khatm), in place of the divider. | §5.3 surah row |
 | Revisit | Per bookmark: never read from the bookmark first, then the ones read longest ago; a tap opens it. | §4.8 |
-| Audio | Setting **Stop before sajda ayahs** (off by default): playback stops before a sajda ayah and plays it when the listener taps play. A sajda dhikr after the ayah is planned (needs a recording). | §7.8 |
+| Audio | Setting **Stop before sajda ayahs** (off by default): playback stops before a sajda ayah and plays it when the listener taps play. Setting **Sajda dhikr after sajda ayahs** (on by default): after a sajda ayah the bundled dhikr (`res/raw/sajda_dhikr.mp3`: سُبْحَانَ رَبِّيَ الْأَعْلَى وَبِحَمْدِهِ and the sajda dua, voice by Google Cloud Text-to-Speech, credited in About) plays, never counted, then playback waits until the listener plays on. | §7.8 |
 
 ## Appendix A — Sources checked on 2026-11-15
 

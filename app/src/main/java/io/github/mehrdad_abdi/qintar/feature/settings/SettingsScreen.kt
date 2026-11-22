@@ -107,6 +107,7 @@ object SettingsTags {
     const val PLAYBACK_SPEED = "setting-playback-speed"
     const val COUNT_LISTENED = "setting-count-listened"
     const val STOP_BEFORE_SAJDA = "setting-stop-before-sajda"
+    const val SAJDA_DHIKR = "setting-sajda-dhikr"
     const val HADITH = "setting-hadith"
     const val WIFI_ONLY = "setting-wifi-only"
     const val CLEAR_AUDIO = "setting-clear-audio"
@@ -487,6 +488,14 @@ private fun AudioSection(prefs: UserPrefs, audioBytes: Long?, vm: SettingsViewMo
         onChange = vm::setStopBeforeSajda,
     )
     RowDivider()
+    SwitchSetting(
+        stringResource(R.string.settings_sajda_dhikr),
+        prefs.sajdaDhikr,
+        SettingsTags.SAJDA_DHIKR,
+        summary = stringResource(R.string.settings_sajda_dhikr_summary),
+        onChange = vm::setSajdaDhikr,
+    )
+    RowDivider()
     SwitchSetting(stringResource(R.string.settings_wifi_only), prefs.wifiOnlyDownloads, SettingsTags.WIFI_ONLY, onChange = vm::setWifiOnlyDownloads)
     RowDivider()
     val context = LocalContext.current
@@ -633,6 +642,11 @@ private fun AboutSection(onOpenLicences: () -> Unit) = Section(stringResource(R.
         TextButton(onClick = { uriHandler.openUri(TANZIL_URL) }, modifier = Modifier.testTag(SettingsTags.TANZIL_LINK)) {
             Text(stringResource(R.string.settings_tanzil_link), style = QintarType.Label)
         }
+    }
+    RowDivider()
+    Column(Modifier.fillMaxWidth().padding(vertical = Spacing.sm)) {
+        Text(stringResource(R.string.settings_sajda_dhikr_credit), style = QintarType.Body)
+        Text(stringResource(R.string.settings_sajda_dhikr_credit_body), style = QintarType.Caption, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     RowDivider()
     ActionRow(stringResource(R.string.settings_licences), stringResource(R.string.settings_licences_summary), SettingsTags.LICENCES, onOpenLicences)

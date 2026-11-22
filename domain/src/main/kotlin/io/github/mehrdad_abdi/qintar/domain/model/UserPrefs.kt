@@ -66,6 +66,8 @@ data class UserPrefs(
     val countListened: Boolean = true,
     /** Playback pauses before a sajda ayah until the listener plays it. */
     val stopBeforeSajda: Boolean = false,
+    /** After a sajda ayah, the sajda dhikr plays and playback waits for the listener. */
+    val sajdaDhikr: Boolean = true,
     val wifiOnlyDownloads: Boolean = true,
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime = LocalTime.of(20, 0),

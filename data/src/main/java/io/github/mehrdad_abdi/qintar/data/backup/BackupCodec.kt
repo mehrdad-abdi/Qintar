@@ -207,6 +207,7 @@ class BackupCodec @Inject constructor() {
         put("playbackSpeed", p.playbackSpeed)
         put("countListened", p.countListened)
         put("stopBeforeSajda", p.stopBeforeSajda)
+        put("sajdaDhikr", p.sajdaDhikr)
         put("wifiOnlyDownloads", p.wifiOnlyDownloads)
         put("reminderEnabled", p.reminderEnabled)
         put("reminderTime", p.reminderTime.format(TIME))
@@ -385,6 +386,7 @@ class BackupCodec @Inject constructor() {
             playbackSpeed = json.primitive("playbackSpeed")?.floatOrNull?.takeIf { it.isFinite() && it > 0f } ?: d.playbackSpeed,
             countListened = bool("countListened", d.countListened),
             stopBeforeSajda = bool("stopBeforeSajda", d.stopBeforeSajda),
+            sajdaDhikr = bool("sajdaDhikr", d.sajdaDhikr),
             wifiOnlyDownloads = bool("wifiOnlyDownloads", d.wifiOnlyDownloads),
             reminderEnabled = bool("reminderEnabled", d.reminderEnabled),
             reminderTime = time("reminderTime", d.reminderTime),

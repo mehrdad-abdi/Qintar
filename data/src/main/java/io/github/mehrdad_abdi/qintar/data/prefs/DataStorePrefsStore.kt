@@ -88,6 +88,7 @@ class DataStorePrefsStore(private val dataStore: DataStore<Preferences>) : Prefs
         private val PLAYBACK_SPEED = floatPreferencesKey("playback_speed")
         private val COUNT_LISTENED = booleanPreferencesKey("count_listened")
         private val STOP_BEFORE_SAJDA = booleanPreferencesKey("stop_before_sajda")
+        private val SAJDA_DHIKR = booleanPreferencesKey("sajda_dhikr")
         private val WIFI_ONLY_DOWNLOADS = booleanPreferencesKey("wifi_only_downloads")
         private val REMINDER_ENABLED = booleanPreferencesKey("reminder_enabled")
         private val REMINDER_MINUTES = intPreferencesKey("reminder_minutes")
@@ -131,6 +132,7 @@ class DataStorePrefsStore(private val dataStore: DataStore<Preferences>) : Prefs
                 playbackSpeed = p.read(PLAYBACK_SPEED)?.takeIf { it.isFinite() && it > 0f } ?: d.playbackSpeed,
                 countListened = p.read(COUNT_LISTENED) ?: d.countListened,
                 stopBeforeSajda = p.read(STOP_BEFORE_SAJDA) ?: d.stopBeforeSajda,
+                sajdaDhikr = p.read(SAJDA_DHIKR) ?: d.sajdaDhikr,
                 wifiOnlyDownloads = p.read(WIFI_ONLY_DOWNLOADS) ?: d.wifiOnlyDownloads,
                 reminderEnabled = p.read(REMINDER_ENABLED) ?: d.reminderEnabled,
                 reminderTime = p.time(REMINDER_MINUTES) ?: d.reminderTime,
@@ -166,6 +168,7 @@ class DataStorePrefsStore(private val dataStore: DataStore<Preferences>) : Prefs
             p.put(PLAYBACK_SPEED, u.playbackSpeed)
             p.put(COUNT_LISTENED, u.countListened)
             p.put(STOP_BEFORE_SAJDA, u.stopBeforeSajda)
+            p.put(SAJDA_DHIKR, u.sajdaDhikr)
             p.put(WIFI_ONLY_DOWNLOADS, u.wifiOnlyDownloads)
             p.put(REMINDER_ENABLED, u.reminderEnabled)
             p.put(REMINDER_MINUTES, u.reminderTime.minutes())

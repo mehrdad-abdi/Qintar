@@ -81,7 +81,9 @@ private fun playerTitle(state: PlayerBarState): String {
         null -> Unit
     }
     val surah = state.surah?.let { surahName(it) }.orEmpty()
-    val what = if (state.basmala) {
+    val what = if (state.dhikr) {
+        stringResource(R.string.audio_title_sajda_dhikr)
+    } else if (state.basmala) {
         stringResource(R.string.audio_title_basmala, surah)
     } else {
         stringResource(R.string.audio_title_ayah, surah, formatNumber(state.ayahNumber))
