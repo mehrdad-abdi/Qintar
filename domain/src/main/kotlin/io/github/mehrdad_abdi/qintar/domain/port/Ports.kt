@@ -130,6 +130,9 @@ interface ReadLogStore {
     /** Observed form of [bookmarkAyahCounts]. */
     fun observeBookmarkAyahCounts(day: LocalDate): Flow<List<BookmarkAyahCount>>
 
+    /** The newest day of any event per bookmark, counted under that bookmark. Never-read bookmarks are absent. */
+    fun observeBookmarkLastRead(): Flow<Map<Long, LocalDate>>
+
     /** `MAX(day)` and `COUNT(*)` per ayah in [range] over every context. Never-read ayahs are absent. */
     fun observeRecency(range: AyahRange): Flow<List<AyahRecency>>
 

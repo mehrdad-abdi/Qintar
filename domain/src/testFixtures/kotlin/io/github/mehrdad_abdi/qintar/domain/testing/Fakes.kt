@@ -255,6 +255,11 @@ class FakeReadLogStore : ReadLogStore, Restorable {
     override fun observeBookmarkAyahCounts(day: LocalDate): Flow<List<BookmarkAyahCount>> =
         observe { it.bookmarkAyahCounts(day) }
 
+    override fun observeBookmarkLastRead(): Flow<Map<Long, LocalDate>> = observe { s ->
+        s.events.mapNotNull { e -> (e.context as? ReadContext.Bookmark)?.let { it.id to e.day } }
+            .groupBy({ it.first }, { it.second }).mapValues { (_, days) -> days.max() }
+    }
+
     override fun observeRecency(range: AyahRange): Flow<List<AyahRecency>> = observe { s ->
         s.events.filter { it.ayahId in range }.groupBy { it.ayahId }
             .map { (ayah, rows) -> AyahRecency(ayah, rows.maxOf { it.day }, rows.size) }

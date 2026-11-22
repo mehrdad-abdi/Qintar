@@ -122,13 +122,12 @@ class InsightsScreensTest {
     }
 
     @Test
-    fun `a revisit page opens the reader at that page`() {
+    fun `a revisit bookmark opens it in the reader`() {
         read(yesterday, 1, 7)
+        val bookmark = runBlocking { app.library.create(io.github.mehrdad_abdi.qintar.domain.service.BookmarkDrafts.surah(67, app.index).copy(label = "Mulk")) }
         openInsights()
-        compose.onNodeWithText("Pages not read yet").performScrollTo().assertIsDisplayed()
-        val page2 = app.index.pageRange(2).start
-        compose.onNodeWithText("Page 2").performScrollTo().performClick()
-        assertEquals(listOf<Any>(ReaderRoute.browse(page2.value)), navigated)
+        compose.onNodeWithText("Mulk").performScrollTo().performClick()
+        assertEquals(listOf<Any>(ReaderRoute.bookmark(bookmark.id)), navigated)
     }
 
     // ---- Day detail -------------------------------------------------------------------------------------

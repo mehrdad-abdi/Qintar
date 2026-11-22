@@ -334,6 +334,19 @@ abstract class StorageContract {
     }
 
     @Test
+    fun bookmarkLastReadIsTheNewestDayOfEachBookmarkContext() = runTest {
+        log.insertEvents(
+            listOf(
+                event(7, day1, ReadContext.Bookmark(1)),
+                event(8, day3, ReadContext.Bookmark(1)),
+                event(9, day2, ReadContext.Bookmark(2)),
+                event(9, day3, ReadContext.Browse),
+            ),
+        )
+        assertEquals(mapOf(1L to day3, 2L to day2), log.observeBookmarkLastRead().first())
+    }
+
+    @Test
     fun dayCountsCountEventsOnlyAndTallySumsCountTalliesOnly() = runTest {
         log.insertEvents(listOf(event(1, day1), event(2, day1), event(1, day3)))
         log.insertTally(NewTally(day1, 40, null, t0))

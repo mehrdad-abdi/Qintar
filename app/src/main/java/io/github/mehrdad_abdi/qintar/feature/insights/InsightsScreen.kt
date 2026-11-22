@@ -139,7 +139,7 @@ internal fun InsightsContent(state: InsightsUiState, viewModel: InsightsViewMode
                 )
             }
             if (!state.isNewUser) {
-                RevisitSection(state.revisit, viewModel::onToggleRevisit, onPage = { onNavigate(ReaderRoute.browse(it.value)) })
+                RevisitSection(state.revisit, viewModel::onToggleRevisit, onBookmark = { onNavigate(ReaderRoute.bookmark(it)) })
             }
             Spacer(Modifier.size(Spacing.lg))
         }
@@ -392,31 +392,20 @@ private fun weekdayLabel(day: DayOfWeek, locale: Locale): String = day.getDispla
 internal fun RevisitSection(
     revisit: RevisitState,
     onToggle: () -> Unit,
-    onPage: (io.github.mehrdad_abdi.qintar.domain.model.AyahId) -> Unit,
+    onBookmark: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (revisit.items.isEmpty()) return
     Column(modifier.testTag(INSIGHTS_REVISIT_TAG), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         SectionHeader(stringResource(R.string.insights_revisit_title))
-        if (revisit.readLongAgo.isNotEmpty()) {
-            Text(stringResource(R.string.insights_revisit_long_ago), style = QintarType.Label, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            QCard(Modifier.fillMaxWidth(), contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = Spacing.card)) {
-                revisit.readLongAgo.forEachIndexed { i, item ->
-                    if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    RevisitRow(item, onPage)
-                }
+        Text(stringResource(R.string.insights_revisit_bookmarks), style = QintarType.Label, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        QCard(Modifier.fillMaxWidth(), contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = Spacing.card)) {
+            revisit.items.forEachIndexed { i, item ->
+                if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                RevisitRow(item, onBookmark)
             }
         }
-        if (revisit.notReadYet.isNotEmpty()) {
-            Text(stringResource(R.string.insights_revisit_not_yet), style = QintarType.Label, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            QCard(Modifier.fillMaxWidth(), contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = Spacing.card)) {
-                revisit.notReadYet.forEachIndexed { i, item ->
-                    if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    RevisitRow(item, onPage)
-                }
-            }
-        }
-        val more = revisit.readLongAgoTotal > revisit.readLongAgo.size || revisit.notReadYetTotal > revisit.notReadYet.size
-        if (more || revisit.expanded) {
+        if (revisit.total > revisit.items.size || revisit.expanded) {
             TextButton(onClick = onToggle, modifier = Modifier.heightIn(min = Sizes.touchTarget)) {
                 Text(
                     stringResource(if (revisit.expanded) R.string.insights_show_less else R.string.insights_show_more),
@@ -428,28 +417,21 @@ internal fun RevisitSection(
 }
 
 @Composable
-private fun RevisitRow(item: RevisitItem, onPage: (io.github.mehrdad_abdi.qintar.domain.model.AyahId) -> Unit) {
+private fun RevisitRow(item: RevisitItem, onBookmark: (Long) -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val names = item.surahs.map { surahName(it) }.joinToString(" · ")
-    val detail = when {
-        item.neverRead > 0 ->
-            stringResource(R.string.insights_never_read, formatNumber(item.neverRead), formatNumber(item.ayahCount))
-        item.lastRead != null -> stringResource(R.string.insights_last_read, dateText(item.lastRead))
-        else -> ""
-    }
-    val page = stringResource(R.string.page_n, formatNumber(item.page))
+    val lastRead = item.lastRead
+    val detail = if (lastRead == null) stringResource(R.string.insights_bookmark_never_read) else stringResource(R.string.insights_last_read, dateText(lastRead))
     Row(
         Modifier
             .fillMaxWidth()
             .heightIn(min = Sizes.touchTarget)
-            .clickable(role = Role.Button) { onPage(item.firstAyah) }
+            .clickable(role = Role.Button) { onBookmark(item.bookmarkId) }
             .padding(vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         Column(Modifier.weight(1f)) {
-            Text(page, style = QintarType.BodyStrong, color = colors.onSurface)
-            Text("$names · $detail", style = QintarType.Caption, color = colors.onSurfaceVariant)
+            Text(io.github.mehrdad_abdi.qintar.ui.common.bookmarkTitleText(item.title), style = QintarType.BodyStrong, color = colors.onSurface)
+            Text(detail, style = QintarType.Caption, color = colors.onSurfaceVariant)
         }
     }
 }

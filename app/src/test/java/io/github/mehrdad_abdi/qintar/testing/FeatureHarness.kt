@@ -307,7 +307,8 @@ fun DomainFixture.dayDetailViewModel(isoDate: String, io: CoroutineDispatcher) =
 
 fun DomainFixture.insightsViewModel(io: CoroutineDispatcher, systemFirstDay: DayOfWeek = DayOfWeek.SATURDAY) = InsightsViewModel(
     index = { index },
-    revisit = { revisit },
+    availability = availability,
+    log = log,
     totals = totals,
     prefs = prefs,
     clock = clock,

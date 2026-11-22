@@ -95,10 +95,9 @@
     <string name="insights_previous_month">الشهر السابق</string>
     <string name="insights_next_month">الشهر التالي</string>
     <string name="insights_revisit_title">للمراجعة</string>
-    <string name="insights_revisit_long_ago">صفحات قُرئت منذ أطول وقت</string>
-    <string name="insights_revisit_not_yet">صفحات لم تُقرأ بعد</string>
-    <string name="insights_never_read">%1$s من %2$s آية لم تُقرأ قط</string>
     <string name="insights_last_read">آخر قراءة %1$s</string>
     <string name="insights_show_more">عرض المزيد</string>
     <string name="insights_show_less">عرض أقل</string>
+    <string name="insights_revisit_bookmarks">العلامات التي لم تُقرأ منذ أطول مدة</string>
+    <string name="insights_bookmark_never_read">لم تُقرأ من هذه العلامة بعد</string>
 </resources>

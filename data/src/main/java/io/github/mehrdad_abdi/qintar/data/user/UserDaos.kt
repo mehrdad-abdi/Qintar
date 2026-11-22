@@ -141,6 +141,12 @@ interface ReadLogDao {
     fun observeBookmarkAyahCounts(day: Long): Flow<List<BookmarkAyahCountRow>>
 
     @Query(
+        "SELECT context_id, MAX(day) AS last_day FROM read_event " +
+            "WHERE context_type = 'BOOKMARK' AND context_id IS NOT NULL GROUP BY context_id",
+    )
+    fun observeBookmarkLastRead(): Flow<List<BookmarkLastReadRow>>
+
+    @Query(
         "SELECT ayah_id, MAX(day) AS last_day, COUNT(*) AS n FROM read_event WHERE $IN_RANGE " +
             "GROUP BY ayah_id ORDER BY ayah_id",
     )

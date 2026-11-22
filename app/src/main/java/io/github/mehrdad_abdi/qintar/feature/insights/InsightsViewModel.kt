@@ -16,8 +16,6 @@ import io.github.mehrdad_abdi.qintar.domain.service.DayTotals
 import io.github.mehrdad_abdi.qintar.domain.service.InsightsCalculator
 import io.github.mehrdad_abdi.qintar.domain.service.PeriodSummary
 import io.github.mehrdad_abdi.qintar.domain.service.RankCalculator
-import io.github.mehrdad_abdi.qintar.domain.service.Revisit
-import io.github.mehrdad_abdi.qintar.domain.service.RevisitRanker
 import io.github.mehrdad_abdi.qintar.domain.service.SourceSplit
 import io.github.mehrdad_abdi.qintar.domain.service.Streak
 import io.github.mehrdad_abdi.qintar.domain.service.StreakCalculator
@@ -28,6 +26,11 @@ import java.time.YearMonth
 import java.time.temporal.WeekFields
 import java.util.Locale
 import javax.inject.Inject
+import io.github.mehrdad_abdi.qintar.domain.port.ReadLogStore
+import io.github.mehrdad_abdi.qintar.domain.service.BookmarkTitles
+import io.github.mehrdad_abdi.qintar.domain.service.BookmarkTitle
+import io.github.mehrdad_abdi.qintar.domain.service.BookmarkBoard
+import io.github.mehrdad_abdi.qintar.domain.service.Availability
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -88,23 +91,13 @@ data class SourceSplitUi(
     val byMethod: Map<MethodKind, Int>,
 )
 
-/** A page offered by Revisit: opens the reader at [firstAyah]. */
-data class RevisitItem(
-    val page: Int,
-    val surahs: List<SurahInfo>,
-    val firstAyah: AyahId,
-    val ayahCount: Int,
-    /** For "read long ago": the day its oldest ayah was last read. */
-    val lastRead: LocalDate?,
-    /** For "not read yet": how many of its ayahs were never read. */
-    val neverRead: Int,
-)
+/** A bookmark offered by Revisit (§4.8): when it was last read from the bookmark; null = never. */
+data class RevisitItem(val bookmarkId: Long, val title: BookmarkTitle, val lastRead: LocalDate?)
 
 data class RevisitState(
-    val readLongAgo: List<RevisitItem> = emptyList(),
-    val readLongAgoTotal: Int = 0,
-    val notReadYet: List<RevisitItem> = emptyList(),
-    val notReadYetTotal: Int = 0,
+    /** Never read first, then the ones read longest ago. */
+    val items: List<RevisitItem> = emptyList(),
+    val total: Int = 0,
     val expanded: Boolean = false,
 )
 
@@ -139,7 +132,8 @@ data class InsightsUiState(
 @HiltViewModel
 class InsightsViewModel(
     private val index: Provider<QuranIndex>,
-    private val revisit: Provider<RevisitRanker>,
+    private val availability: Availability,
+    private val log: ReadLogStore,
     private val totals: DayTotals,
     private val prefs: PrefsStore,
     private val clock: DayClock,
@@ -151,12 +145,13 @@ class InsightsViewModel(
     @Inject
     constructor(
         index: Provider<QuranIndex>,
-        revisit: Provider<RevisitRanker>,
+        availability: Availability,
+        log: ReadLogStore,
         totals: DayTotals,
         prefs: PrefsStore,
         clock: DayClock,
         @IoDispatcher io: CoroutineDispatcher,
-    ) : this(index, revisit, totals, prefs, clock, io, { WeekFields.of(Locale.getDefault()).firstDayOfWeek })
+    ) : this(index, availability, log, totals, prefs, clock, io, { WeekFields.of(Locale.getDefault()).firstDayOfWeek })
 
     private val period = MutableStateFlow(InsightsPeriod.WEEK)
 
@@ -169,14 +164,16 @@ class InsightsViewModel(
 
     init {
         viewModelScope.launch {
-            val (quran, ranker) = withContext(io) { index.get() to revisit.get() }
+            val quran = withContext(io) { index.get() }
             val overview = combine(totals.observeAllTotals(), clock.todayFlow, prefs.prefs, period, month) { all, today, userPrefs, p, m ->
                 Overview(all, today, userPrefs.goalRank, userPrefs.weekStart.firstDay(systemFirstDay()), p, m)
             }
             val split = combine(period, clock.todayFlow, ::Pair).flatMapLatest { (p, today) ->
                 totals.observeSourceSplit(p.from(today), today)
             }
-            val revisitFlow = combine(ranker.observe().flowOn(io), revisitExpanded) { r, expanded -> revisitState(r, expanded, quran) }
+            val revisitFlow = combine(availability.observe(), log.observeBookmarkLastRead(), revisitExpanded) { board, lastRead, expanded ->
+                revisitState(board, lastRead, expanded, quran)
+            }
             combine(overview, split, revisitFlow) { o, s, r -> build(o, s, r) }.collect { next -> _state.value = next }
         }
     }
@@ -237,25 +234,11 @@ class InsightsViewModel(
         )
     }
 
-    private fun revisitState(revisit: Revisit, expanded: Boolean, quran: QuranIndex): RevisitState {
+    private fun revisitState(board: BookmarkBoard, lastRead: Map<Long, LocalDate>, expanded: Boolean, quran: QuranIndex): RevisitState {
         val limit = if (expanded) EXPANDED_ITEMS else COLLAPSED_ITEMS
-        val longAgo = revisit.readLongAgo
-        val notYet = revisit.notReadYet
-        fun item(page: io.github.mehrdad_abdi.qintar.domain.service.PageRecency) = RevisitItem(
-            page = page.page,
-            surahs = page.surahs.map(quran::surah),
-            firstAyah = page.range.start,
-            ayahCount = page.ayahCount,
-            lastRead = page.oldest,
-            neverRead = page.neverRead,
-        )
-        return RevisitState(
-            readLongAgo = longAgo.take(limit).map(::item),
-            readLongAgoTotal = longAgo.size,
-            notReadYet = notYet.take(limit).map(::item),
-            notReadYetTotal = notYet.size,
-            expanded = expanded,
-        )
+        val ranked = board.listed.map { RevisitItem(it.bookmark.id, BookmarkTitles.of(it.bookmark, quran), lastRead[it.bookmark.id]) }
+            .sortedWith(compareBy(nullsFirst()) { it.lastRead })
+        return RevisitState(items = ranked.take(limit), total = ranked.size, expanded = expanded)
     }
 
     companion object {

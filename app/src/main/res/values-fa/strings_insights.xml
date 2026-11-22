@@ -95,10 +95,9 @@
     <string name="insights_previous_month">ماه قبل</string>
     <string name="insights_next_month">ماه بعد</string>
     <string name="insights_revisit_title">مرور دوباره</string>
-    <string name="insights_revisit_long_ago">صفحه‌هایی که مدت‌ها پیش خوانده‌اید</string>
-    <string name="insights_revisit_not_yet">صفحه‌های خوانده‌نشده</string>
-    <string name="insights_never_read">%1$s از %2$s آیه هرگز خوانده نشده</string>
     <string name="insights_last_read">آخرین قرائت %1$s</string>
     <string name="insights_show_more">نمایش بیشتر</string>
     <string name="insights_show_less">نمایش کمتر</string>
+    <string name="insights_revisit_bookmarks">نشان‌هایی که مدت‌ها خوانده نشده‌اند</string>
+    <string name="insights_bookmark_never_read">هنوز از این نشان خوانده نشده</string>
 </resources>

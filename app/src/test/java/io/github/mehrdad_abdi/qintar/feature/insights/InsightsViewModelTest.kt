@@ -291,45 +291,33 @@ class InsightsViewModelTest {
     // ---- revisit ----------------------------------------------------------------------------------------
 
     @Test
-    fun `revisit lists the pages read longest ago and the pages not read yet`() = runTest {
-        // Page 1 fully read on 1 Oct, page 2 fully read on 10 Nov, page 3 partly read.
-        val p1 = app.index.pageRange(1)
-        val p2 = app.index.pageRange(2)
-        val p3 = app.index.pageRange(3)
-        app.tracker.markRange(p1, ReadContext.Browse, ReadMethod.BULK, RangeMode.ADD, day = LocalDate.of(2026, 10, 1))
-        app.tracker.markRange(p2, ReadContext.Browse, ReadMethod.BULK, RangeMode.ADD, day = LocalDate.of(2026, 11, 10))
-        app.tracker.markRange(AyahRange(p3.start, p3.start), ReadContext.Browse, ReadMethod.TAP, RangeMode.ADD, day = today)
+    fun `revisit lists bookmarks, never read first, then the ones read longest ago`() = runTest {
+        // Owner, 2026-11-22: per page it always showed the same pages; per bookmark it says something.
+        val mulk = app.library.create(BookmarkDrafts.surah(67, app.index))
+        val kahf = app.library.create(BookmarkDrafts.surah(18, app.index))
+        val kursi = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)))
+        app.tracker.markRange(mulk.range, ReadContext.Bookmark(mulk.id), ReadMethod.BULK, RangeMode.FILL, day = LocalDate.of(2026, 11, 10))
+        app.tracker.markRange(kahf.range, ReadContext.Bookmark(kahf.id), ReadMethod.BULK, RangeMode.FILL, day = LocalDate.of(2026, 10, 1))
+        // Reading the same ayahs elsewhere does not count for the bookmark.
+        app.tracker.mark(kursi.range.start, ReadContext.Browse, ReadMethod.TAP)
 
         val vm = open()
         val r = vm.state.value.revisit
-        assertEquals(listOf(1, 2), r.readLongAgo.map { it.page })
-        assertEquals(LocalDate.of(2026, 10, 1), r.readLongAgo.first().lastRead)
-        assertEquals(p1.start, r.readLongAgo.first().firstAyah)
-        assertEquals(1, r.readLongAgo.first().surahs.first().number)
-        assertEquals(2, r.readLongAgoTotal)
+        assertEquals(listOf(kursi.id, kahf.id, mulk.id), r.items.map { it.bookmarkId })
+        assertEquals(null, r.items[0].lastRead)
+        assertEquals(LocalDate.of(2026, 10, 1), r.items[1].lastRead)
 
-        assertEquals(5, r.notReadYet.size)
-        assertEquals(3, r.notReadYet.first().page)
-        assertEquals(p3.size - 1, r.notReadYet.first().neverRead)
-        assertEquals(604 - 2, r.notReadYetTotal)
-        assertEquals(p3.start, r.notReadYet.first().firstAyah)
-
-        vm.onToggleRevisit()
-        assertEquals(20, vm.state.value.revisit.notReadYet.size)
-        assertTrue(vm.state.value.revisit.expanded)
-        vm.onToggleRevisit()
-        assertEquals(5, vm.state.value.revisit.notReadYet.size)
+        app.tracker.mark(kahf.range.start, ReadContext.Bookmark(kahf.id), ReadMethod.TAP)
+        assertEquals("read today moves it to the end", listOf(kursi.id, mulk.id, kahf.id), vm.state.value.revisit.items.map { it.bookmarkId })
     }
 
     @Test
-    fun `reading a page again moves it to the back of read long ago`() = runTest {
-        val p1 = app.index.pageRange(1)
-        val p2 = app.index.pageRange(2)
-        app.tracker.markRange(p1, ReadContext.Browse, ReadMethod.BULK, RangeMode.ADD, day = LocalDate.of(2026, 10, 1))
-        app.tracker.markRange(p2, ReadContext.Browse, ReadMethod.BULK, RangeMode.ADD, day = LocalDate.of(2026, 10, 5))
+    fun `revisit shows five and expands to twenty`() = runTest {
+        repeat(25) { app.library.create(BookmarkDrafts.ayah(app.ayah(2, 1 + it))) }
         val vm = open()
-        assertEquals(listOf(1, 2), vm.state.value.revisit.readLongAgo.map { it.page })
-        app.tracker.markRange(p1, ReadContext.Browse, ReadMethod.BULK, RangeMode.ADD, day = today)
-        assertEquals(listOf(2, 1), vm.state.value.revisit.readLongAgo.map { it.page })
+        assertEquals(5, vm.state.value.revisit.items.size)
+        assertEquals(25, vm.state.value.revisit.total)
+        vm.onToggleRevisit()
+        assertEquals(20, vm.state.value.revisit.items.size)
     }
 }

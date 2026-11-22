@@ -152,6 +152,9 @@ class RoomReadLogStore @Inject constructor(private val dao: ReadLogDao) : ReadLo
     override fun observeBookmarkAyahCounts(day: LocalDate): Flow<List<BookmarkAyahCount>> =
         dao.observeBookmarkAyahCounts(day.toEpochDay()).map { rows -> rows.map { it.toModel() } }.distinctUntilChanged()
 
+    override fun observeBookmarkLastRead(): Flow<Map<Long, LocalDate>> =
+        dao.observeBookmarkLastRead().map { rows -> rows.associate { it.bookmarkId to LocalDate.ofEpochDay(it.lastDay) } }.distinctUntilChanged()
+
     override fun observeRecency(range: AyahRange): Flow<List<AyahRecency>> =
         dao.observeRecency(range.start.value, range.end.value).map { rows ->
             rows.map { AyahRecency(AyahId(it.ayahId), LocalDate.ofEpochDay(it.lastDay), it.count) }

@@ -121,6 +121,11 @@ data class SourceCountRow(
     @ColumnInfo(name = "n") val count: Int,
 )
 
+data class BookmarkLastReadRow(
+    @ColumnInfo(name = "context_id") val bookmarkId: Long,
+    @ColumnInfo(name = "last_day") val lastDay: Long,
+)
+
 data class RecencyRow(
     @ColumnInfo(name = "ayah_id") val ayahId: Int,
     @ColumnInfo(name = "last_day") val lastDay: Long,

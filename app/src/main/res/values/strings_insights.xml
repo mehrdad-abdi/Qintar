@@ -98,10 +98,9 @@
     <string name="insights_previous_month">Previous month</string>
     <string name="insights_next_month">Next month</string>
     <string name="insights_revisit_title">Revisit</string>
-    <string name="insights_revisit_long_ago">Pages read longest ago</string>
-    <string name="insights_revisit_not_yet">Pages not read yet</string>
-    <string name="insights_never_read">%1$s of %2$s ayahs never read</string>
     <string name="insights_last_read">last read %1$s</string>
     <string name="insights_show_more">Show more</string>
     <string name="insights_show_less">Show less</string>
+    <string name="insights_revisit_bookmarks">Bookmarks read longest ago</string>
+    <string name="insights_bookmark_never_read">not read from the bookmark yet</string>
 </resources>
