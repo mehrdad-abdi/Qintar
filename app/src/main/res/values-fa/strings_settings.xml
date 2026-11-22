@@ -32,7 +32,8 @@
     <string name="settings_reminder_streak">یادآور پیاپی‌خوانی</string>
     <string name="settings_reminder_streak_summary">فقط اگر امروز هنوز %1$s آیه نخوانده باشید.</string>
     <string name="settings_reminder_time">ساعت</string>
-    <string name="settings_notifications_blocked">اعلان‌ها برای قنطار خاموش است. برای دریافت یادآورها در تنظیمات سیستم آن‌ها را مجاز کنید.</string>
+    <string name="settings_notifications_blocked">اعلان‌ها برای قنطار خاموش است. برای مجاز کردن آن‌ها در تنظیمات سیستم اینجا بزنید.</string>
+    <string name="settings_notifications_open">باز کردن تنظیمات اعلان</string>
     <string name="settings_export">گرفتن پشتیبان</string>
     <string name="settings_export_summary">خواندن‌ها، نشانک‌ها و ختم‌ها را در یک پرونده ذخیره کنید.</string>
     <string name="settings_import">بازیابی پشتیبان</string>

@@ -32,7 +32,8 @@
     <string name="settings_reminder_streak">تذكير السلسلة</string>
     <string name="settings_reminder_streak_summary">فقط إذا لم تقرأ %1$s آيات بعد اليوم.</string>
     <string name="settings_reminder_time">الوقت</string>
-    <string name="settings_notifications_blocked">الإشعارات متوقفة لتطبيق قنطار. اسمح بها من إعدادات النظام لتصلك التذكيرات.</string>
+    <string name="settings_notifications_blocked">الإشعارات متوقفة لتطبيق قنطار. اضغط هنا للسماح بها من إعدادات النظام.</string>
+    <string name="settings_notifications_open">فتح إعدادات الإشعارات</string>
     <string name="settings_export">تصدير نسخة احتياطية</string>
     <string name="settings_export_summary">احفظ قراءاتك وعلاماتك وختماتك في ملف.</string>
     <string name="settings_import">استيراد نسخة احتياطية</string>

@@ -42,7 +42,7 @@ Decisions for 11–13 (owner, 2026-11-22): one list, groups then built-in Ungrou
 |---|---|
 | 1 | Not reproduced: the player bar and the highlight come from the same player state. Watch for it while testing. |
 | 2 | Done; owner checked the texts. Hadith source (book) still to be supplied by the owner. |
-| 3 | Not reproduced in a test (switch on → saved, time shown). Needs the exact symptom; the test stays as a guard. |
+| 3 | Done. Symptom (owner): Allow tapped, red "blocked" text stayed. The gate trusted the dialog's answer; it now asks the system, the red text opens the app's notification settings, and coming back allowed turns the reminder on (`NotificationPermissionTest`). |
 | 4 | Done: bar = coverage in the current khatm, in place of the divider. |
 | 5 | Done: star opens the editor; filled star = ayah in a bookmark, opens that bookmark. |
 | 6, 7, 8 | Done. |

@@ -403,14 +403,15 @@ internal fun GoalOption(rank: Rank?, selected: Boolean, onSelect: () -> Unit) {
 
 @Composable
 private fun RemindersSection(prefs: UserPrefs, vm: SettingsViewModel) = Section(stringResource(R.string.settings_section_reminders)) {
-    var blocked by remember { mutableStateOf(false) }
-    val dailyGate = rememberNotificationGate { granted ->
-        blocked = !granted
-        if (granted) vm.setReminderEnabled(true)
+    // The reminder that was being turned on when notifications turned out to be blocked.
+    var blockedFor by remember { mutableStateOf<String?>(null) }
+    val dailyGate = rememberNotificationGate { allowed ->
+        blockedFor = if (allowed) null else SettingsTags.REMINDER
+        if (allowed) vm.setReminderEnabled(true)
     }
-    val streakGate = rememberNotificationGate { granted ->
-        blocked = !granted
-        if (granted) vm.setStreakReminderEnabled(true)
+    val streakGate = rememberNotificationGate { allowed ->
+        blockedFor = if (allowed) null else SettingsTags.STREAK_REMINDER
+        if (allowed) vm.setStreakReminderEnabled(true)
     }
     SwitchSetting(
         stringResource(R.string.settings_reminder_daily),
@@ -431,11 +432,12 @@ private fun RemindersSection(prefs: UserPrefs, vm: SettingsViewModel) = Section(
     if (prefs.streakReminderEnabled) {
         TimeButton(stringResource(R.string.settings_reminder_time), prefs.streakReminderTime, vm::setStreakReminderTime, Modifier.fillMaxWidth().padding(bottom = Spacing.sm))
     }
-    if (blocked) {
-        Text(
-            stringResource(R.string.settings_notifications_blocked),
-            style = QintarType.Caption,
-            color = MaterialTheme.colorScheme.error,
+    blockedFor?.let { which ->
+        io.github.mehrdad_abdi.qintar.ui.common.NotificationsBlockedNotice(
+            onAllowed = {
+                blockedFor = null
+                if (which == SettingsTags.REMINDER) vm.setReminderEnabled(true) else vm.setStreakReminderEnabled(true)
+            },
             modifier = Modifier.padding(bottom = Spacing.sm),
         )
     }

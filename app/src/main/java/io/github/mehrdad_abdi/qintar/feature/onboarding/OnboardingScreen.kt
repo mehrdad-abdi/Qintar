@@ -207,7 +207,12 @@ private fun GoalAndReminderPage(state: OnboardingUiState, vm: OnboardingViewMode
         Switch(checked = state.reminderEnabled, onCheckedChange = null)
     }
     if (state.reminderEnabled) TimeButton(stringResource(R.string.settings_reminder_time), state.reminderTime, vm::setReminderTime, Modifier.fillMaxWidth())
-    if (blocked) Text(stringResource(R.string.settings_notifications_blocked), style = QintarType.Caption, color = MaterialTheme.colorScheme.error)
+    if (blocked) {
+        io.github.mehrdad_abdi.qintar.ui.common.NotificationsBlockedNotice(onAllowed = {
+            blocked = false
+            vm.setReminderEnabled(true)
+        })
+    }
     Spacer(Modifier.height(Spacing.sm))
 }
 

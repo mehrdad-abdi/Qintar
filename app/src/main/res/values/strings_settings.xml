@@ -40,7 +40,8 @@
     <!-- 1: the number of ayahs that keep a streak -->
     <string name="settings_reminder_streak_summary">Only if you have not yet read %1$s ayahs today.</string>
     <string name="settings_reminder_time">Time</string>
-    <string name="settings_notifications_blocked">Notifications are turned off for Qintar. Allow them in the system settings to get reminders.</string>
+    <string name="settings_notifications_blocked">Notifications are turned off for Qintar. Tap here to allow them in the system settings.</string>
+    <string name="settings_notifications_open">Open notification settings</string>
     <string name="settings_export">Export a backup</string>
     <string name="settings_export_summary">Save your readings, bookmarks and khatms to a file.</string>
     <string name="settings_import">Import a backup</string>
