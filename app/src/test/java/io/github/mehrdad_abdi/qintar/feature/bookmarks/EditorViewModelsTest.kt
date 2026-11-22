@@ -355,6 +355,49 @@ class EditorViewModelsTest {
     }
 
     @Test
+    fun `only bookmarks without a group are offered to add`() = runTest {
+        // Owner, 2026-11-22: a bookmark is in one group at most; others' bookmarks are not offered.
+        val other = app.library.createGroup("Other")
+        app.library.create(BookmarkDrafts.ayah(app.ayah(1, 1)).copy(groupId = other.id))
+        val loose = app.library.create(BookmarkDrafts.ayah(app.ayah(1, 2)))
+        val vm = app.groupEditorViewModel(GroupEditorRoute(), main.dispatcher)
+        assertEquals(listOf(loose.id), vm.state.value.candidates.map { it.id })
+    }
+
+    @Test
+    fun `the bulk box creates one bookmark per line in the new group, after the chosen ones`() = runTest {
+        val loose = app.library.create(BookmarkDrafts.ayah(app.ayah(1, 2)))
+        val vm = app.groupEditorViewModel(GroupEditorRoute(), main.dispatcher)
+        vm.onName("Night")
+        vm.onAdd(loose.id)
+        vm.onBulkText("s67\n2:285-286\n\nص۶۰۴")
+        vm.onSave()
+
+        val group = app.bookmarkStore.groups().single()
+        assertEquals(group.id, vm.state.value.savedId)
+        val members = io.github.mehrdad_abdi.qintar.domain.service.Availability.sorted(
+            app.bookmarkStore.bookmarks().filter { it.groupId == group.id },
+            io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort.CUSTOM,
+        )
+        assertEquals(listOf(loose.range, app.index.surahRange(67), AyahRange(app.ayah(2, 285), app.ayah(2, 286)), app.index.pageRange(604)), members.map { it.range })
+    }
+
+    @Test
+    fun `a line that is not a bookmark is shown by its number and nothing is saved`() = runTest {
+        val vm = app.groupEditorViewModel(GroupEditorRoute(), main.dispatcher)
+        vm.onName("Night")
+        vm.onBulkText("s67\nj12\nhello")
+        vm.onSave()
+        assertNull(vm.state.value.savedId)
+        assertEquals(listOf(2, 3), vm.state.value.bulkProblems)
+        assertTrue(app.bookmarkStore.groups().isEmpty())
+        assertTrue(app.bookmarkStore.bookmarks().isEmpty())
+
+        vm.onBulkText("s67")
+        assertTrue("editing clears the marks", vm.state.value.bulkProblems.isEmpty())
+    }
+
+    @Test
     fun `an unknown group id says so`() = runTest {
         assertEquals(EditorPhase.NOT_FOUND, app.groupEditorViewModel(GroupEditorRoute(77), main.dispatcher).state.value.phase)
     }

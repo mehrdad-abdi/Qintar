@@ -184,9 +184,34 @@ private fun GroupForm(state: GroupEditorUiState, vm: GroupEditorViewModel) {
                 }
             }
         }
+
+        // New bookmarks, one per line (owner, 2026-11-22).
+        SectionHeader(stringResource(R.string.grp_bulk_title))
+        val bulkError = state.bulkProblems.takeIf { it.isNotEmpty() }
+        OutlinedTextField(
+            value = state.bulkText,
+            onValueChange = vm::onBulkText,
+            placeholder = { Text(stringResource(R.string.grp_bulk_hint)) },
+            minLines = 3,
+            isError = bulkError != null,
+            supportingText = {
+                Text(
+                    if (bulkError != null) {
+                        stringResource(R.string.grp_bulk_error, bulkError.map { formatNumber(it) }.joinToString(", "))
+                    } else {
+                        stringResource(R.string.grp_bulk_help)
+                    },
+                )
+            },
+            shape = QintarShapes.Inner,
+            modifier = Modifier.fillMaxWidth().testTag(GROUP_BULK_TAG),
+        )
         Spacer(Modifier.height(Spacing.xxl))
     }
 }
+
+/** Test tag of the bulk "new bookmarks" box. */
+const val GROUP_BULK_TAG = "group-bulk"
 
 /** Off while schedules are hidden; the code stays so they can come back. */
 internal const val SHOW_SCHEDULES = false

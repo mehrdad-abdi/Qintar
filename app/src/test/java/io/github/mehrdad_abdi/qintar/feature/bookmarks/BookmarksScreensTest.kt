@@ -8,6 +8,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performScrollTo
 import io.github.mehrdad_abdi.qintar.domain.model.Schedule
 import io.github.mehrdad_abdi.qintar.domain.model.TimeWindow
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkDrafts
@@ -153,5 +155,25 @@ class BookmarksScreensTest {
         compose.waitForIdle()
         assertEquals(1, backs)
         assertEquals("Friday", runBlocking { app.bookmarkStore.groups().single().name })
+    }
+
+    @Test
+    fun `the group editor's bulk box marks a wrong line, then creates the bookmarks`() {
+        val vm = app.groupEditorViewModel(GroupEditorRoute(), Dispatchers.Unconfined)
+        compose.setContent {
+            QintarTheme { GroupEditorScreen(GroupEditorRoute(), onBack = { backs++ }, onNavigate = {}, viewModel = vm) }
+        }
+        compose.onNodeWithText("Name").performTextInput("Night")
+        compose.onNodeWithTag(GROUP_BULK_TAG).performScrollTo().performTextInput("s67\nj12")
+        compose.onNodeWithTag(GROUP_SAVE_TAG).performClick()
+        compose.onNodeWithText("Not a bookmark: line 2").performScrollTo().assertIsDisplayed()
+        assertEquals(0, backs)
+
+        compose.onNodeWithTag(GROUP_BULK_TAG).performTextClearance()
+        compose.onNodeWithTag(GROUP_BULK_TAG).performTextInput("s67\n2:255")
+        compose.onNodeWithTag(GROUP_SAVE_TAG).performClick()
+        compose.waitForIdle()
+        assertEquals(1, backs)
+        assertEquals(2, runBlocking { app.bookmarkStore.bookmarks() }.count { it.groupId != null })
     }
 }

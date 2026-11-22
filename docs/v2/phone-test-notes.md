@@ -56,3 +56,4 @@ Decisions for 11–13 (owner, 2026-11-22): one list, groups then built-in Ungrou
 | 21 | change | Bookmarks list | Visual design: make it consistent with the app and a bit nicer. | |
 | 22 | change | Go to | Accept Persian and Arabic input: ج12 / ج۱۲ = juz 12 (also ص for page, س for surah?), with a small hint. | |
 | 20, 21, 22 | Done. |
+| 23 | Done | Group editor: only ungrouped bookmarks offered; bulk box, one bookmark per line in the Go to forms. |

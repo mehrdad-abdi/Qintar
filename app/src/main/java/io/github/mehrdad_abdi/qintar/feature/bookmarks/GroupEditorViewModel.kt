@@ -17,6 +17,8 @@ import io.github.mehrdad_abdi.qintar.domain.port.PrefsStore
 import io.github.mehrdad_abdi.qintar.domain.quran.QuranIndex
 import io.github.mehrdad_abdi.qintar.domain.service.Availability
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkLibrary
+import io.github.mehrdad_abdi.qintar.domain.service.BookmarkLine
+import io.github.mehrdad_abdi.qintar.domain.service.BookmarkLines
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkTitle
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkTitles
 import io.github.mehrdad_abdi.qintar.ui.common.ScheduleForm
@@ -54,8 +56,12 @@ data class GroupEditorUiState(
     val weekDays: List<DayOfWeek> = weekOrder(DayOfWeek.MONDAY),
     /** In the order they will have once saved; removed ones are gone from this list. */
     val members: List<GroupMember> = emptyList(),
-    /** Bookmarks not in the group, in list order: tapping one adds it (and takes it from its old group). */
+    /** Bookmarks without a group, in list order: tapping one adds it (a bookmark is in one group at most). */
     val candidates: List<GroupMember> = emptyList(),
+    /** New bookmarks, one per line in the forms of "Go to" (2:255, 2:255-257, s36, p300), created on Save. */
+    val bulkText: String = "",
+    /** Line numbers of [bulkText] that are not a bookmark; Save waits until they are fixed. */
+    val bulkProblems: List<Int> = emptyList(),
     val problems: Map<String, GroupProblem> = emptyMap(),
     val savedId: Long? = null,
 ) {
@@ -101,6 +107,8 @@ class GroupEditorViewModel(
     private val _state = MutableStateFlow(GroupEditorUiState(isNew = route.groupId == GroupEditorRoute.NEW))
     val state: StateFlow<GroupEditorUiState> = _state.asStateFlow()
 
+    private var quranIndex: QuranIndex? = null
+
     /** The group's bookmarks as they were when the editor opened. */
     private var original: List<Long> = emptyList()
 
@@ -110,8 +118,9 @@ class GroupEditorViewModel(
             val userPrefs = prefs.prefs.first()
             val weekDays = weekOrder(userPrefs.weekStart.firstDay(systemFirstDay()))
             val board = availability.board()
+            quranIndex = quran
             fun candidatesBesides(members: Set<Long>) =
-                board.listed.filter { it.bookmark.id !in members }.map { GroupMember(it.bookmark.id, BookmarkTitles.of(it.bookmark, quran)) }
+                board.ungrouped.filter { it.bookmark.id !in members }.map { GroupMember(it.bookmark.id, BookmarkTitles.of(it.bookmark, quran)) }
             if (route.groupId == GroupEditorRoute.NEW) {
                 _state.update { it.copy(phase = EditorPhase.READY, weekDays = weekDays, candidates = candidatesBesides(emptySet())) }
                 return@launch
@@ -173,7 +182,9 @@ class GroupEditorViewModel(
         it.copy(members = it.members - member, candidates = it.candidates + member)
     }
 
-    /** Adds a bookmark at the end of the group; on save it leaves the group it was in. */
+    fun onBulkText(value: String) = _state.update { it.copy(bulkText = value, bulkProblems = emptyList()) }
+
+    /** Adds an ungrouped bookmark at the end of the group, on Save. */
     fun onAdd(bookmarkId: Long) = _state.update {
         val candidate = it.candidates.firstOrNull { c -> c.id == bookmarkId } ?: return@update it
         it.copy(members = it.members + candidate, candidates = it.candidates - candidate)
@@ -185,10 +196,13 @@ class GroupEditorViewModel(
         val problems = HashMap(current.problems)
         if (current.name.isBlank()) problems[GroupEditorUiState.NAME] = GroupProblem.NAME_MISSING
         if (current.schedule.problem != null) problems[GroupEditorUiState.SCHEDULE] = GroupProblem.SCHEDULE_INVALID
-        if (problems.isNotEmpty()) {
-            _state.update { it.copy(problems = problems) }
+        val lines = quranIndex?.let { BookmarkLines.parse(current.bulkText, it) }.orEmpty()
+        val bulkProblems = lines.filterIsInstance<BookmarkLine.Problem>().map { it.line }
+        if (problems.isNotEmpty() || bulkProblems.isNotEmpty()) {
+            _state.update { it.copy(problems = problems, bulkProblems = bulkProblems) }
             return
         }
+        val drafts = lines.filterIsInstance<BookmarkLine.Ok>().map { it.draft }
         // "Once" belongs to a bookmark: the group's schedule never carries it.
         val schedule = current.schedule.copy(once = false).toSchedule()
         viewModelScope.launch {
@@ -198,6 +212,8 @@ class GroupEditorViewModel(
                 } else {
                     library.updateGroup(route.groupId, current.name, current.description, schedule).id.also { applyMembers(it, current) }
                 }
+                // The new ones from the bulk box, after the chosen ones, in the order typed.
+                drafts.forEach { library.create(it.copy(groupId = id)) }
                 _state.update { it.copy(savedId = id) }
             } catch (failure: DomainFailure.InvalidInput) {
                 val problem = when (failure.field) {

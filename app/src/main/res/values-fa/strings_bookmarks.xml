@@ -126,4 +126,8 @@
     <string name="grp_add_members">افزودن نشان‌ها</string>
     <string name="grp_add_members_none">همهٔ نشان‌ها در این گروه هستند.</string>
     <string name="bm_filter_count">%1$s · %2$s</string>
+    <string name="grp_bulk_title">نشان‌های تازه</string>
+    <string name="grp_bulk_hint">هر خط یک نشان، مثلاً\n۲:۲۵۵\n۲:۲۵۵-۲۵۷\nس۳۶\nص۳۰۰</string>
+    <string name="grp_bulk_help">هر خط یک نشان: آیه ۲:۲۵۵، بازه ۲:۲۵۵-۲۵۷، سوره س۳۶، صفحه ص۳۰۰ (یا s36، p300). با ذخیره ساخته می‌شوند.</string>
+    <string name="grp_bulk_error">نشان نادرست در خط %1$s</string>
 </resources>

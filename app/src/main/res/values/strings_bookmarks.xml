@@ -141,4 +141,8 @@
     <string name="grp_add_members">Add bookmarks</string>
     <string name="grp_add_members_none">Every bookmark is already in this group.</string>
     <string name="bm_filter_count">%1$s · %2$s</string>
+    <string name="grp_bulk_title">New bookmarks</string>
+    <string name="grp_bulk_hint">One per line, e.g.\n2:255\n2:255-257\ns36\np300</string>
+    <string name="grp_bulk_help">One bookmark per line: an ayah 2:255, a range 2:255-257, a surah s36, a page p300. They are created on Save.</string>
+    <string name="grp_bulk_error">Not a bookmark: line %1$s</string>
 </resources>
