@@ -82,6 +82,7 @@ class ReaderScreenTest {
 
         menu(0).performClick()
         compose.onNodeWithText("Set count…").assertDoesNotExist()
+        compose.onNodeWithText("Add bookmark").assertDoesNotExist() // the star does that (owner, 2026-11-22)
         compose.onNodeWithText("Today's readings").performClick()
         assertEquals(io.github.mehrdad_abdi.qintar.ui.navigation.DayDetailRoute("2026-11-15"), navigated.last())
     }

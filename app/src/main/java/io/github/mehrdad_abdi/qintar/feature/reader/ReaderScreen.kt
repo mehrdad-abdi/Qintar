@@ -418,7 +418,6 @@ private fun ReaderList(
                         viewModel.onCheck(row)
                     },
                     viewModel = viewModel,
-                    onAddBookmark = { onNavigate(io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute.forAyah(row.id.value)) },
                     onStar = { onNavigate(viewModel.starTarget(row)) },
                     onTodayReadings = { onNavigate(viewModel.todayReadingsRoute()) },
                 )
@@ -506,7 +505,6 @@ private fun AyahItem(
     surahLabel: String,
     onCheck: () -> Unit,
     viewModel: ReaderViewModel,
-    onAddBookmark: () -> Unit,
     onStar: () -> Unit,
     onTodayReadings: () -> Unit,
 ) {
@@ -534,10 +532,6 @@ private fun AyahItem(
         )
         Box(Modifier.align(Alignment.End)) {
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.ayah_menu_add_bookmark)) },
-                    onClick = { menuOpen = false; onAddBookmark() },
-                )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.todays_readings)) },
                     onClick = { menuOpen = false; onTodayReadings() },
