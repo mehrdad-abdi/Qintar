@@ -14,12 +14,17 @@ import io.github.mehrdad_abdi.qintar.domain.quran.QuranIndex
 import io.github.mehrdad_abdi.qintar.domain.service.GoToParser
 import io.github.mehrdad_abdi.qintar.domain.service.GoToResult
 import io.github.mehrdad_abdi.qintar.domain.service.KhatmProgress
-import io.github.mehrdad_abdi.qintar.domain.service.RevisitRanker
 import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmListItem
 import io.github.mehrdad_abdi.qintar.feature.khatm.toListItem
 import io.github.mehrdad_abdi.qintar.ui.common.GoToProblem
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
 import javax.inject.Inject
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flatMapLatest
+import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
+import io.github.mehrdad_abdi.qintar.domain.port.ReadLogStore
 import javax.inject.Provider
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineDispatcher
@@ -33,8 +38,8 @@ import kotlinx.coroutines.withContext
 
 enum class ReadTab { SURAH, JUZ, PAGE }
 
-/** A surah in the index with the share of its ayahs ever read. */
-data class SurahRowState(val surah: SurahInfo, val coverage: Float)
+/** A surah in the index with the share of its ayahs covered in the current khatm; null = no khatm. */
+data class SurahRowState(val surah: SurahInfo, val coverage: Float? = null)
 
 /** A juz in the index with the ayah it starts at. */
 data class JuzRowState(val juz: Int, val startSurah: SurahInfo, val start: AyahRef)
@@ -82,11 +87,12 @@ data class ReadUiState(
  * The Read tab (§5.3): where to continue, the surah / juz / page indexes, "Go to…", random picks, and
  * the khatms in progress. Everything it opens is a [ReaderRoute] the screen hands to `onNavigate`.
  */
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ReadViewModel(
     private val index: Provider<QuranIndex>,
     private val prefs: PrefsStore,
-    private val revisit: Provider<RevisitRanker>,
+    private val log: ReadLogStore,
     private val khatmProgress: Provider<KhatmProgress>,
     private val io: CoroutineDispatcher,
     private val random: Random,
@@ -96,10 +102,10 @@ class ReadViewModel(
     constructor(
         index: Provider<QuranIndex>,
         prefs: PrefsStore,
-        revisit: Provider<RevisitRanker>,
+        log: ReadLogStore,
         khatmProgress: Provider<KhatmProgress>,
         @IoDispatcher io: CoroutineDispatcher,
-    ) : this(index, prefs, revisit, khatmProgress, io, Random.Default)
+    ) : this(index, prefs, log, khatmProgress, io, Random.Default)
 
     private val _state = MutableStateFlow(ReadUiState())
     val state: StateFlow<ReadUiState> = _state.asStateFlow()
@@ -108,21 +114,36 @@ class ReadViewModel(
 
     init {
         viewModelScope.launch {
-            val (idx, ranker, progress) = withContext(io) { Triple(index.get(), revisit.get(), khatmProgress.get()) }
+            val (idx, progress) = withContext(io) { index.get() to khatmProgress.get() }
             quran = idx
             val juz = (1..Quran.JUZ_COUNT).map { n ->
                 val start = idx.juzRange(n).start
                 val ref = idx.ref(start)
                 JuzRowState(n, idx.surah(ref.surah), ref)
             }
-            combine(ranker.observeSurahCoverage(), prefs.prefs, progress.observeActive()) { coverage, p, active ->
-                Triple(coverage, p.lastBrowseAyahId, active)
+            val active = progress.observeActive()
+            // The bars follow the khatm read most recently: what is covered in it, per surah.
+            val coverage = active.map { it.firstOrNull()?.khatm }.distinctUntilChanged().flatMapLatest { khatm ->
+                if (khatm == null) {
+                    flowOf(null)
+                } else {
+                    log.observeDistinctAyahs(ReadContext.Khatm(khatm.id), AyahRange.ALL).map { covered ->
+                        val counts = IntArray(Quran.SURAH_COUNT + 1)
+                        for (id in AyahRange.ALL) {
+                            if (id.value <= khatm.assumedCoveredUpTo || id in covered) counts[idx.ref(id).surah]++
+                        }
+                        idx.surahs.associate { it.number to counts[it.number].toFloat() / it.ayahCount }
+                    }
+                }
+            }
+            combine(coverage, prefs.prefs, active) { cover, p, khatms ->
+                Triple(cover, p.lastBrowseAyahId, khatms)
             }.collect { (coverage, last, active) ->
                 _state.update {
                     it.copy(
                         loading = false,
                         juz = juz,
-                        surahs = idx.surahs.map { s -> SurahRowState(s, coverage[s.number] ?: 0f) },
+                        surahs = idx.surahs.map { s -> SurahRowState(s, coverage?.get(s.number)) },
                         continueBrowsing = last?.let { id ->
                             val ref = idx.ref(id)
                             ContinueBrowsing(id, idx.surah(ref.surah), ref.ayah, idx.pageOf(id))

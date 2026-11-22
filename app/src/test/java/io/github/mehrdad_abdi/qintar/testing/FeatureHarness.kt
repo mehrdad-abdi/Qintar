@@ -212,7 +212,7 @@ fun DomainFixture.todayViewModel(
 fun DomainFixture.readViewModel(io: CoroutineDispatcher, random: Random = Random(7)) = ReadViewModel(
     index = { index },
     prefs = prefs,
-    revisit = { revisit },
+    log = log,
     khatmProgress = { khatmProgress },
     io = io,
     random = random,

@@ -138,18 +138,20 @@ class ReadViewModelTest {
     // ---- The indexes -----------------------------------------------------------------------------
 
     @Test
-    fun `the surah list has 114 rows with coverage of what was ever read`() = runTest {
+    fun `the surah bars show the current khatm, not everything ever read`() = runTest {
+        // Reading outside a khatm does not fill the bars (owner, 2026-11-22: they all looked done).
         app.tracker.markRange(app.index.surahRange(112), ReadContext.Browse, ReadMethod.BULK, RangeMode.FILL)
-        app.tracker.mark(app.ayah(114, 1), ReadContext.Browse, ReadMethod.TAP)
         val read = read()
+        assertTrue("no khatm, no bars", read.state.value.surahs.all { it.coverage == null })
+
+        val khatm = app.khatms.start("Ramadan")
+        app.tracker.markRange(app.index.surahRange(1), ReadContext.Khatm(khatm.id), ReadMethod.BULK, RangeMode.FILL)
+        app.tracker.mark(app.ayah(2, 1), ReadContext.Khatm(khatm.id), ReadMethod.TAP)
         val rows = read.state.value.surahs
         assertEquals(114, rows.size)
-        assertEquals(1f, rows[111].coverage, 0f)
-        assertEquals(1f / 6, rows[113].coverage, 0.001f)
-        assertEquals(0f, rows[0].coverage, 0f)
-
-        app.tracker.mark(app.ayah(1, 1), ReadContext.Random, ReadMethod.TAP)
-        assertEquals("live", 1f / 7, read.state.value.surahs[0].coverage, 0.001f)
+        assertEquals(1f, rows[0].coverage!!, 0f)
+        assertEquals(1f / 286, rows[1].coverage!!, 0.0001f)
+        assertEquals("read outside the khatm", 0f, rows[111].coverage!!, 0f)
     }
 
     @Test

@@ -28,7 +28,7 @@
     <string name="read_filter_label">Filter surahs</string>
     <string name="read_no_match">No surah matches.</string>
     <string name="juz_starts_at">Starts at %1$s</string>
-    <string name="surah_coverage_description">%1$s of the surah read</string>
+    <string name="surah_coverage_description">%1$s of the surah read in the current khatm</string>
 
     <!-- Khatm list, new khatm, detail -->
     <string name="khatm_list_title">Khatms</string>

@@ -309,18 +309,23 @@ private fun SurahRow(row: SurahRowState, onClick: () -> Unit) {
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        val coverageText = stringResource(
-            R.string.surah_coverage_description,
-            stringResource(R.string.percent, formatNumber((row.coverage * 100).toInt())),
-        )
-        QProgressBar(
-            progress = row.coverage,
-            height = 3.dp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacing.screen)
-                .clearAndSetSemantics { contentDescription = coverageText },
-        )
+        // Only with a khatm in progress, and in place of the divider so there is never a double line.
+        val coverage = row.coverage
+        if (coverage != null) {
+            val coverageText = stringResource(
+                R.string.surah_coverage_description,
+                stringResource(R.string.percent, formatNumber((coverage * 100).toInt())),
+            )
+            QProgressBar(
+                progress = coverage,
+                height = 3.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.screen, vertical = Spacing.xs)
+                    .clearAndSetSemantics { contentDescription = coverageText },
+            )
+            return@Column
+        }
         Hairline(Modifier.padding(horizontal = Spacing.screen, vertical = Spacing.xs))
     }
 }

@@ -96,4 +96,18 @@ class OnboardingScreenTest {
         assertEquals(1, finished)
         assertTrue(app.prefs.current.onboardingDone)
     }
+
+    @Test
+    fun `turning the reminder on in the tour saves it and offers the time`() {
+        org.robolectric.Shadows.shadowOf(androidx.test.core.app.ApplicationProvider.getApplicationContext<android.app.Application>())
+            .grantPermissions(android.Manifest.permission.POST_NOTIFICATIONS)
+        val app = DomainFixture()
+        open(app)
+        compose.onNodeWithTag(OnboardingTags.NEXT).performClick()
+        compose.onNodeWithTag(OnboardingTags.NEXT).performClick()
+        compose.onNodeWithTag(OnboardingTags.REMINDER).performScrollTo().performClick()
+        compose.waitForIdle()
+        assertTrue("the reminder is on", app.prefs.current.reminderEnabled)
+        compose.onNodeWithText("Time").performScrollTo().assertIsDisplayed()
+    }
 }
