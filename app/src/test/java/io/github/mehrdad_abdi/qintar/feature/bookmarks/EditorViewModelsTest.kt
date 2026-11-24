@@ -365,6 +365,20 @@ class EditorViewModelsTest {
     }
 
     @Test
+    fun `a bookmark taken out again goes back to the list, where it was`() = runTest {
+        val ids = (1..4).map { app.library.create(BookmarkDrafts.ayah(app.ayah(1, it))).id }
+        val vm = app.groupEditorViewModel(GroupEditorRoute(), main.dispatcher)
+        assertEquals(ids, vm.state.value.candidates.map { it.id })
+
+        vm.onAdd(ids[1])
+        vm.onAdd(ids[2])
+        assertEquals(listOf(ids[0], ids[3]), vm.state.value.candidates.map { it.id })
+        vm.onRemove(ids[1])
+        assertEquals(listOf(ids[0], ids[1], ids[3]), vm.state.value.candidates.map { it.id })
+        assertEquals(listOf(ids[2]), vm.state.value.members.map { it.id })
+    }
+
+    @Test
     fun `the bulk box creates one bookmark per line in the new group, after the chosen ones`() = runTest {
         val loose = app.library.create(BookmarkDrafts.ayah(app.ayah(1, 2)))
         val vm = app.groupEditorViewModel(GroupEditorRoute(), main.dispatcher)

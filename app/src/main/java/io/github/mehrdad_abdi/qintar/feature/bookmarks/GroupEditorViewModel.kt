@@ -112,6 +112,9 @@ class GroupEditorViewModel(
     /** The group's bookmarks as they were when the editor opened. */
     private var original: List<Long> = emptyList()
 
+    /** Where each bookmark stands in "Add bookmarks", so one taken out goes back to its place. */
+    private var offerOrder: Map<Long, Int> = emptyMap()
+
     init {
         viewModelScope.launch {
             val quran = withContext(io) { index.get() }
@@ -122,7 +125,9 @@ class GroupEditorViewModel(
             fun candidatesBesides(members: Set<Long>) =
                 board.ungrouped.filter { it.bookmark.id !in members }.map { GroupMember(it.bookmark.id, BookmarkTitles.of(it.bookmark, quran)) }
             if (route.groupId == GroupEditorRoute.NEW) {
-                _state.update { it.copy(phase = EditorPhase.READY, weekDays = weekDays, candidates = candidatesBesides(emptySet())) }
+                val candidates = candidatesBesides(emptySet())
+                offerOrder = candidates.withIndex().associate { (i, c) -> c.id to i }
+                _state.update { it.copy(phase = EditorPhase.READY, weekDays = weekDays, candidates = candidates) }
                 return@launch
             }
             val group = board.groups.firstOrNull { it.group.id == route.groupId }
@@ -133,6 +138,8 @@ class GroupEditorViewModel(
             // The group's own order: the custom order, whatever sort mode the lists are in.
             val members = Availability.sorted(group.bookmarks.map { it.bookmark }, BookmarkSort.CUSTOM)
             original = members.map { it.id }
+            // The group's own bookmarks, if taken out, come after the ungrouped ones, in the group's order.
+            offerOrder = (board.ungrouped.map { it.bookmark.id } + original).withIndex().associate { (i, id) -> id to i }
             _state.update {
                 it.copy(
                     phase = EditorPhase.READY,
@@ -179,7 +186,7 @@ class GroupEditorViewModel(
     /** Takes the bookmark out of the group on Save; the bookmark itself is kept, ungrouped. */
     fun onRemove(bookmarkId: Long) = _state.update {
         val member = it.members.firstOrNull { m -> m.id == bookmarkId } ?: return@update it
-        it.copy(members = it.members - member, candidates = it.candidates + member)
+        it.copy(members = it.members - member, candidates = (it.candidates + member).sortedBy { c -> offerOrder[c.id] ?: Int.MAX_VALUE })
     }
 
     fun onBulkText(value: String) = _state.update { it.copy(bulkText = value, bulkProblems = emptyList()) }
