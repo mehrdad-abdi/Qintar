@@ -120,7 +120,7 @@
     <string name="reminder_text_nothing_read">عشر آيات تُخرجك من الغافلين.</string>
     <string name="reminder_text_in_progress">%1$s آية اليوم — بقي %2$s للوصول إلى %3$s.</string>
     <string name="reminder_text_streak">بقي %1$s آيات للحفاظ على سلسلتك اليوم.</string>
-    <string name="diagnostics_title">التشخيص (الكناري)</string>
+    <string name="diagnostics_title">التشخيص</string>
     <string name="diagnostics_row_summary">تسجيل ما يحدث للمساعدة في إصلاح خلل</string>
     <string name="diagnostics_intro">عندما يحدث خلل، يستطيع قنطار أن يحفظ سجلًا لما جرى على هذا الهاتف: الشاشات التي فتحتها، والإعدادات التي غيّرتها، وأحداث الإشعارات والتشغيل، وأي توقف مفاجئ. لا يُرسل شيء إلى أي مكان؛ أنت تقرر ما تشاركه.</string>
     <string name="diagnostics_steps_title">للإبلاغ عن خلل</string>

@@ -116,7 +116,7 @@
     <string name="reminder_text_nothing_read">ده آیه شما را از غافلان بیرون می‌برد.</string>
     <string name="reminder_text_in_progress">امروز %1$s آیه — %2$s آیهٔ دیگر تا %3$s.</string>
     <string name="reminder_text_streak">%1$s آیهٔ دیگر پیاپی‌خوانی امروزتان را نگه می‌دارد.</string>
-    <string name="diagnostics_title">عیب‌یابی (قناری)</string>
+    <string name="diagnostics_title">عیب‌یابی</string>
     <string name="diagnostics_row_summary">ثبت رخدادها برای کمک به رفع اشکال</string>
     <string name="diagnostics_intro">وقتی چیزی درست کار نمی‌کند، قنطار می‌تواند آنچه را روی این گوشی رخ داده ثبت کند: صفحه‌هایی که باز کردید، تنظیماتی که تغییر دادید، رخدادهای اعلان و پخش، و هر خطای منجر به بسته شدن برنامه. چیزی به جایی فرستاده نمی‌شود؛ خودتان تصمیم می‌گیرید چه چیزی را بفرستید.</string>
     <string name="diagnostics_steps_title">برای گزارش اشکال</string>

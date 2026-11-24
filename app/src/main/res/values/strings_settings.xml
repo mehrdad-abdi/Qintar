@@ -142,7 +142,7 @@
     <string name="reminder_text_in_progress">%1$s ayahs today — %2$s more to %3$s.</string>
     <!-- 1: ayahs still needed -->
     <string name="reminder_text_streak">%1$s more ayahs keep your streak today.</string>
-    <string name="diagnostics_title">Diagnostics (canary)</string>
+    <string name="diagnostics_title">Diagnostics</string>
     <string name="diagnostics_row_summary">Record what happens to help fix a bug</string>
     <string name="diagnostics_intro">When something goes wrong, Qintar can keep a record of what happened on this phone: the screens you opened, settings you changed, notification and playback events, and any crash. Nothing is sent anywhere; you decide what to share.</string>
     <string name="diagnostics_steps_title">To report a bug</string>

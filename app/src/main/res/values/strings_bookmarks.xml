@@ -121,7 +121,7 @@
     <string name="grp_editor_edit">Edit group</string>
     <string name="grp_not_found">This group no longer exists.</string>
     <string name="grp_name">Name</string>
-    <string name="grp_name_hint">Morning</string>
+    <string name="grp_name_hint">Al-Mu\'awwidhatayn</string>
     <string name="grp_description">Description (optional)</string>
     <string name="grp_members">Bookmarks in this group</string>
     <string name="grp_members_empty">No bookmarks yet. Choose a group when you add or edit a bookmark.</string>

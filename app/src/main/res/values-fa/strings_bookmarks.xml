@@ -106,7 +106,7 @@
     <string name="grp_editor_edit">ویرایش گروه</string>
     <string name="grp_not_found">این گروه دیگر وجود ندارد.</string>
     <string name="grp_name">نام</string>
-    <string name="grp_name_hint">صبح</string>
+    <string name="grp_name_hint">معوذتین</string>
     <string name="grp_description">توضیح (اختیاری)</string>
     <string name="grp_members">نشانه‌های این گروه</string>
     <string name="grp_members_empty">هنوز نشانه‌ای نیست. هنگام افزودن یا ویرایش نشانه، گروه را انتخاب کنید.</string>

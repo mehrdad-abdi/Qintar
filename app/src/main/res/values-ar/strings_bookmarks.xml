@@ -106,7 +106,7 @@
     <string name="grp_editor_edit">تعديل المجموعة</string>
     <string name="grp_not_found">لم تعد هذه المجموعة موجودة.</string>
     <string name="grp_name">الاسم</string>
-    <string name="grp_name_hint">الصباح</string>
+    <string name="grp_name_hint">المعوذتين</string>
     <string name="grp_description">الوصف (اختياري)</string>
     <string name="grp_members">علامات هذه المجموعة</string>
     <string name="grp_members_empty">لا علامات بعد. اختر المجموعة عند إضافة علامة أو تعديلها.</string>
