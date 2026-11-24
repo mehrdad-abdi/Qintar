@@ -129,6 +129,7 @@
     <string name="today_start_khatm">Start a khatm</string>
     <string name="today_available_now">Bookmarks to read today</string>
     <string name="today_n_left">%1$s left</string>
+    <string name="today_show_all">Show all</string>
     <string name="today_ungrouped">Ungrouped</string>
     <string name="today_nothing_due">Every bookmark is read today.</string>
     <string name="today_no_bookmarks_title">No bookmarks yet</string>

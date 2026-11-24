@@ -422,5 +422,11 @@ private fun NowSection(state: TodayUiState, onNavigate: (Any) -> Unit) {
                 )
             }
         }
+        if (state.hasMoreNow) {
+            Hairline(Modifier.padding(horizontal = Spacing.card, vertical = Spacing.xs))
+            TextButton(onClick = { onNavigate(BookmarksRoute) }, modifier = Modifier.padding(horizontal = Spacing.sm)) {
+                Text(stringResource(R.string.today_show_all))
+            }
+        }
     }
 }

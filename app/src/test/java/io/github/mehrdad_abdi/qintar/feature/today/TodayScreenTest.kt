@@ -71,6 +71,17 @@ class TodayScreenTest {
     }
 
     @Test
+    fun `with many unread bookmarks Today lists five and Show all opens Bookmarks`() {
+        runBlocking { for (a in 1..8) app.library.create(io.github.mehrdad_abdi.qintar.domain.service.BookmarkDrafts.ayah(app.ayah(2, a))) }
+        open()
+        compose.onNodeWithText("8 left").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Surah 2 5", substring = true).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Surah 2 6", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Show all").performScrollTo().performClick()
+        assertEquals(listOf<Any>(BookmarksRoute), navigated)
+    }
+
+    @Test
     fun `today's readings opens the list of today's readings`() {
         open()
         compose.onNodeWithTag(TODAY_READINGS_TAG).performScrollTo().performClick()

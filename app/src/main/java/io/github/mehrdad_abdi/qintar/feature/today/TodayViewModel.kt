@@ -78,6 +78,9 @@ data class KhatmCardState(
 data class NowItem(val state: BookmarkState, val title: BookmarkTitle)
 
 /** Bookmarks available at this moment and not done, under their group (null = ungrouped). */
+/** How many unread bookmarks Today lists at most. */
+const val NOW_LIMIT = 5
+
 data class NowSectionState(val group: GroupState?, val items: List<NowItem>)
 
 data class TodayUiState(
@@ -96,7 +99,10 @@ data class TodayUiState(
     val remainingNow: Int = 0,
     /** Whether there is any bookmark: decides which empty state the bookmarks card shows. */
     val hasBookmarks: Boolean = false,
-)
+) {
+    /** Today lists only the first [NOW_LIMIT] of [remainingNow]. */
+    val hasMoreNow: Boolean get() = remainingNow > now.sumOf { it.items.size }
+}
 
 /**
  * Today (§5.2): everything on it is derived, live, from the log, the khatms and the bookmark board,
@@ -184,12 +190,24 @@ class TodayViewModel(
             otherKhatms = cards.drop(1),
             // Bookmarks not read today, under their group, then Ungrouped. Schedules are hidden for
             // now (owner, 2026-11-22), so a schedule neither adds nor hides one here.
-            now = unread.map { (group, items) ->
+            // Only the first few, so hundreds of bookmarks do not make Today endless (owner, 2026-11-25);
+            // "Show all" opens the Bookmarks tab.
+            now = firstNow(unread).map { (group, items) ->
                 NowSectionState(group, items.map { NowItem(it, BookmarkTitles.of(it.bookmark, index)) })
             },
             remainingNow = unread.sumOf { it.second.size },
             hasBookmarks = board.all.isNotEmpty(),
         )
+    }
+
+    /** The first [NOW_LIMIT] bookmarks of [sections], in order, keeping their groups. */
+    private fun <G, B> firstNow(sections: List<Pair<G, List<B>>>): List<Pair<G, List<B>>> {
+        var room = NOW_LIMIT
+        return sections.mapNotNull { (group, items) ->
+            val taken = items.take(room)
+            room -= taken.size
+            if (taken.isEmpty()) null else group to taken
+        }
     }
 
     private fun KhatmSnapshot.toCard(index: QuranIndex) = KhatmCardState(
