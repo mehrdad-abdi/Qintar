@@ -40,6 +40,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -129,7 +130,7 @@ fun AyahRow(
         // The Quran font carries its own script; TalkBack gets the reference and state instead
         // of a letter-by-letter reading, plus the row's actions.
         Text(
-            text = text,
+            text = remember(text) { quranDisplay(text) },
             style = quranTextStyle(fontSizeSp),
             color = colors.onSurface,
             modifier = Modifier

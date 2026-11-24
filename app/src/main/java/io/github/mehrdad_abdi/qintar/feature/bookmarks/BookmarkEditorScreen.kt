@@ -246,7 +246,7 @@ fun PassagePreviewCard(preview: PassagePreview, fontSp: Int, modifier: Modifier 
         // One flowing paragraph, as in the reader: ayah text, then its end marker.
         preview.ayahs.forEach { ayah ->
             if (ayah.basmala) io.github.mehrdad_abdi.qintar.ui.designsystem.BasmalaRow(fontSizeSp = fontSp)
-            Text(ayah.text, style = quranTextStyle(fontSp), color = colors.onSurface, modifier = Modifier.fillMaxWidth())
+            Text(io.github.mehrdad_abdi.qintar.ui.designsystem.quranDisplay(ayah.text), style = quranTextStyle(fontSp), color = colors.onSurface, modifier = Modifier.fillMaxWidth())
         }
         if (preview.more > 0) {
             Spacer(Modifier.height(Spacing.xs))
@@ -254,7 +254,7 @@ fun PassagePreviewCard(preview: PassagePreview, fontSp: Int, modifier: Modifier 
             Spacer(Modifier.height(Spacing.xs))
         }
         // The end of the passage, after the dots: from where to where.
-        preview.last?.let { Text(it.text, style = quranTextStyle(fontSp), color = colors.onSurface, modifier = Modifier.fillMaxWidth()) }
+        preview.last?.let { Text(io.github.mehrdad_abdi.qintar.ui.designsystem.quranDisplay(it.text), style = quranTextStyle(fontSp), color = colors.onSurface, modifier = Modifier.fillMaxWidth()) }
     }
 }
 

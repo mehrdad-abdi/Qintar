@@ -120,3 +120,29 @@ fun quranTextStyle(sizeSp: Int = QuranTextSizeDefaultSp): TextStyle {
         lineHeightStyle = CenteredLines,
     )
 }
+
+/**
+ * How far a pause mark is lowered, in ems. Amiri Quran draws the marks high above the line, so on
+ * every line but the first they reached into the line above (owner, 2026-11-25).
+ */
+private const val PAUSE_MARK_SHIFT = -0.3f
+
+private val PauseMarkStyle = androidx.compose.ui.text.SpanStyle(
+    baselineShift = androidx.compose.ui.text.style.BaselineShift(PAUSE_MARK_SHIFT),
+)
+
+/**
+ * An ayah's display string (from `AyahTextFormatter`), ready to draw: each pause mark (U+06D6…U+06DC)
+ * and the space it sits on are drawn a little lower, just above the end of their word. The text is
+ * unchanged; only where the marks are drawn.
+ */
+fun quranDisplay(text: String): androidx.compose.ui.text.AnnotatedString {
+    if (text.none { it in '\u06D6'..'\u06DC' }) return androidx.compose.ui.text.AnnotatedString(text)
+    val builder = androidx.compose.ui.text.AnnotatedString.Builder(text)
+    for (i in text.indices) {
+        if (text[i] !in '\u06D6'..'\u06DC') continue
+        val start = if (i > 0 && text[i - 1].isWhitespace() && text[i - 1] != '\n') i - 1 else i
+        builder.addStyle(PauseMarkStyle, start, i + 1)
+    }
+    return builder.toAnnotatedString()
+}
