@@ -84,6 +84,7 @@ import io.github.mehrdad_abdi.qintar.ui.common.surahFacts
 import io.github.mehrdad_abdi.qintar.ui.common.surahName
 import io.github.mehrdad_abdi.qintar.ui.designsystem.AyahRow
 import io.github.mehrdad_abdi.qintar.ui.designsystem.BasmalaRow
+import io.github.mehrdad_abdi.qintar.ui.designsystem.PartMarker
 import io.github.mehrdad_abdi.qintar.ui.designsystem.EmptyState
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Hairline
 import io.github.mehrdad_abdi.qintar.ui.designsystem.PageDivider
@@ -385,9 +386,11 @@ private fun ReaderList(
                 )
                 is ReaderRow.SurahHeader -> SurahHeader(surahName(row.surah), subtitle = surahFacts(row.surah))
                 is ReaderRow.Basmala -> BasmalaRow(fontSizeSp = state.fontSp, highlighted = state.isAudioAt(row))
+                is ReaderRow.PartStart -> PartMarker(partLabel(row.quarter), juz = (row.quarter - 1) % 8 == 0)
                 is ReaderRow.PageDivider -> PageDivider(
-                    text = if (row.hizb != null) {
-                        stringResource(R.string.page_divider_hizb, formatNumber(row.page), formatNumber(row.juz), formatNumber(row.hizb))
+                    // A hizb or quarter beginning with this page is named here; a juz gets the pill below.
+                    text = if (row.part != null && (row.part - 1) % 8 != 0) {
+                        stringResource(R.string.page_divider_part, formatNumber(row.page), formatNumber(row.juz), partLabel(row.part))
                     } else {
                         stringResource(R.string.page_divider, formatNumber(row.page), formatNumber(row.juz))
                     },
@@ -586,5 +589,18 @@ private fun EndAction(label: String, done: Boolean, onClick: () -> Unit) {
         } else {
             androidx.compose.material3.FilledTonalButton(onClick = onClick) { Text(label, style = QintarType.Label) }
         }
+    }
+}
+
+/** "Juz 4", "Hizb 7", "¼ Hizb 7", "½ Hizb 7" or "¾ Hizb 7" for a hizb quarter (1…240) that begins. */
+@Composable
+private fun partLabel(quarter: Int): String {
+    if ((quarter - 1) % 8 == 0) return stringResource(R.string.juz_n, formatNumber((quarter - 1) / 8 + 1))
+    val hizb = formatNumber((quarter - 1) / 4 + 1)
+    return when ((quarter - 1) % 4) {
+        0 -> stringResource(R.string.part_hizb, hizb)
+        1 -> stringResource(R.string.part_quarter, hizb)
+        2 -> stringResource(R.string.part_half, hizb)
+        else -> stringResource(R.string.part_three_quarters, hizb)
     }
 }

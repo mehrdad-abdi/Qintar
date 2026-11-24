@@ -25,7 +25,29 @@ class ReaderRowModelTest {
             is ReaderRow.Basmala -> "basmala"
             is ReaderRow.Ayah -> "${row.surah}:${row.number}"
             is ReaderRow.PageDivider -> "page ${row.page}"
-            is ReaderRow.SegmentEnd, is ReaderRow.SurahEnd -> null
+            is ReaderRow.SegmentEnd, is ReaderRow.SurahEnd, is ReaderRow.PartStart -> null
+        }
+    }
+
+    @Test
+    fun `every juz, hizb and quarter start is marked once, where it begins, even in the middle of a page`() {
+        val rows = model(AyahRange.ALL).rows
+        val marked = rows.mapNotNull { row ->
+            when (row) {
+                is ReaderRow.PartStart -> row.quarter
+                is ReaderRow.PageDivider -> row.part
+                else -> null
+            }
+        }
+        assertEquals("the first quarter starts with the Quran; every other one is marked", (2..240).toList(), marked)
+        // A mid-page marker stands right before its first ayah's block (surah header, basmala).
+        val midPage = rows.withIndex().filter { it.value is ReaderRow.PartStart }
+        assertTrue("the fixture has quarters starting mid-page", midPage.isNotEmpty())
+        for ((i, row) in midPage) {
+            val ayah = rows.drop(i + 1).first { it is ReaderRow.Ayah } as ReaderRow.Ayah
+            assertEquals((row as ReaderRow.PartStart).quarter, index.hizbQuarterOf(ayah.id))
+            assertTrue(rows.subList(i + 1, rows.indexOf(ayah)).all { it is ReaderRow.SurahHeader || it is ReaderRow.Basmala })
+            assertEquals("not at a page start", (rows[i - 1] as? ReaderRow.Ayah)?.page ?: ayah.page, ayah.page)
         }
     }
 

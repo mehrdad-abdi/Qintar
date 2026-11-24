@@ -108,6 +108,19 @@ class ReaderScreenTest {
     }
 
     @Test
+    fun `a quarter of a hizb that begins mid-page is marked before its first ayah`() {
+        val index = app.index
+        // The first ¼ hizb that starts in the middle of a page.
+        val start = (2..io.github.mehrdad_abdi.qintar.domain.model.Quran.AYAH_COUNT).map { io.github.mehrdad_abdi.qintar.domain.model.AyahId(it) }.first { id ->
+            val before = io.github.mehrdad_abdi.qintar.domain.model.AyahId(id.value - 1)
+            val q = index.hizbQuarterOf(id)
+            q != index.hizbQuarterOf(before) && index.pageOf(id) == index.pageOf(before) && (q - 1) % 4 == 1
+        }
+        open(ReaderRoute.browse(start.value))
+        compose.onNodeWithText("¼ Hizb ${(index.hizbQuarterOf(start) - 1) / 4 + 1}").assertIsDisplayed()
+    }
+
+    @Test
     fun `the undo message goes away by itself after a few seconds, and the marks stay`() {
         open(ReaderRoute.browse(app.ayah(2, 1).value))
         menu(1).performClick()

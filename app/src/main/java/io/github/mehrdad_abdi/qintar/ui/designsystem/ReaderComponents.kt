@@ -376,6 +376,27 @@ fun PageDivider(
 }
 
 /**
+ * Where a juz, hizb or quarter of a hizb begins in the middle of a page: a small centred pill before
+ * its first ayah. A juz start is prominent, like the divider's juz label.
+ */
+@Composable
+fun PartMarker(text: String, modifier: Modifier = Modifier, juz: Boolean = false) {
+    val colors = MaterialTheme.colorScheme
+    Box(modifier.fillMaxWidth().padding(vertical = Spacing.sm), contentAlignment = Alignment.Center) {
+        Text(
+            text = text,
+            style = QintarType.Label,
+            color = if (juz) colors.onPrimaryContainer else colors.onSurfaceVariant,
+            modifier = Modifier
+                .clip(QintarShapes.Pill)
+                .background(if (juz) colors.primaryContainer else colors.surfaceContainerHigh)
+                .padding(horizontal = Spacing.lg, vertical = Spacing.xs)
+                .semantics { heading() },
+        )
+    }
+}
+
+/**
  * The reader's position bar: where the first visible ayah is. Tap opens the position sheet.
  *
  * @param primary "Page 200 of 604 · 33%"

@@ -56,12 +56,20 @@ sealed interface ReaderRow {
         override val segment: Int,
         val page: Int,
         val juz: Int,
-        /** The hizb (1…60) when it changes at this page, otherwise null. */
-        val hizb: Int?,
         /** A juz begins on this page: it gets the prominent label. */
         val startsJuz: Boolean,
+        /** The hizb quarter (1…240) that begins with this page's first ayah, if one does. */
+        val part: Int? = null,
     ) : ReaderRow {
         override val key get() = "page-$segment-$page"
+    }
+
+    /**
+     * A juz, hizb or quarter of a hizb that begins in the middle of a page, before its first ayah
+     * (owner, 2026-11-24: readers plan by these, and many do not start at a page).
+     */
+    data class PartStart(override val segment: Int, val quarter: Int) : ReaderRow {
+        override val key get() = "part-$segment-$quarter"
     }
 }
 
@@ -96,7 +104,7 @@ class ReaderRowModel private constructor(
      */
     fun blockStart(rowIndex: Int): Int {
         var i = rowIndex.coerceIn(0, rows.lastIndex)
-        while (i > 0 && rows[i - 1].let { it is ReaderRow.Basmala || it is ReaderRow.SurahHeader || it is ReaderRow.PageDivider }) i--
+        while (i > 0 && rows[i - 1].let { it is ReaderRow.Basmala || it is ReaderRow.SurahHeader || it is ReaderRow.PageDivider || it is ReaderRow.PartStart }) i--
         return i
     }
 
@@ -108,9 +116,6 @@ class ReaderRowModel private constructor(
     }
 
     companion object {
-        /** Hizb quarters come four to a hizb. */
-        fun hizbOf(quarter: Int): Int = (quarter - 1) / 4 + 1
-
         /**
          * @param segmentHeaders a header row at the start of each segment; on by default for a group.
          */
@@ -130,15 +135,20 @@ class ReaderRowModel private constructor(
                     val ref = index.ref(id)
                     val page = index.pageOf(id)
                     val juz = index.juzOf(id)
+                    val quarter = index.hizbQuarterOf(id)
+                    // A juz, hizb or quarter begins here: at a page start the divider says it, otherwise
+                    // a marker of its own does.
+                    val partStarts = previous != null && quarter != index.hizbQuarterOf(previous!!)
                     if (previous != null && page != previousPage) {
-                        val hizb = hizbOf(index.hizbQuarterOf(id))
                         rows += ReaderRow.PageDivider(
                             segment = s,
                             page = page,
                             juz = juz,
-                            hizb = hizb.takeIf { it != hizbOf(index.hizbQuarterOf(previous!!)) },
                             startsJuz = juz != index.juzOf(previous!!),
+                            part = quarter.takeIf { partStarts },
                         )
+                    } else if (partStarts) {
+                        rows += ReaderRow.PartStart(s, quarter)
                     }
                     if (ref.ayah == 1) {
                         val surah = index.surah(ref.surah)

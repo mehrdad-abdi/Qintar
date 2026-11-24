@@ -86,7 +86,12 @@
     <string name="page_n">الصفحة %1$s</string>
     <string name="juz_n">الجزء %1$s</string>
     <string name="page_divider">الصفحة %1$s · الجزء %2$s</string>
-    <string name="page_divider_hizb">الصفحة %1$s · الجزء %2$s · الحزب %3$s</string>
+    <!-- A hizb or quarter of a hizb that begins with the page (owner, 2026-11-24). -->
+    <string name="page_divider_part">الصفحة %1$s · الجزء %2$s · %3$s</string>
+    <string name="part_hizb">الحزب %1$s</string>
+    <string name="part_quarter">ربع الحزب %1$s</string>
+    <string name="part_half">نصف الحزب %1$s</string>
+    <string name="part_three_quarters">ثلاثة أرباع الحزب %1$s</string>
     <string name="reader_position">الصفحة %1$s من %2$s · %3$s٪</string>
     <string name="sajda_label">سجدة</string>
     <string name="ayah_menu_mark_up_to_here">تعليم إلى هنا</string>
