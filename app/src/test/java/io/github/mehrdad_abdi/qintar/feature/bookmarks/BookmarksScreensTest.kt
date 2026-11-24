@@ -54,6 +54,23 @@ class BookmarksScreensTest {
     }
 
     @Test
+    fun `the list keeps the screen on, as the reader does, when the setting is on`() {
+        seedMorning()
+        var view: android.view.View? = null
+        val vm = app.bookmarksViewModel(Dispatchers.Unconfined)
+        compose.setContent {
+            view = androidx.compose.ui.platform.LocalView.current
+            QintarTheme { BookmarksScreen(onNavigate = {}, viewModel = vm) }
+        }
+        compose.waitForIdle()
+        org.junit.Assert.assertTrue(view!!.keepScreenOn)
+
+        runBlocking { app.prefs.update { it.copy(keepScreenOn = false) } }
+        compose.waitForIdle()
+        org.junit.Assert.assertFalse(view!!.keepScreenOn)
+    }
+
+    @Test
     fun `the empty tab offers to add a bookmark`() {
         openTab()
         compose.onNodeWithText("No bookmarks yet").assertIsDisplayed()

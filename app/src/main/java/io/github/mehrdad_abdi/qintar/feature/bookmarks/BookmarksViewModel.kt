@@ -141,6 +141,8 @@ data class BookmarksUiState(
     val audioPlaying: Boolean = false,
     val fontSp: Int = io.github.mehrdad_abdi.qintar.domain.model.UserPrefs().quranFontSp,
     val breakAtPauseMarks: Boolean = true,
+    /** The reader's "Keep screen on" setting, so one can listen through every bookmark here (owner, 2026-11-24). */
+    val keepScreenOn: Boolean = true,
     val scrollRequest: ListScrollRequest? = null,
     val notice: UndoNotice? = null,
     val dialog: BookmarksDialog? = null,
@@ -197,7 +199,7 @@ class BookmarksViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            prefs.prefs.collect { p -> _state.update { it.copy(fontSp = p.quranFontSp, breakAtPauseMarks = p.breakAtPauseMarks) } }
+            prefs.prefs.collect { p -> _state.update { it.copy(fontSp = p.quranFontSp, breakAtPauseMarks = p.breakAtPauseMarks, keepScreenOn = p.keepScreenOn) } }
         }
         viewModelScope.launch {
             clock.todayFlow.flatMapLatest { day -> log.observeBookmarkAyahCounts(day) }.collect { list ->

@@ -118,6 +118,13 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
     val snackbar = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
 
+    // Keep the screen on while the list is in front, as the reader does (R-RDR-6).
+    val view = androidx.compose.ui.platform.LocalView.current
+    DisposableEffect(view, state.keepScreenOn) {
+        view.keepScreenOn = state.keepScreenOn
+        onDispose { view.keepScreenOn = false }
+    }
+
     // Bookmarks read under Unread stay until the screen is left.
     DisposableEffect(viewModel) { onDispose { viewModel.onScreenLeft() } }
 
