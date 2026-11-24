@@ -214,6 +214,7 @@ fun DomainFixture.readViewModel(io: CoroutineDispatcher, random: Random = Random
     prefs = prefs,
     log = log,
     khatmProgress = { khatmProgress },
+    clock = clock,
     io = io,
     random = random,
 )

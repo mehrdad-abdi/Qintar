@@ -26,7 +26,7 @@
     <string name="read_filter_label">تصفية السور</string>
     <string name="read_no_match">لا توجد سورة مطابقة.</string>
     <string name="juz_starts_at">تبدأ من %1$s</string>
-    <string name="surah_coverage_description">قُرئ %1$s من السورة في الختمة الحالية</string>
+    <string name="surah_coverage_description">قُرئ %1$s من السورة اليوم</string>
 
     <string name="khatm_list_title">الختمات</string>
     <string name="khatm_section_active">قيد القراءة</string>

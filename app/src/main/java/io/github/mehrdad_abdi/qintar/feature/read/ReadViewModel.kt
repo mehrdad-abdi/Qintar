@@ -12,6 +12,7 @@ import io.github.mehrdad_abdi.qintar.domain.model.SurahInfo
 import io.github.mehrdad_abdi.qintar.domain.port.PrefsStore
 import io.github.mehrdad_abdi.qintar.domain.quran.QuranIndex
 import io.github.mehrdad_abdi.qintar.domain.service.GoToParser
+import io.github.mehrdad_abdi.qintar.domain.time.DayClock
 import io.github.mehrdad_abdi.qintar.domain.service.GoToResult
 import io.github.mehrdad_abdi.qintar.domain.service.KhatmProgress
 import io.github.mehrdad_abdi.qintar.feature.khatm.KhatmListItem
@@ -19,11 +20,8 @@ import io.github.mehrdad_abdi.qintar.feature.khatm.toListItem
 import io.github.mehrdad_abdi.qintar.ui.common.GoToProblem
 import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
 import javax.inject.Inject
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flatMapLatest
-import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
 import io.github.mehrdad_abdi.qintar.domain.port.ReadLogStore
 import javax.inject.Provider
 import kotlin.random.Random
@@ -38,7 +36,7 @@ import kotlinx.coroutines.withContext
 
 enum class ReadTab { SURAH, JUZ, PAGE }
 
-/** A surah in the index with the share of its ayahs covered in the current khatm; null = no khatm. */
+/** A surah in the index with the share of its ayahs read today; null = none read today. */
 data class SurahRowState(val surah: SurahInfo, val coverage: Float? = null)
 
 /** A juz in the index with the ayah it starts at. */
@@ -94,6 +92,7 @@ class ReadViewModel(
     private val prefs: PrefsStore,
     private val log: ReadLogStore,
     private val khatmProgress: Provider<KhatmProgress>,
+    private val clock: DayClock,
     private val io: CoroutineDispatcher,
     private val random: Random,
 ) : ViewModel() {
@@ -104,8 +103,9 @@ class ReadViewModel(
         prefs: PrefsStore,
         log: ReadLogStore,
         khatmProgress: Provider<KhatmProgress>,
+        clock: DayClock,
         @IoDispatcher io: CoroutineDispatcher,
-    ) : this(index, prefs, log, khatmProgress, io, Random.Default)
+    ) : this(index, prefs, log, khatmProgress, clock, io, Random.Default)
 
     private val _state = MutableStateFlow(ReadUiState())
     val state: StateFlow<ReadUiState> = _state.asStateFlow()
@@ -122,19 +122,11 @@ class ReadViewModel(
                 JuzRowState(n, idx.surah(ref.surah), ref)
             }
             val active = progress.observeActive()
-            // The bars follow the khatm read most recently: what is covered in it, per surah.
-            val coverage = active.map { it.firstOrNull()?.khatm }.distinctUntilChanged().flatMapLatest { khatm ->
-                if (khatm == null) {
-                    flowOf(null)
-                } else {
-                    log.observeDistinctAyahs(ReadContext.Khatm(khatm.id), AyahRange.ALL).map { covered ->
-                        val counts = IntArray(Quran.SURAH_COUNT + 1)
-                        for (id in AyahRange.ALL) {
-                            if (id.value <= khatm.assumedCoveredUpTo || id in covered) counts[idx.ref(id).surah]++
-                        }
-                        idx.surahs.associate { it.number to counts[it.number].toFloat() / it.ayahCount }
-                    }
-                }
+            // The bars show today's reading, from anywhere (owner, 2026-11-25): the khatm has its own view.
+            val coverage = clock.todayFlow.flatMapLatest { day -> log.observeEventsOfDay(day) }.map { events ->
+                val counts = IntArray(Quran.SURAH_COUNT + 1)
+                for (id in events.mapTo(HashSet()) { it.ayahId }) counts[idx.ref(id).surah]++
+                idx.surahs.associate { it.number to counts[it.number].toFloat() / it.ayahCount }.filterValues { it > 0f }
             }
             combine(coverage, prefs.prefs, active) { cover, p, khatms ->
                 Triple(cover, p.lastBrowseAyahId, khatms)

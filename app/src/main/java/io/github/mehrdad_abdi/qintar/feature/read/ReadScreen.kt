@@ -309,7 +309,7 @@ private fun SurahRow(row: SurahRowState, onClick: () -> Unit) {
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        // Only with a khatm in progress, and in place of the divider so there is never a double line.
+        // Only for a surah read today, and in place of the divider so there is never a double line.
         val coverage = row.coverage
         if (coverage != null) {
             val coverageText = stringResource(

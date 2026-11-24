@@ -143,20 +143,25 @@ class ReadViewModelTest {
     // ---- The indexes -----------------------------------------------------------------------------
 
     @Test
-    fun `the surah bars show the current khatm, not everything ever read`() = runTest {
-        // Reading outside a khatm does not fill the bars (owner, 2026-11-22: they all looked done).
+    fun `the surah bars show what was read today, from anywhere, and start again the next day`() = runTest {
+        // Owner, 2026-11-25: the khatm has its own view; the surah list shows today's reading.
         app.tracker.markRange(app.index.surahRange(112), ReadContext.Browse, ReadMethod.BULK, RangeMode.FILL)
+        app.clock.advanceDays(1)
         val read = read()
-        assertTrue("no khatm, no bars", read.state.value.surahs.all { it.coverage == null })
+        assertTrue("nothing read today, no bars", read.state.value.surahs.all { (it.coverage ?: 0f) == 0f })
 
         val khatm = app.khatms.start("Ramadan")
         app.tracker.markRange(app.index.surahRange(1), ReadContext.Khatm(khatm.id), ReadMethod.BULK, RangeMode.FILL)
-        app.tracker.mark(app.ayah(2, 1), ReadContext.Khatm(khatm.id), ReadMethod.TAP)
+        app.tracker.mark(app.ayah(2, 1), ReadContext.Browse, ReadMethod.TAP)
+        app.tracker.mark(app.ayah(2, 1), ReadContext.Browse, ReadMethod.TAP)
         val rows = read.state.value.surahs
         assertEquals(114, rows.size)
-        assertEquals(1f, rows[0].coverage!!, 0f)
-        assertEquals(1f / 286, rows[1].coverage!!, 0.0001f)
-        assertEquals("read outside the khatm", 0f, rows[111].coverage!!, 0f)
+        assertEquals("a khatm reading counts", 1f, rows[0].coverage!!, 0f)
+        assertEquals("one ayah, read twice", 1f / 286, rows[1].coverage!!, 0.0001f)
+        assertEquals("read yesterday", 0f, rows[111].coverage ?: 0f, 0f)
+
+        app.clock.advanceDays(1)
+        assertTrue("a new day starts empty", read.state.value.surahs.all { (it.coverage ?: 0f) == 0f })
     }
 
     @Test

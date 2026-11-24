@@ -26,7 +26,7 @@
     <string name="read_filter_label">جست‌وجوی سوره</string>
     <string name="read_no_match">سوره‌ای پیدا نشد.</string>
     <string name="juz_starts_at">آغاز از %1$s</string>
-    <string name="surah_coverage_description">%1$s از سوره در ختم جاری خوانده شده</string>
+    <string name="surah_coverage_description">%1$s از سوره امروز خوانده شده</string>
 
     <string name="khatm_list_title">ختم‌ها</string>
     <string name="khatm_section_active">در جریان</string>
