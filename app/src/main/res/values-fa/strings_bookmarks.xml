@@ -116,8 +116,6 @@
     <string name="bm_filter_all">همه</string>
     <string name="bm_filter_unread">خوانده‌نشده</string>
     <string name="bm_unread_empty">همهٔ نشان‌ها امروز خوانده شده‌اند.</string>
-    <string name="bm_description_more">بیشتر</string>
-    <string name="bm_description_less">کمتر</string>
     <string name="bm_play_group">پخش %1$s</string>
     <string name="bm_play_bookmark">پخش %1$s</string>
     <string name="bm_menu_open">باز کردن در قرائت</string>

@@ -1,5 +1,6 @@
 package io.github.mehrdad_abdi.qintar.feature.bookmarks
 
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -92,6 +93,27 @@ class BookmarksScreensTest {
         compose.waitForIdle()
         assertEquals(1, runBlocking { app.log.allEvents().size })
         assertTrue("nothing navigates: the bookmark is read in place", navigated.isEmpty())
+    }
+
+    @Test
+    fun `a tap on a long description opens the bookmark or folds the group, it does not just expand the text`() {
+        val long = "A long note about why this is read. ".repeat(12).trim()
+        val groupNote = "What the group is for. ".repeat(12).trim()
+        runBlocking {
+            val group = app.library.createGroup("Night", description = groupNote)
+            app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)).copy(groupId = group.id, description = long))
+        }
+        openTab()
+
+        // The bookmark: a tap on its description opens its ayahs (and shows the whole description).
+        val card = compose.onNodeWithText("1 ayah", substring = true)
+        card.performScrollTo().assert(androidx.compose.ui.test.hasStateDescription("Collapsed"))
+        compose.onNodeWithText(long, substring = true).performScrollTo().performClick()
+        card.assert(androidx.compose.ui.test.hasStateDescription("Expanded"))
+
+        // The group: a tap on its description folds it.
+        compose.onNodeWithText(groupNote).performScrollTo().performClick()
+        compose.onNodeWithText("1 ayah", substring = true).assertDoesNotExist()
     }
 
     @Test

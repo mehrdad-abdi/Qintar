@@ -268,41 +268,21 @@ private fun InCard(segment: CardSegment, divider: Boolean = false, content: @Com
     }
 }
 
-/** Two lines of a long description; a tap shows all of it, another folds it again. */
+/**
+ * A description: two lines while its bookmark or group is closed, all of it while open. It has no
+ * tap of its own, so a tap anywhere on the header opens or closes (owner, 2026-11-25).
+ */
 @Composable
-private fun ExpandableDescription(text: String, color: Color, modifier: Modifier = Modifier) {
-    var expanded by rememberSaveable(text) { mutableStateOf(false) }
-    var overflows by remember(text) { mutableStateOf(false) }
-    val state = stringResource(if (expanded) R.string.state_expanded else R.string.state_collapsed)
-    Column(
-        modifier
-            .animateContentSize()
-            .then(
-                if (overflows || expanded) {
-                    Modifier.clickable(role = Role.Button) { expanded = !expanded }.semantics { stateDescription = state }
-                } else {
-                    Modifier
-                },
-            ),
-    ) {
-        Text(
-            text,
-            // The user's own words, in any language: their direction comes from the text itself.
-            style = QintarType.Body.copy(textDirection = androidx.compose.ui.text.style.TextDirection.Content),
-            color = color,
-            maxLines = if (expanded) Int.MAX_VALUE else 2,
-            overflow = TextOverflow.Ellipsis,
-            onTextLayout = { if (!expanded) overflows = it.hasVisualOverflow },
-        )
-        if (overflows || expanded) {
-            Text(
-                stringResource(if (expanded) R.string.bm_description_less else R.string.bm_description_more),
-                style = QintarType.Label,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = Spacing.xxs),
-            )
-        }
-    }
+private fun FoldedDescription(text: String, color: Color, open: Boolean, modifier: Modifier = Modifier) {
+    Text(
+        text,
+        // The user's own words, in any language: their direction comes from the text itself.
+        style = QintarType.Body.copy(textDirection = androidx.compose.ui.text.style.TextDirection.Content),
+        color = color,
+        maxLines = if (open) Int.MAX_VALUE else 2,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier.animateContentSize(),
+    )
 }
 
 /** The fold arrow, turning with the state. */
@@ -390,7 +370,12 @@ private fun SectionRow(row: BookmarksRow.Section, vm: BookmarksViewModel, onNavi
             FoldArrow(row.expanded, colors.onSurfaceVariant)
         }
         group?.state?.group?.description?.let {
-            ExpandableDescription(it, colors.onSurfaceVariant, Modifier.fillMaxWidth().padding(top = Spacing.xxs))
+            FoldedDescription(
+                it,
+                colors.onSurfaceVariant,
+                row.expanded,
+                Modifier.fillMaxWidth().clickable(role = Role.Button) { vm.onToggleSection(row.sectionKey) }.padding(top = Spacing.xxs),
+            )
         }
         if (row.expanded && row.bookmarkCount == 0) {
             Text(
@@ -463,7 +448,7 @@ private fun EntryRow(row: BookmarksRow.Entry, vm: BookmarksViewModel, onNavigate
             }
         }
         bookmark.description?.let {
-            ExpandableDescription(it, quiet, Modifier.fillMaxWidth().padding(top = Spacing.sm, end = Spacing.md))
+            FoldedDescription(it, quiet, row.expanded, Modifier.fillMaxWidth().padding(top = Spacing.sm, end = Spacing.md))
         }
         // A quiet hint that the card opens to its ayahs.
         Row(Modifier.fillMaxWidth().height(Spacing.lg), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {

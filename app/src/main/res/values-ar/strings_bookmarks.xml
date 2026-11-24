@@ -116,8 +116,6 @@
     <string name="bm_filter_all">الكل</string>
     <string name="bm_filter_unread">غير المقروءة</string>
     <string name="bm_unread_empty">قُرئت كل العلامات اليوم.</string>
-    <string name="bm_description_more">المزيد</string>
-    <string name="bm_description_less">أقل</string>
     <string name="bm_play_group">تشغيل %1$s</string>
     <string name="bm_play_bookmark">تشغيل %1$s</string>
     <string name="bm_menu_open">فتح في القارئ</string>
