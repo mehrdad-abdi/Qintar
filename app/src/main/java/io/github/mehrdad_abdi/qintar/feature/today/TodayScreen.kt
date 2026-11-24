@@ -1,5 +1,7 @@
 package io.github.mehrdad_abdi.qintar.feature.today
 
+import io.github.mehrdad_abdi.qintar.ui.common.MessageHost
+import io.github.mehrdad_abdi.qintar.ui.common.showUndo
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -137,7 +139,7 @@ fun TodayScreen(
     val loggedMessage = logged?.first?.let { stringResource(R.string.log_snack_added_today, ayahCount(it.count)) }
     LaunchedEffect(logged) {
         val (result, logViewModel) = logged ?: return@LaunchedEffect
-        val outcome = snackbar.showSnackbar(loggedMessage.orEmpty(), actionLabel = undoLabel)
+        val outcome = snackbar.showUndo(loggedMessage.orEmpty(), undoLabel)
         if (outcome == SnackbarResult.ActionPerformed) logViewModel.onUndo(result)
         logged = null
     }
@@ -212,7 +214,7 @@ fun TodayScreen(
             Spacer(Modifier.height(Spacing.xl))
         }
     }
-    SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
+    MessageHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
     if (logging) {
         val log = logViewModel()

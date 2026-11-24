@@ -1,5 +1,7 @@
 package io.github.mehrdad_abdi.qintar.feature.bookmarks
 
+import io.github.mehrdad_abdi.qintar.ui.common.MessageHost
+import io.github.mehrdad_abdi.qintar.ui.common.showUndo
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -128,7 +130,7 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
     val notice = state.notice
     LaunchedEffect(notice?.id) {
         if (notice != null) {
-            val result = snackbar.showSnackbar(messages.getValue(notice.kind), actionLabel = undoLabel)
+            val result = snackbar.showUndo(messages.getValue(notice.kind), undoLabel)
             if (result == SnackbarResult.ActionPerformed) viewModel.onUndo() else viewModel.onNoticeShown(notice.id)
         }
     }
@@ -196,7 +198,7 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
                     }
                 }
             }
-            SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
+            MessageHost(snackbar, Modifier.align(Alignment.BottomCenter))
         }
     }
     BookmarksDialogs(state.dialog, viewModel)

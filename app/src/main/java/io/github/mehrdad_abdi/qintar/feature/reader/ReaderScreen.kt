@@ -1,5 +1,7 @@
 package io.github.mehrdad_abdi.qintar.feature.reader
 
+import io.github.mehrdad_abdi.qintar.ui.common.MessageHost
+import io.github.mehrdad_abdi.qintar.ui.common.showUndo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
@@ -139,7 +141,7 @@ fun ReaderScreen(
     val undoLabel = stringResource(R.string.action_undo)
     LaunchedEffect(bulk?.id) {
         if (bulk != null && bulkMessage != null) {
-            val result = snackbar.showSnackbar(bulkMessage, actionLabel = undoLabel)
+            val result = snackbar.showUndo(bulkMessage, undoLabel)
             if (result == SnackbarResult.ActionPerformed) viewModel.onUndoBulk() else viewModel.onBulkNoticeShown(bulk)
         }
     }
@@ -231,7 +233,7 @@ fun ReaderScreen(
                 .padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.xl, bottom = Spacing.md),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            SnackbarHost(snackbar)
+            MessageHost(snackbar)
             if (download is DownloadState.Running) {
                 DownloadProgress(download, onCancel = viewModel::onDownloadCancel)
             }

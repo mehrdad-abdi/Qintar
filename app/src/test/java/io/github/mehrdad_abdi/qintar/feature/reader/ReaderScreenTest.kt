@@ -10,6 +10,8 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeRight
 import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
 import io.github.mehrdad_abdi.qintar.domain.model.ReadMethod
 import io.github.mehrdad_abdi.qintar.domain.testing.DomainFixture
@@ -103,6 +105,33 @@ class ReaderScreenTest {
 
         assertTrue(app.log.events.isEmpty())
         compose.onNodeWithContentDescription("0 today, 10 ayahs to the first rank").assertIsDisplayed()
+    }
+
+    @Test
+    fun `the undo message goes away by itself after a few seconds, and the marks stay`() {
+        open(ReaderRoute.browse(app.ayah(2, 1).value))
+        menu(1).performClick()
+        compose.onNodeWithText("Mark up to here").performClick()
+        compose.onNodeWithText("2 ayahs marked").assertIsDisplayed()
+
+        compose.mainClock.advanceTimeBy(15_000)
+        compose.waitForIdle()
+
+        compose.onNodeWithText("2 ayahs marked").assertDoesNotExist()
+        assertEquals(2, app.log.events.size)
+    }
+
+    @Test
+    fun `the undo message closes on a swipe, and the marks stay`() {
+        open(ReaderRoute.browse(app.ayah(2, 1).value))
+        menu(1).performClick()
+        compose.onNodeWithText("Mark up to here").performClick()
+
+        compose.onNodeWithText("2 ayahs marked").performTouchInput { swipeRight() }
+        compose.waitForIdle()
+
+        compose.onNodeWithText("2 ayahs marked").assertDoesNotExist()
+        assertEquals(2, app.log.events.size)
     }
 
     @Test

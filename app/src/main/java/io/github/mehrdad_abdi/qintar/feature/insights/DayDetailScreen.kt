@@ -1,5 +1,7 @@
 package io.github.mehrdad_abdi.qintar.feature.insights
 
+import io.github.mehrdad_abdi.qintar.ui.common.MessageHost
+import io.github.mehrdad_abdi.qintar.ui.common.showUndo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -124,14 +126,14 @@ fun DayDetailScreen(
     val notice = state.notice
     LaunchedEffect(notice?.id) {
         if (notice != null) {
-            val result = snackbar.showSnackbar(messages.getValue(notice.kind), actionLabel = undoLabel)
+            val result = snackbar.showUndo(messages.getValue(notice.kind), undoLabel)
             if (result == SnackbarResult.ActionPerformed) viewModel.onUndo() else viewModel.onNoticeShown(notice.id)
         }
     }
     val loggedMessage = logged?.let { stringResource(R.string.log_snack_added_day, ayahCount(it.count), dateText(it.day)) }
     LaunchedEffect(logged) {
         val result = logged ?: return@LaunchedEffect
-        val outcome = snackbar.showSnackbar(loggedMessage.orEmpty(), actionLabel = undoLabel)
+        val outcome = snackbar.showUndo(loggedMessage.orEmpty(), undoLabel)
         if (outcome == SnackbarResult.ActionPerformed) logViewModel.onUndo(result)
         logged = null
     }
@@ -168,7 +170,7 @@ fun DayDetailScreen(
                 DayPhase.READY -> DayContent(state, viewModel, onAdd = { logging = true }, onDialog = { dialog = it })
             }
         }
-        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
+        MessageHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
 
     when (val open = dialog) {
