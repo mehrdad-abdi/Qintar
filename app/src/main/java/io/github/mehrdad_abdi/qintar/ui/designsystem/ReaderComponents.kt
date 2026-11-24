@@ -298,8 +298,11 @@ fun SurahHeader(
 fun BasmalaRow(
     modifier: Modifier = Modifier,
     fontSizeSp: Int = QuranTextSizeDefaultSp,
+    /** Being recited: tinted like a playing ayah. */
+    highlighted: Boolean = false,
 ) {
     val style = quranTextStyle(fontSizeSp)
+    val tint = if (highlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f) else Color.Transparent
     Text(
         text = BASMALA,
         style = style.copy(textAlign = TextAlign.Center),
@@ -308,6 +311,7 @@ fun BasmalaRow(
         softWrap = false,
         modifier = modifier
             .fillMaxWidth()
+            .background(tint)
             .padding(start = Spacing.screen, end = Spacing.screen, bottom = with(LocalDensity.current) { (style.fontSize * 2).toDp() })
             .semantics { contentDescription = BASMALA_PLAIN },
     )

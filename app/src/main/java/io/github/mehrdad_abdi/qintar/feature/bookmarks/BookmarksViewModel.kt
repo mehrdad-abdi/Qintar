@@ -107,7 +107,8 @@ sealed interface BookmarksRow {
 }
 
 /** Where the player is in the list: an ayah of a bookmark. */
-data class ListAudio(val bookmarkId: Long, val ayah: AyahId)
+/** What the player is on in the list: an ayah, or the Bismillah before [ayah] when [basmala]. */
+data class ListAudio(val bookmarkId: Long, val ayah: AyahId, val basmala: Boolean = false)
 
 data class ListScrollRequest(val row: Int, val token: Int)
 
@@ -151,7 +152,17 @@ data class BookmarksUiState(
 
     fun count(row: BookmarksRow.Ayah): Int = counts[row.bookmarkId]?.get(row.id) ?: 0
 
-    fun isAudioAt(row: BookmarksRow.Ayah): Boolean = audio?.let { it.bookmarkId == row.bookmarkId && it.ayah == row.id } == true
+    fun isAudioAt(row: BookmarksRow.Ayah): Boolean = audio?.let { !it.basmala && it.bookmarkId == row.bookmarkId && it.ayah == row.id } == true
+
+    /** The Bismillah is its own playing row (owner, 2026-11-24). */
+    fun isAudioAt(row: BookmarksRow.Basmala): Boolean =
+        audio?.let { it.basmala && it.bookmarkId == row.bookmarkId && rowIndexOf(it) == rows.indexOf(row) } == true
+
+    /** The list row of [at]: its ayah, or the Bismillah row just before it; -1 when not shown. */
+    fun rowIndexOf(at: ListAudio): Int {
+        val ayah = rows.indexOfFirst { it is BookmarksRow.Ayah && it.bookmarkId == at.bookmarkId && it.id == at.ayah }
+        return if (at.basmala && ayah > 0 && rows[ayah - 1] is BookmarksRow.Basmala) ayah - 1 else ayah
+    }
 }
 
 /**
@@ -363,7 +374,7 @@ class BookmarksViewModel @Inject constructor(
     private fun onPlayerState(p: PlayerState) {
         val item = p.item
         val now = if (p.origin == BOOKMARKS_ORIGIN && item != null) {
-            (item.context as? ReadContext.Bookmark)?.let { ListAudio(it.id, item.ayah) }
+            (item.context as? ReadContext.Bookmark)?.let { ListAudio(it.id, item.ayah, item.basmala) }
         } else {
             null
         }
@@ -375,10 +386,9 @@ class BookmarksViewModel @Inject constructor(
             val changed = expandedBookmarks.add(now.bookmarkId) or collapsedSections.remove(section)
             if (changed) rebuild()
         }
-        val rows = _state.value.rows
-        val row = rows.indexOfFirst { it is BookmarksRow.Ayah && it.bookmarkId == now.bookmarkId && it.id == now.ayah }
+        val row = _state.value.rowIndexOf(now)
         if (row < 0) return
-        val previous = before?.let { b -> rows.indexOfFirst { it is BookmarksRow.Ayah && it.bookmarkId == b.bookmarkId && it.id == b.ayah } } ?: -1
+        val previous = before?.let { _state.value.rowIndexOf(it) } ?: -1
         val shown = visibleRows
         if (before == null || (previous in shown && (row >= shown.last || row < shown.first))) {
             _state.update { it.copy(scrollRequest = ListScrollRequest(row, ++scrollToken)) }

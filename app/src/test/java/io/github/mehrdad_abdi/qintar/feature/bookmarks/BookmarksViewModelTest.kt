@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -161,6 +162,20 @@ class BookmarksViewModelTest {
         vm.onFilter(BookmarksFilter.UNREAD)
         vm.onPlaySection(UNGROUPED)
         assertEquals(listOf(first.range, second.range), player.requests.single().segments.map { it.range })
+    }
+
+    @Test
+    fun `while a bookmark's Bismillah plays, its row is followed and highlighted, not ayah 1`() = runTest {
+        val b = kahf()
+        val player = FakePlayerController()
+        val vm = app.bookmarksViewModel(main.dispatcher, player)
+        player.nowAt(BOOKMARKS_ORIGIN, 0, b.range.start, io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(b.id), basmala = true)
+        val state = vm.state.value
+        val basmala = state.rows.indexOfFirst { it is BookmarksRow.Basmala && it.bookmarkId == b.id }
+        assertTrue(basmala >= 0)
+        assertEquals(basmala, state.scrollRequest?.row)
+        assertTrue(state.isAudioAt(state.rows[basmala] as BookmarksRow.Basmala))
+        assertFalse(state.isAudioAt(state.ayahsOf(b.id).first()))
     }
 
     @Test

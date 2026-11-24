@@ -384,7 +384,7 @@ private fun ReaderList(
                     onLogGroup = viewModel::onLogGroupReading,
                 )
                 is ReaderRow.SurahHeader -> SurahHeader(surahName(row.surah), subtitle = surahFacts(row.surah))
-                is ReaderRow.Basmala -> BasmalaRow(fontSizeSp = state.fontSp)
+                is ReaderRow.Basmala -> BasmalaRow(fontSizeSp = state.fontSp, highlighted = state.isAudioAt(row))
                 is ReaderRow.PageDivider -> PageDivider(
                     text = if (row.hizb != null) {
                         stringResource(R.string.page_divider_hizb, formatNumber(row.page), formatNumber(row.juz), formatNumber(row.hizb))

@@ -196,7 +196,7 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
                                 is BookmarksRow.Section -> SectionRow(row, viewModel, onNavigate, first = index == 0)
                                 is BookmarksRow.Entry -> EntryRow(row, viewModel, onNavigate)
                                 is BookmarksRow.Basmala -> InCard(CardSegment.MIDDLE) {
-                                    BasmalaRow(Modifier.padding(top = Spacing.lg), fontSizeSp = state.fontSp)
+                                    BasmalaRow(Modifier.padding(top = Spacing.lg), fontSizeSp = state.fontSp, highlighted = state.isAudioAt(row))
                                 }
                                 is BookmarksRow.Ayah -> InCard(CardSegment.MIDDLE, divider = true) { InlineAyah(row, state, viewModel) }
                                 is BookmarksRow.End -> InCard(CardSegment.BOTTOM, divider = true) { EndRow(row, viewModel) }

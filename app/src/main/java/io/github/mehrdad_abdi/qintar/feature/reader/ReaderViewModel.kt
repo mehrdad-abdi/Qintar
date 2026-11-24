@@ -116,7 +116,8 @@ data class SegmentHeaderInfo(
 )
 
 /** The ayah of this reader that is loaded in the player. */
-data class AudioPosition(val segment: Int, val ayah: AyahId)
+/** What the player is on: an ayah, or the Bismillah before [ayah] (its ayah 1) when [basmala]. */
+data class AudioPosition(val segment: Int, val ayah: AyahId, val basmala: Boolean = false)
 
 /** Asks the list to scroll to [row]; [token] tells one request from the next. */
 data class ScrollRequest(val row: Int, val token: Int)
@@ -172,7 +173,10 @@ data class ReaderUiState(
     /** The row whose ayah is being played: it is highlighted and its button pauses. */
     fun isPlaying(row: ReaderRow.Ayah): Boolean = audioPlaying && isAudioAt(row)
 
-    fun isAudioAt(row: ReaderRow.Ayah): Boolean = audioAt?.let { it.segment == row.segment && it.ayah == row.id } == true
+    fun isAudioAt(row: ReaderRow.Ayah): Boolean = audioAt?.let { !it.basmala && it.segment == row.segment && it.ayah == row.id } == true
+
+    /** The Bismillah before a surah is its own playing row (owner, 2026-11-24). */
+    fun isAudioAt(row: ReaderRow.Basmala): Boolean = audioAt?.let { it.basmala && it.segment == row.segment && it.ayah == model?.surahInfo(row.surah)?.firstAyahId } == true
 
     /** A passage smaller than the whole Quran can be downloaded as one. */
     val canDownloadPassage: Boolean get() = entry != ReaderEntry.KHATM && entry != ReaderEntry.BROWSE
@@ -652,7 +656,7 @@ class ReaderViewModel @AssistedInject constructor(
     /** Where the player is, if what it plays was started from this reader. */
     private fun audioPosition(p: PlayerState): AudioPosition? {
         val item = p.item ?: return null
-        return if (p.origin == route.origin()) AudioPosition(item.segment, item.ayah) else null
+        return if (p.origin == route.origin()) AudioPosition(item.segment, item.ayah, item.basmala) else null
     }
 
     /**
@@ -663,16 +667,19 @@ class ReaderViewModel @AssistedInject constructor(
         val model = model ?: return
         val before = _state.value.audioAt
         val now = audioPosition(p)
-        // The basmala before an ayah is not a row of its own: the ayah it leads to is shown as playing.
         _state.update { it.copy(audioAt = now, audioPlaying = now != null && (p.playing || p.loading)) }
         if (now == null || now == before) return
-        val row = model.indexOf(now.segment, now.ayah) ?: return
-        val previousRow = before?.let { model.indexOf(it.segment, it.ayah) } ?: return
+        val row = rowOf(model, now) ?: return
+        val previousRow = before?.let { rowOf(model, it) } ?: return
         val shown = visibleRows
         if (previousRow in shown && (row >= shown.last || row < shown.first)) {
             _state.update { it.copy(scrollRequest = ScrollRequest(model.blockStart(row), ++scrollToken)) }
         }
     }
+
+    /** The row of [at]: its ayah, or the Bismillah row just before it. */
+    private fun rowOf(model: ReaderRowModel, at: AudioPosition): Int? =
+        model.indexOf(at.segment, at.ayah)?.let { if (at.basmala && model.rows.getOrNull(it - 1) is ReaderRow.Basmala) it - 1 else it }
 
     /** The play button of a row: pause or resume when it is the ayah in the player, otherwise play from it. */
     fun onPlay(row: ReaderRow.Ayah) {

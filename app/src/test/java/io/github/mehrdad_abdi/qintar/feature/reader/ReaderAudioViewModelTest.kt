@@ -203,6 +203,26 @@ class ReaderAudioViewModelTest {
     }
 
     @Test
+    fun `going on into the next surah, the Bismillah is the playing row, then its first ayah`() {
+        val reader = reader(browseRoute)
+        val model = reader.state.value.model!!
+        fun rowOf(s: Int, n: Int) = model.indexOf(0, app.ayah(s, n))!!
+        val basmala = model.rows.indexOfFirst { it is ReaderRow.Basmala && it.surah == 3 }
+        reader.onVisibleRows(rowOf(2, 283), rowOf(2, 286))
+        player.nowAt(browseRoute.origin(), 0, app.ayah(2, 286))
+
+        // The next surah's Bismillah: its row is followed and shown as playing, not ayah 1.
+        player.nowAt(browseRoute.origin(), 0, app.ayah(3, 1), basmala = true)
+        assertEquals(model.blockStart(basmala), reader.state.value.scrollRequest!!.row)
+        assertTrue(reader.state.value.isAudioAt(model.rows[basmala] as ReaderRow.Basmala))
+        assertFalse(reader.state.value.isAudioAt(model.rows[rowOf(3, 1)] as ReaderRow.Ayah))
+
+        player.nowAt(browseRoute.origin(), 0, app.ayah(3, 1))
+        assertFalse(reader.state.value.isAudioAt(model.rows[basmala] as ReaderRow.Basmala))
+        assertTrue(reader.state.value.isAudioAt(model.rows[rowOf(3, 1)] as ReaderRow.Ayah))
+    }
+
+    @Test
     fun `scrolling away stops the following, and the player's title brings the ayah back`() {
         val reader = reader(browseRoute)
         val model = reader.state.value.model!!
