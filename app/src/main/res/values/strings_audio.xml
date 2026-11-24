@@ -2,7 +2,6 @@
 <resources>
     <!-- Audio (§7.8): what is being played -->
     <string name="audio_title_ayah">%1$s %2$s</string>
-    <string name="audio_title_basmala">Basmala · %1$s</string>
     <string name="audio_title_with_reciter">%1$s · %2$s</string>
     <string name="audio_needs_connection">Audio needs a connection</string>
     <string name="audio_failed">This audio could not be played</string>

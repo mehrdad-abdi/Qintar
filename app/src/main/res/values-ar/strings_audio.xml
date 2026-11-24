@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="audio_title_ayah">%1$s %2$s</string>
-    <string name="audio_title_basmala">البسملة · %1$s</string>
     <string name="audio_title_with_reciter">%1$s · %2$s</string>
     <string name="audio_needs_connection">تشغيل الصوت يحتاج إلى اتصال بالإنترنت</string>
     <string name="audio_failed">تعذّر تشغيل هذا الصوت</string>

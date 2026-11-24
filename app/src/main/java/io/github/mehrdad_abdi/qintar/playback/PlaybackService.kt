@@ -259,9 +259,8 @@ class PlaybackService : MediaSessionService() {
         val surah = quran?.surah(entry.surah)?.displayName(language).orEmpty()
         val title = if (entry.kind == QueueKind.SAJDA_DHIKR) {
             getString(R.string.audio_title_sajda_dhikr)
-        } else if (entry.kind == QueueKind.BASMALA) {
-            getString(R.string.audio_title_basmala, surah)
         } else {
+            // The Bismillah is titled as the surah's first ayah.
             val number = quran?.ref(entry.ayah)?.ayah ?: 0
             getString(R.string.audio_title_ayah, surah, Numerals.format(number, if (settings.latinNumerals) "en" else language))
         }

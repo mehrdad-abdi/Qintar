@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="audio_title_ayah">%1$s %2$s</string>
-    <string name="audio_title_basmala">بسمله · %1$s</string>
     <string name="audio_title_with_reciter">%1$s · %2$s</string>
     <string name="audio_needs_connection">پخش صوت به اینترنت نیاز دارد</string>
     <string name="audio_failed">این صوت پخش نشد</string>

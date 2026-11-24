@@ -83,9 +83,8 @@ private fun playerTitle(state: PlayerBarState): String {
     val surah = state.surah?.let { surahName(it) }.orEmpty()
     val what = if (state.dhikr) {
         stringResource(R.string.audio_title_sajda_dhikr)
-    } else if (state.basmala) {
-        stringResource(R.string.audio_title_basmala, surah)
     } else {
+        // The Bismillah is titled as the surah's first ayah (owner, 2026-11-25).
         stringResource(R.string.audio_title_ayah, surah, formatNumber(state.ayahNumber))
     }
     val reciter = state.reciterId?.let { stringResource(Reciters.of(it).name) } ?: return what
