@@ -19,18 +19,29 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
 
 /**
  * The hadith the seven ranks come from: the Bismillah, then the narration in Arabic, English and
- * Persian, whatever the app language (onboarding's first page, Settings → About).
+ * Persian, whatever the app language (onboarding's first page).
  */
 @Composable
-fun HadithText(modifier: Modifier = Modifier, withBasmala: Boolean = true) {
+fun HadithText(modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-        if (withBasmala) BasmalaRow()
+        BasmalaRow()
         Text(stringResource(R.string.hadith_intro), style = QintarType.Body, color = colors.onSurfaceVariant)
         HadithPart(stringResource(R.string.hadith_label_ar), stringResource(R.string.hadith_text_ar), LayoutDirection.Rtl, arabic = true)
         HadithPart(stringResource(R.string.hadith_label_en), stringResource(R.string.hadith_text_en), LayoutDirection.Ltr)
         HadithPart(stringResource(R.string.hadith_label_fa), stringResource(R.string.hadith_text_fa), LayoutDirection.Rtl)
     }
+}
+
+/** The hadith alone, in the app language: Settings → About (owner, 2026-11-24). */
+@Composable
+fun HadithInAppLanguage(modifier: Modifier = Modifier) {
+    Text(
+        stringResource(R.string.hadith_text_local),
+        style = QintarType.Body,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = modifier.fillMaxWidth(),
+    )
 }
 
 @Composable

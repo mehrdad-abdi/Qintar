@@ -136,6 +136,7 @@
     <string name="hadith_label_fa">الفارسية</string>
     <string name="settings_hadith">حديث المراتب</string>
     <string name="settings_hadith_summary">من أين جاءت المراتب السبع</string>
+    <string name="hadith_text_local" translatable="false">@string/hadith_text_ar</string>
     <string name="todays_readings">قراءات اليوم</string>
     <string name="day_show_ayahs">عرض الآيات</string>
 </resources>

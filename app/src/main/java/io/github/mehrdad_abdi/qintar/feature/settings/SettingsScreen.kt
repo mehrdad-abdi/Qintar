@@ -632,7 +632,7 @@ private fun AboutSection(onOpenLicences: () -> Unit, onOpenDiagnostics: () -> Un
     // The hadith of the ranks, to read again (owner, 2026-11-22).
     var hadith by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
     ActionRow(stringResource(R.string.settings_hadith), stringResource(R.string.settings_hadith_summary), SettingsTags.HADITH) { hadith = !hadith }
-    if (hadith) io.github.mehrdad_abdi.qintar.ui.common.HadithText(Modifier.padding(bottom = Spacing.md), withBasmala = true)
+    if (hadith) io.github.mehrdad_abdi.qintar.ui.common.HadithInAppLanguage(Modifier.padding(bottom = Spacing.md))
     RowDivider()
     Column(Modifier.fillMaxWidth().padding(vertical = Spacing.sm)) {
         Text(stringResource(R.string.settings_privacy_title), style = QintarType.Body)

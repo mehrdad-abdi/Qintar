@@ -148,6 +148,8 @@
     <string name="hadith_label_fa">Persian</string>
     <string name="settings_hadith">The hadith of the ranks</string>
     <string name="settings_hadith_summary">Where the seven ranks come from</string>
+    <!-- The hadith in the app language only (Settings → About). -->
+    <string name="hadith_text_local" translatable="false">@string/hadith_text_en</string>
     <string name="todays_readings">Today\'s readings</string>
     <string name="day_show_ayahs">Show the ayahs</string>
 </resources>

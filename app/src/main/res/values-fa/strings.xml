@@ -132,6 +132,7 @@
     <string name="hadith_label_fa">فارسی</string>
     <string name="settings_hadith">حدیث رتبه‌ها</string>
     <string name="settings_hadith_summary">هفت رتبه از کجا آمده‌اند</string>
+    <string name="hadith_text_local" translatable="false">@string/hadith_text_fa</string>
     <string name="todays_readings">خوانده‌های امروز</string>
     <string name="day_show_ayahs">نمایش آیه‌ها</string>
 </resources>

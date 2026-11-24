@@ -139,7 +139,7 @@ class SettingsScreensTest {
         open()
         tag(SettingsTags.HADITH).performScrollTo().performClick()
         compose.onNodeWithText("will not be written among the heedless", substring = true).performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("الْغَافِلِينَ", substring = true).assertExists()
+        compose.onNodeWithText("الْغَافِلِينَ", substring = true).assertDoesNotExist()
     }
 
     @Test
@@ -267,5 +267,19 @@ class SettingsScreensTest {
     fun `nothing is drawn while there is nothing to say`() {
         compose.setContent { QintarTheme { MigrationNoticeCard(MigrationNotice.Hidden, onDismiss = {}, onRetry = {}) } }
         compose.onNodeWithTag(MIGRATION_CARD_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    @org.robolectric.annotation.Config(qualifiers = "fa")
+    fun `About's hadith is in the app language only, without the Bismillah`() {
+        open()
+        // Settings shows a Bismillah elsewhere (the Quran font preview); opening the hadith adds none.
+        val basmalas = compose.onAllNodesWithText("بِسْمِ", substring = true).fetchSemanticsNodes().size
+        tag(SettingsTags.HADITH).performClick()
+        val res = ApplicationProvider.getApplicationContext<android.content.Context>().resources
+        compose.onNodeWithText(res.getString(io.github.mehrdad_abdi.qintar.R.string.hadith_text_fa)).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText(res.getString(io.github.mehrdad_abdi.qintar.R.string.hadith_text_en)).assertDoesNotExist()
+        compose.onNodeWithText(res.getString(io.github.mehrdad_abdi.qintar.R.string.hadith_text_ar)).assertDoesNotExist()
+        assertEquals(basmalas, compose.onAllNodesWithText("بِسْمِ", substring = true).fetchSemanticsNodes().size)
     }
 }
