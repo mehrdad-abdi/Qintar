@@ -99,3 +99,7 @@ To do when the owner says "start": reproduce each bug in a failing test first, t
 | 37 | Done: a tap on a description opens/closes; full text while open. Reproduced first. |
 | 38 | Done: surah bars show today's reading. |
 
+
+| # | Kind | Screen | What was seen or asked | Notes / evidence |
+|---|---|---|---|---|
+| 39 | bug? | Reminder notification | The daily reminder should be in the app's chosen language, also after the language is changed. | Not reproduced (2026-11-25): on the emulator (system English, app set to Persian in Qintar's Settings) the reminder came as title «قنطار», text «ده آیه شما را از غافلان بیرون می‌برد.», channel «یادآور روزانه». The text is built at the moment it fires from the language in Qintar's settings (`ReminderNotifier.localized`). In English were only the parts Android draws itself: the header "Qintar • now" (the app's name in the phone's language) and the left alignment. Waiting for the owner's screenshot of what was in English. |
