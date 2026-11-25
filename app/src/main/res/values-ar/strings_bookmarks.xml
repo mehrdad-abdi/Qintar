@@ -128,4 +128,22 @@
     <string name="grp_bulk_hint">علامة في كل سطر، مثلًا\n٢:٢٥٥\n٢:٢٥٥-٢٥٧\nس٣٦\nص٣٠٠</string>
     <string name="grp_bulk_help">علامة في كل سطر: آية ٢:٢٥٥، مدى ٢:٢٥٥-٢٥٧، سورة س٣٦، صفحة ص٣٠٠ (أو s36، p300). تُنشأ عند الحفظ.</string>
     <string name="grp_bulk_error">ليست علامة: السطر %1$s</string>
+    <!-- Order and Arrange (owner, 2026-11-25). -->
+    <string name="bm_order">الترتيب</string>
+    <string name="bm_order_quran">ترتيب المصحف</string>
+    <string name="bm_order_custom">ترتيبي</string>
+    <string name="bm_order_recent">الأحدث أولًا</string>
+    <string name="bm_arrange">ترتيب يدوي…</string>
+    <string name="arrange_title">ترتيب العلامات</string>
+    <string name="arrange_hint">اسحب ≡ للنقل. انقر مجموعة لترتيب علاماتها.</string>
+    <string name="arrange_hint_group">اسحب ≡ للنقل.</string>
+    <string name="arrange_move">نقل</string>
+    <plurals name="arrange_group_count">
+        <item quantity="zero">لا علامات</item>
+        <item quantity="one">علامة واحدة</item>
+        <item quantity="two">علامتان</item>
+        <item quantity="few">%1$s علامات</item>
+        <item quantity="many">%1$s علامة</item>
+        <item quantity="other">%1$s علامة</item>
+    </plurals>
 </resources>

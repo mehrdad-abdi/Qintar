@@ -9,7 +9,9 @@ import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
 import io.github.mehrdad_abdi.qintar.domain.model.ReadMethod
 import io.github.mehrdad_abdi.qintar.domain.model.Schedule
 import io.github.mehrdad_abdi.qintar.domain.model.TimeWindow
+import io.github.mehrdad_abdi.qintar.domain.service.ArrangeKey
 import io.github.mehrdad_abdi.qintar.domain.service.Availability
+import io.github.mehrdad_abdi.qintar.domain.service.BoardItem
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkDrafts
 import io.github.mehrdad_abdi.qintar.domain.service.ScheduleStatus
 import io.github.mehrdad_abdi.qintar.domain.service.ScheduleStatus.AVAILABLE_NOW
@@ -480,6 +482,40 @@ class AvailabilityTest {
 
         app.library.reorder(listOf(kahf.id, nas.id, fatiha.id))
         assertEquals(listOf(kahf.id, nas.id, fatiha.id), order(BookmarkSort.CUSTOM))
+    }
+
+    @Test
+    fun `bookmarks without a group stand among the groups, in Quran order, newest first or as arranged`() = runTest {
+        // Owner, 2026-11-25: no "Ungrouped" section; the user picks the order and can arrange it.
+        val kahf = bookmark(BookmarkDrafts.surah(18, app.index))
+        val night = app.library.createGroup("Night")
+        app.clock.advanceMinutes(1)
+        val mulk = bookmark(BookmarkDrafts.surah(67, app.index).copy(groupId = night.id))
+        app.clock.advanceMinutes(1)
+        val fatiha = bookmark(BookmarkDrafts.surah(1, app.index))
+        app.clock.advanceMinutes(1)
+        val yasin = bookmark(BookmarkDrafts.surah(36, app.index).copy(groupId = night.id))
+
+        fun BoardItem.name(): String = when (this) {
+            is BoardItem.Group -> state.group.name + state.bookmarks.joinToString(",", "[", "]") { it.bookmark.id.toString() }
+            is BoardItem.Loose -> state.bookmark.id.toString()
+        }
+        suspend fun order(sort: BookmarkSort): List<String> {
+            app.prefs.update { it.copy(bookmarkSort = sort) }
+            return app.availability.board().items.map { it.name() }
+        }
+
+        // A group stands where its first ayah is, or by its newest bookmark.
+        assertEquals(listOf("${fatiha.id}", "${kahf.id}", "Night[${yasin.id},${mulk.id}]"), order(BookmarkSort.MUSHAF))
+        assertEquals(listOf("Night[${yasin.id},${mulk.id}]", "${fatiha.id}", "${kahf.id}"), order(BookmarkSort.RECENT))
+
+        app.library.arrange(listOf(ArrangeKey.Bookmark(fatiha.id), ArrangeKey.Group(night.id), ArrangeKey.Bookmark(kahf.id)))
+        app.library.reorder(listOf(yasin.id, mulk.id))
+        assertEquals(listOf("${fatiha.id}", "Night[${yasin.id},${mulk.id}]", "${kahf.id}"), order(BookmarkSort.CUSTOM))
+
+        val board = app.availability.board()
+        assertEquals("the list, played in order", listOf(fatiha.id, yasin.id, mulk.id, kahf.id), board.listed.map { it.bookmark.id })
+        assertEquals("Today's list, in the same order", listOf(null, night.id, null), board.unread.map { it.group?.group?.id })
     }
 
     @Test

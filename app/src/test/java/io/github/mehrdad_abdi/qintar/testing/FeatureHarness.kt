@@ -1,5 +1,7 @@
 package io.github.mehrdad_abdi.qintar.testing
 
+import io.github.mehrdad_abdi.qintar.feature.bookmarks.ArrangeViewModel
+import io.github.mehrdad_abdi.qintar.ui.navigation.ArrangeRoute
 import io.github.mehrdad_abdi.qintar.domain.model.AyahId
 import io.github.mehrdad_abdi.qintar.domain.port.QuranTextSource
 import io.github.mehrdad_abdi.qintar.domain.testing.DomainFixture
@@ -384,3 +386,13 @@ fun DomainFixture.migrationNoticeViewModel(migration: LegacyMigration = FakeLega
     MigrationNoticeViewModel(prefs = prefs, migration = migration, reports = reports)
 
 fun DomainFixture.onboardingViewModel() = OnboardingViewModel(prefs = prefs)
+
+fun DomainFixture.arrangeViewModel(route: ArrangeRoute, io: CoroutineDispatcher) =
+    ArrangeViewModel(
+        route = route,
+        index = { index },
+        availability = availability,
+        library = library,
+        prefs = prefs,
+        io = io,
+    )

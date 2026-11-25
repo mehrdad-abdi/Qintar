@@ -119,7 +119,6 @@
     <string name="today_available_now">علامات اليوم</string>
     <string name="today_n_left">%1$s متبقية</string>
     <string name="today_show_all">عرض الكل</string>
-    <string name="today_ungrouped">بلا مجموعة</string>
     <string name="today_nothing_due">قُرئت كل العلامات اليوم.</string>
     <string name="today_no_bookmarks_title">لا علامات بعد</string>
     <string name="today_no_bookmarks_message">احفظ ما تقرؤه كل يوم علاماتٍ؛ يظهر هنا ما بقي منها اليوم.</string>

@@ -202,6 +202,21 @@ class BookmarkLibrary @Inject constructor(
         }
     }
 
+    /**
+     * "My order" of the Bookmarks list's top level (owner, 2026-11-25): groups and bookmarks without a
+     * group take positions 0, 1, 2… in one sequence. A group's own bookmarks are ordered with [reorder].
+     */
+    suspend fun arrange(order: List<ArrangeKey>) {
+        tx.inTransaction {
+            order.forEachIndexed { position, key ->
+                when (key) {
+                    is ArrangeKey.Group -> store.group(key.id)?.takeIf { it.sortIndex != position }?.let { store.updateGroup(it.copy(sortIndex = position)) }
+                    is ArrangeKey.Bookmark -> store.bookmark(key.id)?.takeIf { it.sortIndex != position }?.let { store.updateBookmark(it.copy(sortIndex = position)) }
+                }
+            }
+        }
+    }
+
     suspend fun reorderGroups(orderedIds: List<Long>) {
         tx.inTransaction {
             orderedIds.forEachIndexed { position, id ->
@@ -239,4 +254,13 @@ class BookmarkLibrary @Inject constructor(
         if (schedule?.once == true) throw DomainFailure.InvalidInput(Field.SCHEDULE)
         return schedule
     }
+}
+
+/** An entry of the Bookmarks list's top level, for [BookmarkLibrary.arrange]. */
+sealed interface ArrangeKey {
+    val id: Long
+
+    data class Group(override val id: Long) : ArrangeKey
+
+    data class Bookmark(override val id: Long) : ArrangeKey
 }

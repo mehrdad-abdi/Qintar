@@ -38,16 +38,25 @@ class BookmarksViewModelTest {
     private fun BookmarksUiState.ayahsOf(id: Long) = rows.filterIsInstance<BookmarksRow.Ayah>().filter { it.bookmarkId == id }
 
     @Test
-    fun `groups come first, then Ungrouped, groups open and bookmarks closed`() = runTest {
+    fun `bookmarks without a group stand among the groups, with no Ungrouped section, in the chosen order`() = runTest {
+        // Owner, 2026-11-25. Quran order is the default: 2:255 comes before the group at surah 112.
         val morning = app.library.createGroup("Morning")
         val inGroup = kahf(groupId = morning.id)
+        app.clock.advanceMinutes(1)
         val loose = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)))
         val vm = open()
         val state = vm.state.value
-        assertEquals(listOf(morning.id, UNGROUPED), state.sections().map { it.sectionKey })
+        assertEquals(listOf(morning.id), state.sections().map { it.sectionKey })
         assertTrue(state.sections().all { it.expanded })
-        assertEquals(listOf(inGroup.id, loose.id), state.entries())
+        assertEquals(BookmarksRow.Entry::class, state.rows[0]::class)
+        assertEquals(listOf(loose.id, inGroup.id), state.entries())
         assertTrue("no ayahs until a bookmark is opened", state.rows.none { it is BookmarksRow.Ayah })
+
+        vm.onSort(io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort.RECENT)
+        assertEquals("newest first: the loose bookmark was added last", listOf(loose.id, inGroup.id), vm.state.value.entries())
+        vm.onSort(io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort.CUSTOM)
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort.CUSTOM, app.prefs.current.bookmarkSort)
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort.CUSTOM, vm.state.value.sort)
     }
 
     @Test
@@ -146,8 +155,9 @@ class BookmarksViewModelTest {
         vm.onPlayBookmark(two.id)
         val request = player.requests.single()
         assertEquals(BOOKMARKS_ORIGIN, request.origin)
-        assertEquals("every listed bookmark, in list order", listOf(one.range, two.range, three.range), request.segments.map { it.range })
-        assertEquals(1, request.startSegment)
+        // Quran order: 1:1 (no group) comes before the group, which stands at its first ayah, 2:255.
+        assertEquals("every listed bookmark, in list order", listOf(three.range, one.range, two.range), request.segments.map { it.range })
+        assertEquals(2, request.startSegment)
         assertEquals(two.range.start, request.startAyah)
     }
 
@@ -160,7 +170,7 @@ class BookmarksViewModelTest {
         val player = FakePlayerController()
         val vm = app.bookmarksViewModel(main.dispatcher, player)
         vm.onFilter(BookmarksFilter.UNREAD)
-        vm.onPlaySection(UNGROUPED)
+        vm.onPlayBookmark(first.id)
         assertEquals(listOf(first.range, second.range), player.requests.single().segments.map { it.range })
     }
 

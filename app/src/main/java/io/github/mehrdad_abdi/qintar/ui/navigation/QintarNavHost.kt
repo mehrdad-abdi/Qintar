@@ -66,6 +66,9 @@ fun QintarNavHost(
         composable<BookmarkEditorRoute> { entry ->                       // feature/bookmarks
             BookmarkEditorScreen(entry.toRoute<BookmarkEditorRoute>(), onBack, onNavigate)
         }
+        composable<ArrangeRoute> { entry ->                              // feature/bookmarks
+            io.github.mehrdad_abdi.qintar.feature.bookmarks.ArrangeScreen(entry.toRoute<ArrangeRoute>(), onBack, onNavigate)
+        }
         composable<GroupEditorRoute> { entry ->                          // feature/bookmarks
             GroupEditorScreen(entry.toRoute<GroupEditorRoute>(), onBack, onNavigate)
         }

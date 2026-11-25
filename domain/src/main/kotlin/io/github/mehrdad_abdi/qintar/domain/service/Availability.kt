@@ -104,6 +104,22 @@ data class GroupState(
 /** The bookmarks available now that share a header: a group, or Ungrouped when [group] is null. */
 data class NowSection(val group: GroupState?, val items: List<BookmarkState>)
 
+/**
+ * One entry of the Bookmarks list's top level: a group with its bookmarks, or a bookmark without a
+ * group, which stands among the groups (owner, 2026-11-25: no "Ungrouped" section).
+ */
+sealed interface BoardItem {
+    val bookmarks: List<BookmarkState>
+
+    data class Group(val state: GroupState) : BoardItem {
+        override val bookmarks: List<BookmarkState> get() = state.bookmarks
+    }
+
+    data class Loose(val state: BookmarkState) : BoardItem {
+        override val bookmarks: List<BookmarkState> get() = listOf(state)
+    }
+}
+
 /** Every bookmark and group with its state at one moment; the source of Now, Groups, All and Today. */
 data class BookmarkBoard(
     val day: LocalDate,
@@ -114,18 +130,31 @@ data class BookmarkBoard(
     val ungrouped: List<BookmarkState>,
     /** Every bookmark in the current sort mode. */
     val all: List<BookmarkState>,
+    /** The Bookmarks list's top level in the current sort mode: groups and bookmarks without one. */
+    val items: List<BoardItem> = groups.map { BoardItem.Group(it) } + ungrouped.map { BoardItem.Loose(it) },
 ) {
-    /** Every bookmark in the order of the Bookmarks list: each group's in group order, then Ungrouped. */
-    val listed: List<BookmarkState> get() = groups.flatMap { it.bookmarks } + ungrouped
+    /** Every bookmark in the order of the Bookmarks list. */
+    val listed: List<BookmarkState> get() = items.flatMap { it.bookmarks }
 
-    /** Available at this moment and not done, under their group's header, then Ungrouped. */
-    val now: List<NowSection>
-        get() {
-            fun due(items: List<BookmarkState>) =
-                items.filter { it.status == ScheduleStatus.AVAILABLE_NOW && !it.progress.done }
-            val grouped = groups.map { NowSection(it, due(it.bookmarks)) }
-            return (grouped + NowSection(null, due(ungrouped))).filter { it.items.isNotEmpty() }
+    /** Available at this moment and not done, in list order: under their group, or (without one) together. */
+    val now: List<NowSection> get() = sections { it.status == ScheduleStatus.AVAILABLE_NOW && !it.progress.done }
+
+    /** Not read today, in list order: under their group, or (without one) together. Today's list. */
+    val unread: List<NowSection> get() = sections { !it.progress.done }
+
+    private fun sections(keep: (BookmarkState) -> Boolean): List<NowSection> {
+        val sections = ArrayList<NowSection>()
+        for (item in items) {
+            val kept = item.bookmarks.filter(keep)
+            val last = sections.lastOrNull()
+            when {
+                item is BoardItem.Group -> sections += NowSection(item.state, kept)
+                last != null && last.group == null -> sections[sections.lastIndex] = last.copy(items = last.items + kept)
+                else -> sections += NowSection(null, kept)
+            }
         }
+        return sections.filter { it.items.isNotEmpty() }
+    }
 
     /** "2 left" on Today. */
     val remainingNow: Int get() = now.sumOf { it.items.size }
@@ -303,7 +332,40 @@ class Availability @Inject constructor(
                 val members = states.filter { it.group?.id == group.id }
                 GroupState(group, members, status(group.schedule, day, time, dayStartMinutes), groupProgress(members.map { it.progress }))
             }
-            return BookmarkBoard(day, time, sort, groupStates, states.filter { it.group == null }, states)
+            val ungrouped = states.filter { it.group == null }
+            return BookmarkBoard(day, time, sort, groupStates, ungrouped, states, topLevel(groupStates, ungrouped, sort))
+        }
+
+        /**
+         * Groups and bookmarks without a group in one order: a group stands where its first ayah is
+         * (Quran order), by its newest bookmark (newest first), or where it was arranged (my order).
+         */
+        fun topLevel(groups: List<GroupState>, ungrouped: List<BookmarkState>, sort: BookmarkSort): List<BoardItem> {
+            val items = groups.map { BoardItem.Group(it) } + ungrouped.map { BoardItem.Loose(it) }
+            fun isGroup(item: BoardItem) = if (item is BoardItem.Group) 0 else 1
+            fun id(item: BoardItem) = when (item) {
+                is BoardItem.Group -> item.state.group.id
+                is BoardItem.Loose -> item.state.bookmark.id
+            }
+            return when (sort) {
+                BookmarkSort.MUSHAF -> items.sortedWith(
+                    compareBy<BoardItem> { item -> item.bookmarks.minOfOrNull { it.bookmark.range.start.value } ?: Int.MAX_VALUE }
+                        .thenBy(::isGroup).thenBy(::id),
+                )
+                BookmarkSort.RECENT -> items.sortedWith(
+                    compareByDescending<BoardItem> { item ->
+                        item.bookmarks.maxOfOrNull { it.bookmark.createdAt } ?: (item as? BoardItem.Group)?.state?.group?.createdAt
+                    }.thenBy(::isGroup).thenBy(::id),
+                )
+                BookmarkSort.CUSTOM -> items.sortedWith(
+                    compareBy<BoardItem> { item ->
+                        when (item) {
+                            is BoardItem.Group -> item.state.group.sortIndex
+                            is BoardItem.Loose -> item.state.bookmark.sortIndex
+                        }
+                    }.thenBy(::isGroup).thenBy(::id),
+                )
+            }
         }
     }
 }

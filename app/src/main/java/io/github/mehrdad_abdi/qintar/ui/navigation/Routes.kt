@@ -127,6 +127,17 @@ data class GroupEditorRoute(val groupId: Long = NEW) {
     }
 }
 
+/**
+ * Arrange the Bookmarks list by dragging (owner, 2026-11-25): its top level (groups and bookmarks
+ * without one), or the bookmarks of group [groupId].
+ */
+@Serializable
+data class ArrangeRoute(val groupId: Long = TOP) {
+    companion object {
+        const val TOP = 0L
+    }
+}
+
 /** One day of the calendar. [isoDate] is `yyyy-MM-dd` (storage is always ISO, §6.6). */
 @Serializable
 data class DayDetailRoute(val isoDate: String)

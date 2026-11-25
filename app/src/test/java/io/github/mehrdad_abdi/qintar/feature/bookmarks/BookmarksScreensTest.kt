@@ -1,5 +1,6 @@
 package io.github.mehrdad_abdi.qintar.feature.bookmarks
 
+import io.github.mehrdad_abdi.qintar.testing.arrangeViewModel
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -69,6 +70,45 @@ class BookmarksScreensTest {
         runBlocking { app.prefs.update { it.copy(keepScreenOn = false) } }
         compose.waitForIdle()
         org.junit.Assert.assertFalse(view!!.keepScreenOn)
+    }
+
+    @Test
+    fun `the order menu picks Quran order, My order or Newest first, and opens Arrange`() {
+        seedMorning()
+        openTab()
+        compose.onNodeWithTag(BOOKMARKS_ORDER_TAG).performClick()
+        compose.onNodeWithText("Newest first").performClick()
+        compose.waitForIdle()
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort.RECENT, app.prefs.current.bookmarkSort)
+
+        compose.onNodeWithTag(BOOKMARKS_ORDER_TAG).performClick()
+        compose.onNodeWithText("Arrange…").performClick()
+        assertEquals(io.github.mehrdad_abdi.qintar.ui.navigation.ArrangeRoute(), navigated.single())
+    }
+
+    @Test
+    fun `Arrange lists the titles, moves one with Move up, and a group opens its own Arrange`() {
+        val (group, loose) = runBlocking {
+            val g = app.library.createGroup("Night")
+            app.library.create(BookmarkDrafts.ayah(app.ayah(36, 1)).copy(groupId = g.id))
+            g to app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)))
+        }
+        val vm = app.arrangeViewModel(io.github.mehrdad_abdi.qintar.ui.navigation.ArrangeRoute(), Dispatchers.Unconfined)
+        compose.setContent {
+            QintarTheme { ArrangeScreen(io.github.mehrdad_abdi.qintar.ui.navigation.ArrangeRoute(), onBack = {}, onNavigate = { navigated += it }, viewModel = vm) }
+        }
+        // Quran order: 2:255 first, then the group at 36:1.
+        compose.onNodeWithText("1 bookmark").assertIsDisplayed()
+        val node = compose.onNodeWithText("Night", substring = true).fetchSemanticsNode()
+        compose.runOnIdle { node.config[androidx.compose.ui.semantics.SemanticsActions.CustomActions].single { it.label == "Move up" }.action() }
+        compose.waitForIdle()
+        val top = runBlocking { app.availability.board().items }
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort.CUSTOM, app.prefs.current.bookmarkSort)
+        assertEquals(group.id, (top.first() as io.github.mehrdad_abdi.qintar.domain.service.BoardItem.Group).state.group.id)
+        assertEquals(loose.id, (top.last() as io.github.mehrdad_abdi.qintar.domain.service.BoardItem.Loose).state.bookmark.id)
+
+        compose.onNodeWithText("Night", substring = true).performClick()
+        assertEquals(io.github.mehrdad_abdi.qintar.ui.navigation.ArrangeRoute(group.id), navigated.single())
     }
 
     @Test

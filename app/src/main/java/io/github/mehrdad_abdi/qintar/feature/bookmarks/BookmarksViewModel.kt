@@ -17,6 +17,7 @@ import io.github.mehrdad_abdi.qintar.domain.port.QuranTextSource
 import io.github.mehrdad_abdi.qintar.domain.port.ReadLogStore
 import io.github.mehrdad_abdi.qintar.domain.quran.QuranIndex
 import io.github.mehrdad_abdi.qintar.domain.service.Availability
+import io.github.mehrdad_abdi.qintar.domain.service.BoardItem
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkBoard
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkLibrary
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkState
@@ -59,8 +60,12 @@ data class GroupChoice(val id: Long, val name: String)
 /** The list's filter (§5.6): every bookmark, or those not yet read today. */
 enum class BookmarksFilter { ALL, UNREAD }
 
-/** Key of a section in the list: a group's id, or [UNGROUPED] for the bookmarks without one. */
-const val UNGROUPED = -1L
+/** An entry of the list's top level: a group, or a bookmark without one (owner, 2026-11-25). */
+sealed interface TopItem {
+    data class OfGroup(val group: GroupItem) : TopItem
+
+    data class Loose(val item: BookmarkItem) : TopItem
+}
 
 /** The playback origin of the list: audio started here plays every listed bookmark, in order. */
 val BOOKMARKS_ORIGIN = PlaybackOrigin(ReaderEntry.BOOKMARKS)
@@ -69,14 +74,14 @@ val BOOKMARKS_ORIGIN = PlaybackOrigin(ReaderEntry.BOOKMARKS)
 sealed interface BookmarksRow {
     val key: String
 
-    /** A group's header, or Ungrouped's when [group] is null. */
+    /** A group's header. */
     data class Section(
-        val group: GroupItem?,
+        val group: GroupItem,
         val bookmarkCount: Int,
         val doneCount: Int,
         val expanded: Boolean,
     ) : BookmarksRow {
-        val sectionKey: Long get() = group?.id ?: UNGROUPED
+        val sectionKey: Long get() = group.id
         override val key: String get() = "section-$sectionKey"
     }
 
@@ -130,6 +135,9 @@ data class BookmarksUiState(
     /** Groups in their custom order. */
     val groups: List<GroupItem> = emptyList(),
     val ungrouped: List<BookmarkItem> = emptyList(),
+    /** The list's top level in the chosen order: groups and bookmarks without one. */
+    val top: List<TopItem> = emptyList(),
+    val sort: io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort = io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort.MUSHAF,
     /** Every bookmark, whatever the filter. */
     val all: List<BookmarkItem> = emptyList(),
     /** What the list shows, in order. */
@@ -166,7 +174,8 @@ data class BookmarksUiState(
 }
 
 /**
- * The Bookmarks tab (§5.6): one list of groups, then Ungrouped, each bookmark with its ayahs inline.
+ * The Bookmarks tab (§5.6): one list of groups and bookmarks without a group, in the chosen order,
+ * each bookmark with its ayahs inline.
  * Two levels fold: a group hides its bookmarks, a bookmark hides its ayahs. Ticks count under the
  * bookmark; play goes on through every following bookmark of the list.
  */
@@ -233,6 +242,11 @@ class BookmarksViewModel @Inject constructor(
 
     // ---- the list ------------------------------------------------------------------------------
 
+    /** The list's order: Quran order, newest first, or as arranged (owner, 2026-11-25). */
+    fun onSort(sort: io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort) {
+        viewModelScope.launch { prefs.update { it.copy(bookmarkSort = sort) } }
+    }
+
     fun onFilter(filter: BookmarksFilter) {
         keptUnread.clear()
         _state.update { it.copy(filter = filter) }
@@ -262,15 +276,20 @@ class BookmarksViewModel @Inject constructor(
 
     fun onScrollHandled(request: ListScrollRequest) = _state.update { if (it.scrollRequest == request) it.copy(scrollRequest = null) else it }
 
-    /** What the filter lets through, in list order, with their sections. */
+    /** What the filter lets through, in list order: each group with its bookmarks, or a bookmark alone (null). */
     private fun visibleSections(state: BookmarksUiState): List<Pair<GroupItem?, List<BookmarkItem>>> {
         fun pass(item: BookmarkItem): Boolean = when (state.filter) {
             BookmarksFilter.ALL -> true
             BookmarksFilter.UNREAD -> (!item.state.progress.done || item.id in keptUnread).also { if (it) keptUnread += item.id }
         }
-        val sections = state.groups.map { it to it.items.filter(::pass) } + (null to state.ungrouped.filter(::pass))
+        val sections = state.top.map { top ->
+            when (top) {
+                is TopItem.OfGroup -> top.group to top.group.items.filter(::pass)
+                is TopItem.Loose -> null to listOf(top.item).filter(::pass)
+            }
+        }
         return when (state.filter) {
-            // Every group is listed, even an empty one; Ungrouped only when it has bookmarks.
+            // Every group is listed, even an empty one.
             BookmarksFilter.ALL -> sections.filter { (group, items) -> group != null || items.isNotEmpty() }
             BookmarksFilter.UNREAD -> sections.filter { it.second.isNotEmpty() }
         }
@@ -281,11 +300,11 @@ class BookmarksViewModel @Inject constructor(
         val state = _state.value
         val rows = ArrayList<BookmarksRow>()
         for ((group, items) in visibleSections(state)) {
-            val all = group?.items ?: state.ungrouped
-            val key = group?.id ?: UNGROUPED
-            val open = key !in collapsedSections
-            rows += BookmarksRow.Section(group, all.size, all.count { it.state.progress.done }, open)
-            if (!open) continue
+            if (group != null) {
+                val open = group.id !in collapsedSections
+                rows += BookmarksRow.Section(group, group.items.size, group.items.count { it.state.progress.done }, open)
+                if (!open) continue
+            }
             for (item in items) {
                 val expanded = item.id in expandedBookmarks
                 rows += BookmarksRow.Entry(item, expanded)
@@ -357,7 +376,7 @@ class BookmarksViewModel @Inject constructor(
     /** The play button of a section: from its first bookmark not read today. */
     fun onPlaySection(sectionKey: Long) {
         val state = _state.value
-        val items = if (sectionKey == UNGROUPED) state.ungrouped else state.groups.firstOrNull { it.id == sectionKey }?.items.orEmpty()
+        val items = state.groups.firstOrNull { it.id == sectionKey }?.items.orEmpty()
         val first = items.firstOrNull { !it.state.progress.done } ?: items.firstOrNull() ?: return
         play(first.id, null)
     }
@@ -382,8 +401,8 @@ class BookmarksViewModel @Inject constructor(
         _state.update { it.copy(audio = now, audioPlaying = now != null && (p.playing || p.loading)) }
         if (now == null || now == before) return
         if (before?.bookmarkId != now.bookmarkId) {
-            val section = _state.value.all.firstOrNull { it.id == now.bookmarkId }?.state?.bookmark?.groupId ?: UNGROUPED
-            val changed = expandedBookmarks.add(now.bookmarkId) or collapsedSections.remove(section)
+            val section = _state.value.all.firstOrNull { it.id == now.bookmarkId }?.state?.bookmark?.groupId
+            val changed = expandedBookmarks.add(now.bookmarkId) or (section != null && collapsedSections.remove(section))
             if (changed) rebuild()
         }
         val row = _state.value.rowIndexOf(now)
@@ -489,10 +508,19 @@ internal fun BookmarkBoard.toUi(index: QuranIndex, previous: BookmarksUiState): 
     val cache = HashMap<Long, BookmarkItem>()
     fun item(state: BookmarkState) = cache.getOrPut(state.bookmark.id) { BookmarkItem(state, BookmarkTitles.of(state.bookmark, index)) }
     fun items(states: List<BookmarkState>) = states.map(::item)
+    val groupItems = groups.map { GroupItem(it, items(it.bookmarks)) }
+    val byId = groupItems.associateBy { it.id }
     return previous.copy(
         loading = false,
-        groups = groups.map { GroupItem(it, items(it.bookmarks)) },
+        groups = groupItems,
         ungrouped = items(ungrouped),
         all = items(all),
+        top = this.items.mapNotNull { top ->
+            when (top) {
+                is BoardItem.Group -> byId[top.state.group.id]?.let { TopItem.OfGroup(it) }
+                is BoardItem.Loose -> TopItem.Loose(item(top.state))
+            }
+        },
+        sort = sort,
     )
 }

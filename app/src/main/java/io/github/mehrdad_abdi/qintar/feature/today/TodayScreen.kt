@@ -404,13 +404,6 @@ private fun NowSection(state: TodayUiState, onNavigate: (Any) -> Unit) {
                     state = readState(group.progress.started, group.progress.done),
                     onRead = { onNavigate(ReaderRoute.group(group.group.id)) },
                 )
-            } else if (state.now.size > 1) {
-                Text(
-                    stringResource(R.string.today_ungrouped),
-                    style = QintarType.BodyStrong,
-                    color = colors.onSurface,
-                    modifier = Modifier.padding(horizontal = Spacing.card, vertical = Spacing.sm),
-                )
             }
             for (item in section.items) {
                 BookmarkRow(

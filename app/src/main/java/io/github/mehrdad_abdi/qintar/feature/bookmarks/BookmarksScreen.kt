@@ -1,5 +1,9 @@
 package io.github.mehrdad_abdi.qintar.feature.bookmarks
 
+import io.github.mehrdad_abdi.qintar.ui.navigation.ArrangeRoute
+import io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.automirrored.rounded.Sort
 import io.github.mehrdad_abdi.qintar.ui.common.MessageHost
 import io.github.mehrdad_abdi.qintar.ui.common.showUndo
 import androidx.compose.animation.animateContentSize
@@ -104,6 +108,7 @@ const val BOOKMARKS_LIST_TAG = "bookmarks-list"
 
 /** Test tag of the add button's menu. */
 const val BOOKMARKS_ADD_TAG = "bookmarks-add"
+const val BOOKMARKS_ORDER_TAG = "bookmarks-order"
 
 /**
  * The Bookmarks tab (§5.6): All / Unread, then one list of groups and Ungrouped. A group folds its
@@ -164,6 +169,7 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(stringResource(R.string.tab_bookmarks), style = QintarType.Title, color = colors.onSurface, modifier = Modifier.weight(1f))
+            OrderMenu(state.sort, viewModel::onSort, onNavigate)
             AddMenu(onNavigate)
         }
         FilterRow(state, viewModel::onFilter)
@@ -209,6 +215,35 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
         }
     }
     BookmarksDialogs(state.dialog, viewModel)
+}
+
+/** The list's order (Quran order, My order, Newest first) and Arrange (owner, 2026-11-25). */
+@Composable
+private fun OrderMenu(sort: BookmarkSort, onSort: (BookmarkSort) -> Unit, onNavigate: (Any) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { open = true }, modifier = Modifier.size(Sizes.touchTarget).testTag(BOOKMARKS_ORDER_TAG)) {
+            Icon(Icons.AutoMirrored.Rounded.Sort, stringResource(R.string.bm_order), tint = MaterialTheme.colorScheme.onSurface)
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            for ((choice, label) in listOf(
+                BookmarkSort.MUSHAF to R.string.bm_order_quran,
+                BookmarkSort.CUSTOM to R.string.bm_order_custom,
+                BookmarkSort.RECENT to R.string.bm_order_recent,
+            )) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(label)) },
+                    leadingIcon = { if (choice == sort) Icon(Icons.Rounded.Check, null) },
+                    onClick = { open = false; onSort(choice) },
+                )
+            }
+            HorizontalDivider()
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.bm_arrange)) },
+                onClick = { open = false; onNavigate(ArrangeRoute()) },
+            )
+        }
+    }
 }
 
 @Composable
@@ -319,7 +354,7 @@ private fun SectionRow(row: BookmarksRow.Section, vm: BookmarksViewModel, onNavi
     val colors = MaterialTheme.colorScheme
     val group = row.group
     val done = row.bookmarkCount > 0 && row.doneCount == row.bookmarkCount
-    val name = group?.state?.group?.name ?: stringResource(R.string.bm_ungrouped)
+    val name = group.state.group.name
     val expandedText = stringResource(if (row.expanded) R.string.state_expanded else R.string.state_collapsed)
     var menu by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth().padding(top = if (first) Spacing.sm else Spacing.betweenSections, bottom = Spacing.xs)) {
@@ -347,29 +382,27 @@ private fun SectionRow(row: BookmarksRow.Section, vm: BookmarksViewModel, onNavi
                 }
             }
             if (row.bookmarkCount > 0) PlayButton(stringResource(R.string.bm_play_group, name)) { vm.onPlaySection(row.sectionKey) }
-            if (group != null) {
-                Box {
-                    IconButton(onClick = { menu = true }, modifier = Modifier.size(Sizes.touchTarget)) {
-                        Icon(Icons.Rounded.MoreVert, stringResource(R.string.bm_group_menu_more), tint = colors.onSurfaceVariant)
-                    }
-                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_edit)) }, onClick = { menu = false; onNavigate(GroupEditorRoute(group.id)) })
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.bm_add_bookmark)) },
-                            onClick = { menu = false; onNavigate(BookmarkEditorRoute(draftGroupId = group.id)) },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.bm_group_menu_log)) },
-                            enabled = row.bookmarkCount > 0,
-                            onClick = { menu = false; vm.onLogGroupReading(group.id) },
-                        )
-                        DropdownMenuItem(text = { Text(stringResource(R.string.bm_group_menu_delete)) }, onClick = { menu = false; vm.onDeleteGroupRequested(group.id) })
-                    }
+            Box {
+                IconButton(onClick = { menu = true }, modifier = Modifier.size(Sizes.touchTarget)) {
+                    Icon(Icons.Rounded.MoreVert, stringResource(R.string.bm_group_menu_more), tint = colors.onSurfaceVariant)
+                }
+                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                    DropdownMenuItem(text = { Text(stringResource(R.string.bm_menu_edit)) }, onClick = { menu = false; onNavigate(GroupEditorRoute(group.id)) })
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.bm_add_bookmark)) },
+                        onClick = { menu = false; onNavigate(BookmarkEditorRoute(draftGroupId = group.id)) },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.bm_group_menu_log)) },
+                        enabled = row.bookmarkCount > 0,
+                        onClick = { menu = false; vm.onLogGroupReading(group.id) },
+                    )
+                    DropdownMenuItem(text = { Text(stringResource(R.string.bm_group_menu_delete)) }, onClick = { menu = false; vm.onDeleteGroupRequested(group.id) })
                 }
             }
             FoldArrow(row.expanded, colors.onSurfaceVariant)
         }
-        group?.state?.group?.description?.let {
+        group.state.group.description?.let {
             FoldedDescription(
                 it,
                 colors.onSurfaceVariant,

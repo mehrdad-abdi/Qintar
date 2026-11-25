@@ -174,9 +174,7 @@ class TodayViewModel(
     ): TodayUiState {
         val firstDay = userPrefs.weekStart.firstDay(systemFirstDay())
         val cards = active.map { it.toCard(index) }
-        val unread = (board.groups.map { it to it.bookmarks } + (null to board.ungrouped))
-            .map { (group, items) -> group to items.filter { !it.progress.done } }
-            .filter { it.second.isNotEmpty() }
+        val unread = board.unread.map { it.group to it.items }
         return TodayUiState(
             loading = false,
             day = day,

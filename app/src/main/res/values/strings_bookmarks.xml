@@ -17,7 +17,7 @@
     <string name="bm_later_today">Later today</string>
     <string name="bm_earlier_today">Earlier today</string>
     <string name="bm_done_today">Done</string>
-    <string name="bm_ungrouped">Ungrouped</string>
+    <string name="bm_ungrouped">No group</string>
     <string name="bm_group_empty">No bookmarks in this group yet.</string>
     <string name="bm_groups_empty_title">No groups yet</string>
     <string name="bm_groups_empty_message">A group gathers bookmarks that you read together, such as Morning or Friday.</string>
@@ -143,4 +143,18 @@
     <string name="grp_bulk_hint">One per line, e.g.\n2:255\n2:255-257\ns36\np300</string>
     <string name="grp_bulk_help">One bookmark per line: an ayah 2:255, a range 2:255-257, a surah s36, a page p300. They are created on Save.</string>
     <string name="grp_bulk_error">Not a bookmark: line %1$s</string>
+    <!-- Order and Arrange (owner, 2026-11-25). -->
+    <string name="bm_order">Order</string>
+    <string name="bm_order_quran">Quran order</string>
+    <string name="bm_order_custom">My order</string>
+    <string name="bm_order_recent">Newest first</string>
+    <string name="bm_arrange">Arrange…</string>
+    <string name="arrange_title">Arrange bookmarks</string>
+    <string name="arrange_hint">Drag ≡ to move. Tap a group to arrange its bookmarks.</string>
+    <string name="arrange_hint_group">Drag ≡ to move.</string>
+    <string name="arrange_move">Move</string>
+    <plurals name="arrange_group_count">
+        <item quantity="one">%1$s bookmark</item>
+        <item quantity="other">%1$s bookmarks</item>
+    </plurals>
 </resources>

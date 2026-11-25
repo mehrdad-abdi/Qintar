@@ -128,4 +128,18 @@
     <string name="grp_bulk_hint">هر خط یک نشان، مثلاً\n۲:۲۵۵\n۲:۲۵۵-۲۵۷\nس۳۶\nص۳۰۰</string>
     <string name="grp_bulk_help">هر خط یک نشان: آیه ۲:۲۵۵، بازه ۲:۲۵۵-۲۵۷، سوره س۳۶، صفحه ص۳۰۰ (یا s36، p300). با ذخیره ساخته می‌شوند.</string>
     <string name="grp_bulk_error">نشان نادرست در خط %1$s</string>
+    <!-- Order and Arrange (owner, 2026-11-25). -->
+    <string name="bm_order">ترتیب</string>
+    <string name="bm_order_quran">ترتیب قرآن</string>
+    <string name="bm_order_custom">ترتیب من</string>
+    <string name="bm_order_recent">جدیدترین اول</string>
+    <string name="bm_arrange">مرتب‌کردن…</string>
+    <string name="arrange_title">مرتب‌کردن نشانه‌ها</string>
+    <string name="arrange_hint">با کشیدن ≡ جابه‌جا کنید. برای مرتب‌کردن نشانه‌های یک گروه روی آن بزنید.</string>
+    <string name="arrange_hint_group">با کشیدن ≡ جابه‌جا کنید.</string>
+    <string name="arrange_move">جابه‌جایی</string>
+    <plurals name="arrange_group_count">
+        <item quantity="one">%1$s نشانه</item>
+        <item quantity="other">%1$s نشانه</item>
+    </plurals>
 </resources>

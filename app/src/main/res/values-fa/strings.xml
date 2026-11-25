@@ -119,7 +119,6 @@
     <string name="today_available_now">نشان‌های امروز</string>
     <string name="today_n_left">%1$s مانده</string>
     <string name="today_show_all">نمایش همه</string>
-    <string name="today_ungrouped">بدون گروه</string>
     <string name="today_nothing_due">همهٔ نشان‌ها امروز خوانده شده‌اند.</string>
     <string name="today_no_bookmarks_title">هنوز نشانی ندارید</string>
     <string name="today_no_bookmarks_message">بخش‌هایی را که هر روز می‌خوانید نشان کنید؛ آن‌هایی که امروز مانده‌اند اینجا می‌آیند.</string>
