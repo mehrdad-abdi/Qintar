@@ -195,10 +195,7 @@ fun DayDetailScreen(
 }
 
 @Composable
-private fun dayTitle(day: java.time.LocalDate): String {
-    val locale = LocalConfiguration.current.locales[0]
-    return localizeDigits(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", locale).format(day))
-}
+private fun dayTitle(day: java.time.LocalDate): String = io.github.mehrdad_abdi.qintar.ui.common.calendarDate(day, weekday = true)
 
 @Composable
 private fun DayContent(

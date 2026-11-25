@@ -1,5 +1,6 @@
 package io.github.mehrdad_abdi.qintar.feature.settings
 
+import io.github.mehrdad_abdi.qintar.domain.model.CalendarSystem
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -100,6 +101,8 @@ object SettingsTags {
     const val GOAL_NONE = "setting-goal-none"
     const val DAY_START = "setting-day-start"
     const val WEEK_START = "setting-week-start"
+    const val CALENDAR = "setting-calendar"
+    const val HIJRI_ADJUST = "setting-hijri-adjust"
     const val REMINDER = "setting-reminder"
     const val STREAK_REMINDER = "setting-streak-reminder"
     const val RECITER = "setting-reciter"
@@ -376,6 +379,40 @@ private fun GoalSection(prefs: UserPrefs, vm: SettingsViewModel) = Section(strin
         tag = SettingsTags.WEEK_START,
         onSelect = vm::setWeekStart,
     )
+    // The calendar dates are shown in (R-SET-5, owner 2026-11-25); counts keep using ISO days.
+    RowDivider()
+    ChoiceSetting(
+        title = stringResource(R.string.settings_calendar),
+        options = CalendarSystem.entries,
+        selected = prefs.calendarSystem,
+        label = {
+            when (it) {
+                CalendarSystem.GREGORIAN -> stringResource(R.string.settings_calendar_gregorian)
+                CalendarSystem.PERSIAN -> stringResource(R.string.settings_calendar_persian)
+                CalendarSystem.ISLAMIC -> stringResource(R.string.settings_calendar_islamic)
+            }
+        },
+        tag = SettingsTags.CALENDAR,
+        onSelect = vm::setCalendarSystem,
+    )
+    if (prefs.calendarSystem == CalendarSystem.ISLAMIC) {
+        // Where the month is seen a day earlier or later than Umm al-Qura says.
+        RowDivider()
+        ChoiceSetting(
+            title = stringResource(R.string.settings_hijri_adjust),
+            options = listOf(-2, -1, 0, 1, 2),
+            selected = prefs.hijriAdjustDays,
+            label = {
+                if (it == 0) {
+                    stringResource(R.string.settings_hijri_adjust_zero)
+                } else {
+                    stringResource(R.string.settings_hijri_adjust_days, localizeDigits(if (it > 0) "+$it" else "−${-it}"))
+                }
+            },
+            tag = SettingsTags.HIJRI_ADJUST,
+            onSelect = vm::setHijriAdjustDays,
+        )
+    }
 }
 
 private const val DAY_START_STEP = 30

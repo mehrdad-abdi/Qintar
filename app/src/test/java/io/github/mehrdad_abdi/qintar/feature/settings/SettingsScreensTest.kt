@@ -59,12 +59,31 @@ class SettingsScreensTest {
     private fun tag(tag: String) = compose.onNodeWithTag(tag).performScrollTo()
 
     @Test
-    fun `the sections are all there, and calendar system is not offered`() {
+    fun `the sections are all there, with the calendar`() {
         open()
         for (title in listOf("Appearance", "Reading", "Goal and days", "Reminders", "Data", "About")) {
             compose.onNodeWithText(title).performScrollTo().assertIsDisplayed()
         }
-        compose.onNodeWithText("Calendar system").assertDoesNotExist()
+        compose.onNodeWithTag(SettingsTags.CALENDAR).performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun `the calendar is chosen, and the Hijri adjustment shows only for the Hijri calendar`() {
+        open()
+        compose.onNodeWithTag(SettingsTags.HIJRI_ADJUST).assertDoesNotExist()
+        tag(SettingsTags.CALENDAR).performClick()
+        compose.onNodeWithTag("${SettingsTags.CALENDAR}-option-PERSIAN").performClick()
+        compose.waitForIdle()
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.model.CalendarSystem.PERSIAN, app.prefs.current.calendarSystem)
+        compose.onNodeWithTag(SettingsTags.HIJRI_ADJUST).assertDoesNotExist()
+
+        tag(SettingsTags.CALENDAR).performClick()
+        compose.onNodeWithTag("${SettingsTags.CALENDAR}-option-ISLAMIC").performClick()
+        compose.waitForIdle()
+        tag(SettingsTags.HIJRI_ADJUST).performClick()
+        compose.onNodeWithTag("${SettingsTags.HIJRI_ADJUST}-option--1").performClick()
+        compose.waitForIdle()
+        assertEquals(-1, app.prefs.current.hijriAdjustDays)
     }
 
     @Test

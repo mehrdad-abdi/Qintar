@@ -59,6 +59,8 @@ data class UserPrefs(
     val dayStartMinutes: Int = 0,
     val weekStart: WeekStart = WeekStart.SYSTEM,
     val calendarSystem: CalendarSystem = CalendarSystem.GREGORIAN,
+    /** Days the Hijri date is moved (−2…2), for where the month's start is seen a day earlier or later. */
+    val hijriAdjustDays: Int = 0,
     val latinNumerals: Boolean = false,
     val reciterId: String = DEFAULT_RECITER,
     val audioQuality: Int = DEFAULT_AUDIO_QUALITY,

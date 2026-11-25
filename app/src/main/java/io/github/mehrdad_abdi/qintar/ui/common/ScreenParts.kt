@@ -59,9 +59,6 @@ fun pagesText(value: Double): String {
     return if (shown == latin) shown else shown.replace('.', '٫')
 }
 
-/** A date such as "15 Nov 2026" in the app's language and digits. */
+/** A compact date such as "15 Nov 2026" in the chosen calendar, the app's language and digits. */
 @Composable
-fun dateText(day: LocalDate): String {
-    val locale = LocalConfiguration.current.locales[0]
-    return localizeDigits(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale).format(day))
-}
+fun dateText(day: LocalDate): String = calendarDate(day, shortMonth = true)

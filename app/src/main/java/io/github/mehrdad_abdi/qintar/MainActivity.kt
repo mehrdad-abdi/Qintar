@@ -79,6 +79,8 @@ class MainActivity : AppCompatActivity() {
                 CompositionLocalProvider(
                     LocalNumeralStyle provides appearance.numerals,
                     io.github.mehrdad_abdi.qintar.diagnostics.LocalDiagnostics provides diagnostics,
+                    io.github.mehrdad_abdi.qintar.ui.common.LocalCalendarDates provides
+                        io.github.mehrdad_abdi.qintar.ui.common.calendarDatesOf(prefs!!),
                 ) {
                     val destination = start
                     if (destination == null) {

@@ -1,5 +1,8 @@
 package io.github.mehrdad_abdi.qintar.feature.insights
 
+import io.github.mehrdad_abdi.qintar.domain.model.CalendarSystem
+import io.github.mehrdad_abdi.qintar.domain.service.CalMonth
+import io.github.mehrdad_abdi.qintar.domain.service.CalendarDates
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -72,7 +75,8 @@ data class InsightsBar(val start: LocalDate, val count: Int, val rank: Rank, val
 data class CalendarDay(val date: LocalDate, val total: Int, val rank: Rank, val isToday: Boolean, val isFuture: Boolean)
 
 data class CalendarState(
-    val month: YearMonth,
+    /** A month of the chosen calendar (R-SET-5). */
+    val month: CalMonth,
     /** The seven weekdays, in the user's week-start order. */
     val weekdays: List<DayOfWeek>,
     val leadingBlanks: Int,
@@ -156,7 +160,10 @@ class InsightsViewModel(
     private val period = MutableStateFlow(InsightsPeriod.WEEK)
 
     /** Null = the current month, following the reading day. */
-    private val month = MutableStateFlow<YearMonth?>(null)
+    private val month = MutableStateFlow<CalMonth?>(null)
+
+    /** The calendar of the settings; months step in it. */
+    private var dates = CalendarDates(CalendarSystem.GREGORIAN)
     private val revisitExpanded = MutableStateFlow(false)
 
     private val _state = MutableStateFlow(InsightsUiState())
@@ -166,7 +173,12 @@ class InsightsViewModel(
         viewModelScope.launch {
             val quran = withContext(io) { index.get() }
             val overview = combine(totals.observeAllTotals(), clock.todayFlow, prefs.prefs, period, month) { all, today, userPrefs, p, m ->
-                Overview(all, today, userPrefs.goalRank, userPrefs.weekStart.firstDay(systemFirstDay()), p, m)
+                val chosen = CalendarDates(userPrefs.calendarSystem, userPrefs.hijriAdjustDays)
+                // Another calendar names other months: back to the current one.
+                val changed = chosen.system != dates.system
+                if (changed) month.value = null
+                dates = chosen
+                Overview(all, today, userPrefs.goalRank, userPrefs.weekStart.firstDay(systemFirstDay()), p, m.takeIf { !changed }, chosen)
             }
             val split = combine(period, clock.todayFlow, ::Pair).flatMapLatest { (p, today) ->
                 totals.observeSourceSplit(p.from(today), today)
@@ -184,18 +196,19 @@ class InsightsViewModel(
         val goal: Rank?,
         val firstDay: DayOfWeek,
         val period: InsightsPeriod,
-        val month: YearMonth?,
+        val month: CalMonth?,
+        val dates: CalendarDates,
     )
 
     fun onPeriod(value: InsightsPeriod) {
         period.value = value
     }
 
-    fun onPreviousMonth() = month.update { (it ?: YearMonth.from(clock.today())).minusMonths(1) }
+    fun onPreviousMonth() = month.update { dates.plus(it ?: dates.monthOf(clock.today()), -1) }
 
     fun onNextMonth() = month.update { current ->
-        val now = YearMonth.from(clock.today())
-        (current ?: now).plusMonths(1).takeIf { it <= now }
+        val now = dates.monthOf(clock.today())
+        dates.plus(current ?: now, 1).takeIf { it <= now }
     }
 
     /** Back to the current month. */
@@ -214,7 +227,7 @@ class InsightsViewModel(
         val firstActive = o.all.keys.minOrNull()
         val goalFrom = from ?: firstActive ?: today
         val goalMet = o.goal?.let { InsightsCalculator.goalMetDays(o.all, it, goalFrom, today) }
-        val shown = o.month ?: YearMonth.from(today)
+        val shown = o.month ?: o.dates.monthOf(today)
         return InsightsUiState(
             loading = false,
             period = o.period,
@@ -225,11 +238,11 @@ class InsightsViewModel(
             goal = o.goal,
             goalMetDays = goalMet,
             periodDays = (today.toEpochDay() - goalFrom.toEpochDay() + 1).toInt().coerceAtLeast(1),
-            bars = bars(o.all, o.period, today, firstActive),
+            bars = bars(o.all, o.period, today, firstActive, o.dates),
             rankDays = Rank.ladder.map { it to (summary.rankDistribution[it] ?: 0) },
             belowRankDays = summary.rankDistribution[Rank.NONE] ?: 0,
             sources = sources(split),
-            calendar = calendar(o.all, shown, today, o.firstDay),
+            calendar = calendar(o.all, shown, today, o.firstDay, o.dates),
             revisit = revisit,
         )
     }
@@ -246,7 +259,13 @@ class InsightsViewModel(
         const val EXPANDED_ITEMS = 20
         private const val MAX_MONTH_BARS = 36
 
-        fun bars(all: Map<LocalDate, Int>, period: InsightsPeriod, today: LocalDate, firstActive: LocalDate?): List<InsightsBar> {
+        fun bars(
+            all: Map<LocalDate, Int>,
+            period: InsightsPeriod,
+            today: LocalDate,
+            firstActive: LocalDate?,
+            dates: CalendarDates = CalendarDates(CalendarSystem.GREGORIAN),
+        ): List<InsightsBar> {
             if (period.daily) {
                 val from = period.from(today)!!
                 return generateSequence(from) { it.plusDays(1) }.takeWhile { it <= today }.map { day ->
@@ -254,16 +273,18 @@ class InsightsViewModel(
                     InsightsBar(day, count, RankCalculator.rankFor(count), monthly = false)
                 }.toList()
             }
-            val last = YearMonth.from(today)
+            // Months of the chosen calendar.
+            val last = dates.monthOf(today)
             val first = when (period) {
-                InsightsPeriod.YEAR -> last.minusMonths(11)
-                else -> maxOf(YearMonth.from(firstActive ?: today), last.minusMonths(MAX_MONTH_BARS - 1L))
+                InsightsPeriod.YEAR -> dates.plus(last, -11)
+                else -> maxOf(dates.monthOf(firstActive ?: today), dates.plus(last, -(MAX_MONTH_BARS - 1)))
             }
-            return generateSequence(first) { it.plusMonths(1) }.takeWhile { it <= last }.map { month ->
-                val days = all.filterKeys { YearMonth.from(it) == month }.filterValues { it > 0 }
-                val total = days.values.sum()
+            val byMonth = all.filterValues { it > 0 }.entries.groupBy({ dates.monthOf(it.key) }, { it.value })
+            return generateSequence(first) { dates.plus(it, 1) }.takeWhile { it <= last }.map { month ->
+                val days = byMonth[month].orEmpty()
+                val total = days.sum()
                 val average = if (days.isEmpty()) 0 else total / days.size
-                InsightsBar(month.atDay(1), total, RankCalculator.rankFor(average), monthly = true)
+                InsightsBar(dates.firstDay(month), total, RankCalculator.rankFor(average), monthly = true)
             }.toList()
         }
 
@@ -285,8 +306,14 @@ class InsightsViewModel(
             return SourceSplitUi(split.total, bySource, byMethod)
         }
 
-        fun calendar(all: Map<LocalDate, Int>, month: YearMonth, today: LocalDate, firstDay: DayOfWeek): CalendarState {
-            val grid = CalendarWeeks.monthGrid(month, firstDay)
+        fun calendar(
+            all: Map<LocalDate, Int>,
+            month: CalMonth,
+            today: LocalDate,
+            firstDay: DayOfWeek,
+            dates: CalendarDates = CalendarDates(CalendarSystem.GREGORIAN),
+        ): CalendarState {
+            val grid = CalendarWeeks.monthGrid(dates.firstDay(month), dates.lastDay(month), firstDay)
             val days = grid.flatten().filterNotNull().map { date ->
                 val total = all[date] ?: 0
                 CalendarDay(date, total, RankCalculator.rankFor(total), isToday = date == today, isFuture = date > today)
@@ -296,7 +323,7 @@ class InsightsViewModel(
                 weekdays = CalendarWeeks.weekdays(firstDay),
                 leadingBlanks = grid.first().takeWhile { it == null }.size,
                 days = days,
-                canGoNext = month < YearMonth.from(today),
+                canGoNext = month < dates.monthOf(today),
             )
         }
     }

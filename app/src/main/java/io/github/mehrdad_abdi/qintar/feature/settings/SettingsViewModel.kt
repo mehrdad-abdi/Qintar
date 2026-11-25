@@ -78,6 +78,8 @@ class SettingsViewModel @Inject constructor(
     fun setGoal(rank: Rank?) = edit { it.copy(goalRank = rank?.takeIf { r -> r != Rank.NONE }) }
     fun setDayStartMinutes(minutes: Int) = edit { it.copy(dayStartMinutes = minutes.coerceIn(0, UserPrefs.MAX_DAY_START_MINUTES)) }
     fun setWeekStart(value: WeekStart) = edit { it.copy(weekStart = value) }
+    fun setCalendarSystem(value: io.github.mehrdad_abdi.qintar.domain.model.CalendarSystem) = edit { it.copy(calendarSystem = value) }
+    fun setHijriAdjustDays(value: Int) = edit { it.copy(hijriAdjustDays = value.coerceIn(-2, 2)) }
 
     // ---- Reminders. The screen asks for the notification permission before it enables one.
     fun setReminderEnabled(value: Boolean) = edit { it.copy(reminderEnabled = value) }

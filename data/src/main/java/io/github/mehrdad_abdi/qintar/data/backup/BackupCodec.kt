@@ -201,6 +201,7 @@ class BackupCodec @Inject constructor() {
         put("dayStartMinutes", p.dayStartMinutes)
         put("weekStart", p.weekStart.name)
         put("calendarSystem", p.calendarSystem.name)
+        put("hijriAdjustDays", p.hijriAdjustDays)
         put("latinNumerals", p.latinNumerals)
         put("reciterId", p.reciterId)
         put("audioQuality", p.audioQuality)
@@ -380,6 +381,7 @@ class BackupCodec @Inject constructor() {
             dayStartMinutes = json.primitive("dayStartMinutes")?.intOrNull?.takeIf { it in 0..UserPrefs.MAX_DAY_START_MINUTES } ?: d.dayStartMinutes,
             weekStart = json.enumOrNull<WeekStart>("weekStart") ?: d.weekStart,
             calendarSystem = json.enumOrNull<CalendarSystem>("calendarSystem") ?: d.calendarSystem,
+            hijriAdjustDays = json.primitive("hijriAdjustDays")?.intOrNull?.takeIf { it in -2..2 } ?: d.hijriAdjustDays,
             latinNumerals = bool("latinNumerals", d.latinNumerals),
             reciterId = json.text("reciterId")?.takeIf { it.isNotBlank() } ?: d.reciterId,
             audioQuality = json.primitive("audioQuality")?.intOrNull?.takeIf { it > 0 } ?: d.audioQuality,

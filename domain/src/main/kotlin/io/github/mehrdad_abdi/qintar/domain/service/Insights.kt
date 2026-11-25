@@ -57,10 +57,13 @@ object CalendarWeeks {
      * A Gregorian month as rows of seven cells starting on [firstDay]; cells outside the month are null.
      * Other calendar systems are laid out by the UI with the platform calendar and these same rules.
      */
-    fun monthGrid(month: YearMonth, firstDay: DayOfWeek): List<List<LocalDate?>> {
-        val first = month.atDay(1)
+    fun monthGrid(month: YearMonth, firstDay: DayOfWeek): List<List<LocalDate?>> = monthGrid(month.atDay(1), month.atEndOfMonth(), firstDay)
+
+    /** The weeks of a month of any calendar, [first] to [last], blank cells before and after. */
+    fun monthGrid(first: LocalDate, last: LocalDate, firstDay: DayOfWeek): List<List<LocalDate?>> {
         val lead = (first.dayOfWeek.value - firstDay.value + 7) % 7
-        val cells = List<LocalDate?>(lead) { null } + List(month.lengthOfMonth()) { first.plusDays(it.toLong()) }
+        val length = (last.toEpochDay() - first.toEpochDay() + 1).toInt()
+        val cells = List<LocalDate?>(lead) { null } + List(length) { first.plusDays(it.toLong()) }
         return cells.chunked(7) { row -> row + List<LocalDate?>(7 - row.size) { null } }
     }
 }

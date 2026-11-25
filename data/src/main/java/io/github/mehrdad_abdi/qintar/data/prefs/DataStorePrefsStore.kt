@@ -82,6 +82,7 @@ class DataStorePrefsStore(private val dataStore: DataStore<Preferences>) : Prefs
         private val DAY_START_MINUTES = intPreferencesKey("day_start_minutes")
         private val WEEK_START = stringPreferencesKey("week_start")
         private val CALENDAR_SYSTEM = stringPreferencesKey("calendar_system")
+        private val HIJRI_ADJUST_DAYS = intPreferencesKey("hijri_adjust_days")
         private val LATIN_NUMERALS = booleanPreferencesKey("latin_numerals")
         private val RECITER_ID = stringPreferencesKey("reciter_id")
         private val AUDIO_QUALITY = intPreferencesKey("audio_quality")
@@ -126,6 +127,7 @@ class DataStorePrefsStore(private val dataStore: DataStore<Preferences>) : Prefs
                 dayStartMinutes = p.read(DAY_START_MINUTES)?.takeIf { it in 0..UserPrefs.MAX_DAY_START_MINUTES } ?: d.dayStartMinutes,
                 weekStart = p.enum<WeekStart>(WEEK_START) ?: d.weekStart,
                 calendarSystem = p.enum<CalendarSystem>(CALENDAR_SYSTEM) ?: d.calendarSystem,
+                hijriAdjustDays = (p.read(HIJRI_ADJUST_DAYS) ?: d.hijriAdjustDays).coerceIn(-2, 2),
                 latinNumerals = p.read(LATIN_NUMERALS) ?: d.latinNumerals,
                 reciterId = p.read(RECITER_ID)?.takeIf { it.isNotBlank() } ?: d.reciterId,
                 audioQuality = p.read(AUDIO_QUALITY)?.takeIf { it > 0 } ?: d.audioQuality,
@@ -162,6 +164,7 @@ class DataStorePrefsStore(private val dataStore: DataStore<Preferences>) : Prefs
             p.put(DAY_START_MINUTES, u.dayStartMinutes)
             p.put(WEEK_START, u.weekStart.name)
             p.put(CALENDAR_SYSTEM, u.calendarSystem.name)
+            p.put(HIJRI_ADJUST_DAYS, u.hijriAdjustDays)
             p.put(LATIN_NUMERALS, u.latinNumerals)
             p.put(RECITER_ID, u.reciterId)
             p.put(AUDIO_QUALITY, u.audioQuality)

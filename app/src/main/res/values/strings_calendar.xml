@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dates in the chosen calendar (R-SET-5, owner 2026-11-25). Month names are display text only. -->
+<resources>
+    <string-array name="months_persian">
+        <item>Farvardin</item>
+        <item>Ordibehesht</item>
+        <item>Khordad</item>
+        <item>Tir</item>
+        <item>Mordad</item>
+        <item>Shahrivar</item>
+        <item>Mehr</item>
+        <item>Aban</item>
+        <item>Azar</item>
+        <item>Dey</item>
+        <item>Bahman</item>
+        <item>Esfand</item>
+    </string-array>
+    <string-array name="months_hijri">
+        <item>Muharram</item>
+        <item>Safar</item>
+        <item>Rabi al-Awwal</item>
+        <item>Rabi al-Thani</item>
+        <item>Jumada al-Ula</item>
+        <item>Jumada al-Akhirah</item>
+        <item>Rajab</item>
+        <item>Sha\'ban</item>
+        <item>Ramadan</item>
+        <item>Shawwal</item>
+        <item>Dhu al-Qa\'dah</item>
+        <item>Dhu al-Hijjah</item>
+    </string-array>
+    <string name="date_day_month">%1$s %2$s</string>
+    <string name="date_day_month_year">%1$s %2$s %3$s</string>
+    <string name="date_with_weekday">%1$s %2$s</string>
+    <string name="date_month_year">%1$s %2$s</string>
+    <string name="settings_calendar">Calendar</string>
+    <string name="settings_calendar_gregorian">Gregorian</string>
+    <string name="settings_calendar_persian">Persian (solar Hijri)</string>
+    <string name="settings_calendar_islamic">Hijri (lunar)</string>
+    <string name="settings_hijri_adjust">Hijri date adjustment</string>
+    <string name="settings_hijri_adjust_zero">None</string>
+    <string name="settings_hijri_adjust_days">%1$s days</string>
+</resources>

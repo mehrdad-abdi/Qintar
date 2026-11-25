@@ -90,6 +90,21 @@ class InsightsScreenshotTest(private val language: String, private val dark: Boo
     }
 
     @Test
+    fun insightsPersianCalendar() {
+        // R-SET-5: the bars and the month grid in the Persian solar calendar.
+        seedMonth()
+        runBlocking { app.prefs.update { it.copy(calendarSystem = io.github.mehrdad_abdi.qintar.domain.model.CalendarSystem.PERSIAN) } }
+        val vm = app.insightsViewModel(Dispatchers.Unconfined)
+        vm.onPeriod(InsightsPeriod.MONTH)
+        val dates = io.github.mehrdad_abdi.qintar.domain.service.CalendarDates(io.github.mehrdad_abdi.qintar.domain.model.CalendarSystem.PERSIAN)
+        shot("feature_insights_persian_calendar") {
+            androidx.compose.runtime.CompositionLocalProvider(io.github.mehrdad_abdi.qintar.ui.common.LocalCalendarDates provides dates) {
+                InsightsScreen(onNavigate = {}, viewModel = vm)
+            }
+        }
+    }
+
+    @Test
     fun insightsCalendar() {
         seedMonth()
         val vm = app.insightsViewModel(Dispatchers.Unconfined)

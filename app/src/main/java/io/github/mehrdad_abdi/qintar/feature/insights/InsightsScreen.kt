@@ -214,16 +214,18 @@ internal fun OverviewSection(state: InsightsUiState, onDay: (LocalDate) -> Unit)
 @Composable
 private fun barUi(bar: InsightsBar, index: Int, period: InsightsPeriod): DayBarUi {
     val locale = LocalConfiguration.current.locales[0]
-    val fmt = { pattern: String -> DateTimeFormatter.ofPattern(pattern, locale).format(bar.start) }
-    val label = localizeDigits(
-        when (period) {
-            InsightsPeriod.WEEK -> fmt("EEE")
-            InsightsPeriod.MONTH -> if (index % 5 == 0) bar.start.dayOfMonth.toString() else ""
-            InsightsPeriod.YEAR -> fmt("MMM")
-            InsightsPeriod.ALL -> if (index % 3 == 0) fmt("MMM") else ""
-        },
-    )
-    val name = localizeDigits(if (bar.monthly) fmt("MMMM yyyy") else fmt("EEEE d MMMM"))
+    val month = io.github.mehrdad_abdi.qintar.ui.common.LocalCalendarDates.current.monthOf(bar.start)
+    val label = when (period) {
+        InsightsPeriod.WEEK -> bar.start.dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
+        InsightsPeriod.MONTH -> if (index % 5 == 0) io.github.mehrdad_abdi.qintar.ui.common.dayOfMonthText(bar.start) else ""
+        InsightsPeriod.YEAR -> io.github.mehrdad_abdi.qintar.ui.common.monthName(month.month, short = true)
+        InsightsPeriod.ALL -> if (index % 3 == 0) io.github.mehrdad_abdi.qintar.ui.common.monthName(month.month, short = true) else ""
+    }
+    val name = if (bar.monthly) {
+        io.github.mehrdad_abdi.qintar.ui.common.monthTitle(month)
+    } else {
+        io.github.mehrdad_abdi.qintar.ui.common.calendarDate(bar.start, weekday = true, year = false)
+    }
     val description = if (bar.rank.number > 0) {
         stringResource(R.string.insights_bar_description_rank, name, formatNumber(bar.count), rankName(bar.rank.number))
     } else {
@@ -234,8 +236,7 @@ private fun barUi(bar: InsightsBar, index: Int, period: InsightsPeriod): DayBarU
 
 @Composable
 private fun shortDate(day: LocalDate): String {
-    val locale = LocalConfiguration.current.locales[0]
-    return localizeDigits(DateTimeFormatter.ofPattern("d MMM", locale).format(day))
+    return io.github.mehrdad_abdi.qintar.ui.common.calendarDate(day, year = false, shortMonth = true)
 }
 
 @Composable
@@ -336,11 +337,11 @@ internal fun CalendarSection(
 ) {
     val colors = MaterialTheme.colorScheme
     val locale = LocalConfiguration.current.locales[0]
-    val title = localizeDigits(DateTimeFormatter.ofPattern("LLLL yyyy", locale).format(calendar.month))
+    val title = io.github.mehrdad_abdi.qintar.ui.common.monthTitle(calendar.month)
     val days = calendar.days.map { day ->
-        val name = localizeDigits(DateTimeFormatter.ofPattern("d MMMM", locale).format(day.date))
+        val name = io.github.mehrdad_abdi.qintar.ui.common.calendarDate(day.date, year = false)
         MonthDayUi(
-            dayLabel = formatNumber(day.date.dayOfMonth),
+            dayLabel = io.github.mehrdad_abdi.qintar.ui.common.dayOfMonthText(day.date),
             rank = day.rank.number,
             count = day.total,
             isToday = day.isToday,

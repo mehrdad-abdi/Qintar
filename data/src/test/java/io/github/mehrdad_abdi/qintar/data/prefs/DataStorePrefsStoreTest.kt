@@ -62,6 +62,7 @@ class DataStorePrefsStoreTest {
         dayStartMinutes = 240,
         weekStart = WeekStart.SATURDAY,
         calendarSystem = CalendarSystem.PERSIAN,
+        hijriAdjustDays = -1,
         latinNumerals = true,
         reciterId = "ar.husary",
         audioQuality = 128,

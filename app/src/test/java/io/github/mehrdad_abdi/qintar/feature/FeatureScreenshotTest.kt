@@ -153,6 +153,23 @@ class FeatureScreenshotTest(private val language: String, private val dark: Bool
     }
 
     @Test
+    fun khatmDetailHijri() {
+        // R-SET-5: long Hijri month names in the tiles and the list.
+        val khatm = runBlocking {
+            val khatm = app.khatms.start("Ramadan khatm", dailyPages = 4f)
+            app.tracker.markRange(AyahRange.of(1, 900), ReadContext.Khatm(khatm.id), ReadMethod.BULK, RangeMode.FILL)
+            khatm
+        }
+        val viewModel = app.khatmDetailViewModel(khatm.id, Dispatchers.Unconfined)
+        val dates = io.github.mehrdad_abdi.qintar.domain.service.CalendarDates(io.github.mehrdad_abdi.qintar.domain.model.CalendarSystem.ISLAMIC)
+        shot("feature_khatm_detail_hijri") {
+            androidx.compose.runtime.CompositionLocalProvider(io.github.mehrdad_abdi.qintar.ui.common.LocalCalendarDates provides dates) {
+                KhatmDetailScreen(KhatmDetailRoute(khatm.id), onBack = {}, onNavigate = {}, viewModel = viewModel)
+            }
+        }
+    }
+
+    @Test
     fun newKhatmForm() {
         runBlocking { app.khatms.start("Ramadan khatm") }
         val viewModel = app.newKhatmViewModel(Dispatchers.Unconfined)

@@ -62,6 +62,7 @@ class BackupCodecTest {
         dayStartMinutes = 180,
         weekStart = WeekStart.SUNDAY,
         calendarSystem = CalendarSystem.ISLAMIC,
+        hijriAdjustDays = 2,
         latinNumerals = true,
         reciterId = "ar.minshawi",
         audioQuality = 128,

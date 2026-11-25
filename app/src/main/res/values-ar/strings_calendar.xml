@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dates in the chosen calendar (R-SET-5, owner 2026-11-25). Month names are display text only. -->
+<resources>
+    <string-array name="months_persian">
+        <item>فروردين</item>
+        <item>أرديبهشت</item>
+        <item>خرداد</item>
+        <item>تير</item>
+        <item>مرداد</item>
+        <item>شهريور</item>
+        <item>مهر</item>
+        <item>آبان</item>
+        <item>آذر</item>
+        <item>دي</item>
+        <item>بهمن</item>
+        <item>إسفند</item>
+    </string-array>
+    <string-array name="months_hijri">
+        <item>محرم</item>
+        <item>صفر</item>
+        <item>ربيع الأول</item>
+        <item>ربيع الآخر</item>
+        <item>جمادى الأولى</item>
+        <item>جمادى الآخرة</item>
+        <item>رجب</item>
+        <item>شعبان</item>
+        <item>رمضان</item>
+        <item>شوال</item>
+        <item>ذو القعدة</item>
+        <item>ذو الحجة</item>
+    </string-array>
+    <string name="date_day_month">%1$s %2$s</string>
+    <string name="date_day_month_year">%1$s %2$s %3$s</string>
+    <string name="date_with_weekday">%1$s %2$s</string>
+    <string name="date_month_year">%1$s %2$s</string>
+    <string name="settings_calendar">التقويم</string>
+    <string name="settings_calendar_gregorian">الميلادي</string>
+    <string name="settings_calendar_persian">الهجري الشمسي</string>
+    <string name="settings_calendar_islamic">الهجري القمري</string>
+    <string name="settings_hijri_adjust">تعديل التاريخ الهجري</string>
+    <string name="settings_hijri_adjust_zero">بلا تعديل</string>
+    <string name="settings_hijri_adjust_days">%1$s أيام</string>
+</resources>

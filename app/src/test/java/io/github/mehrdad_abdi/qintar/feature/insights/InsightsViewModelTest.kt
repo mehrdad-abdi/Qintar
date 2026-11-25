@@ -220,7 +220,7 @@ class InsightsViewModelTest {
         // 1 Nov 2026 is a Sunday.
         val vm = open(DayOfWeek.SATURDAY)
         var cal = vm.state.value.calendar!!
-        assertEquals(YearMonth.of(2026, 11), cal.month)
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.service.CalMonth(2026, 11), cal.month)
         assertEquals(DayOfWeek.SATURDAY, cal.weekdays.first())
         assertEquals(1, cal.leadingBlanks)
 
@@ -257,26 +257,48 @@ class InsightsViewModelTest {
     }
 
     @Test
+    fun `with the Persian or Hijri calendar the calendar shows and steps through that calendar's months`() = runTest {
+        // Owner, 2026-11-25. Today (15 Nov 2026) is 24 Aban 1405 and 5 Jumada al-Akhirah 1448.
+        seedHistory()
+        app.prefs.update { it.copy(calendarSystem = io.github.mehrdad_abdi.qintar.domain.model.CalendarSystem.PERSIAN) }
+        val vm = open()
+        val aban = vm.state.value.calendar!!
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.service.CalMonth(1405, 8), aban.month)
+        assertEquals(30, aban.days.size)
+        assertEquals(java.time.LocalDate.parse("2026-10-23"), aban.days.first().date)
+        assertEquals(60, aban.days.first { it.date == java.time.LocalDate.parse("2026-11-14") }.total)
+        vm.onPreviousMonth()
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.service.CalMonth(1405, 7), vm.state.value.calendar!!.month)
+
+        app.prefs.update { it.copy(calendarSystem = io.github.mehrdad_abdi.qintar.domain.model.CalendarSystem.ISLAMIC) }
+        assertEquals("a new calendar starts at its current month", io.github.mehrdad_abdi.qintar.domain.service.CalMonth(1448, 6), vm.state.value.calendar!!.month)
+        // Umm al-Qura starts Jumada al-Akhirah on 11 November; seen a day later (−1), it starts on the 12th.
+        assertEquals(java.time.LocalDate.parse("2026-11-11"), vm.state.value.calendar!!.days.first().date)
+        app.prefs.update { it.copy(hijriAdjustDays = -1) }
+        assertEquals(java.time.LocalDate.parse("2026-11-12"), vm.state.value.calendar!!.days.first().date)
+    }
+
+    @Test
     fun `months can be browsed back and forth but not past the current one`() = runTest {
         seedHistory()
         val vm = open()
         assertFalse(vm.state.value.calendar!!.canGoNext)
         vm.onNextMonth()
-        assertEquals(YearMonth.of(2026, 11), vm.state.value.calendar!!.month)
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.service.CalMonth(2026, 11), vm.state.value.calendar!!.month)
 
         vm.onPreviousMonth()
         val october = vm.state.value.calendar!!
-        assertEquals(YearMonth.of(2026, 10), october.month)
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.service.CalMonth(2026, 10), october.month)
         assertTrue(october.canGoNext)
         assertEquals(31, october.days.size)
         assertEquals(Rank.KHASHI, october.days.first { it.date.dayOfMonth == 18 }.rank)
         assertTrue(october.days.none { it.isFuture || it.isToday })
 
         vm.onNextMonth()
-        assertEquals(YearMonth.of(2026, 11), vm.state.value.calendar!!.month)
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.service.CalMonth(2026, 11), vm.state.value.calendar!!.month)
         vm.onPreviousMonth()
         vm.onThisMonth()
-        assertEquals(YearMonth.of(2026, 11), vm.state.value.calendar!!.month)
+        assertEquals(io.github.mehrdad_abdi.qintar.domain.service.CalMonth(2026, 11), vm.state.value.calendar!!.month)
     }
 
     @Test

@@ -32,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -229,11 +230,18 @@ fun StatTile(
             Icon(icon, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(Sizes.iconSmall))
             Spacer(Modifier.height(Spacing.sm))
         }
-        Text(
+        // One line, shrinking to fit; a second line only when even the smallest size does not fit
+        // (a Hijri date such as "5 Jumada al-Akhirah 1448" is long).
+        var lines by androidx.compose.runtime.remember(value) { androidx.compose.runtime.mutableIntStateOf(1) }
+        androidx.compose.foundation.text.BasicText(
             text = value,
-            style = QintarType.Headline.copy(fontFeatureSettings = "tnum"),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
+            style = QintarType.Headline.copy(fontFeatureSettings = "tnum", color = MaterialTheme.colorScheme.onSurface),
+            maxLines = lines,
+            onTextLayout = { if (lines == 1 && it.hasVisualOverflow) lines = 2 },
+            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(
+                minFontSize = QintarType.BodyStrong.fontSize,
+                maxFontSize = QintarType.Headline.fontSize,
+            ),
         )
         Text(
             text = label,

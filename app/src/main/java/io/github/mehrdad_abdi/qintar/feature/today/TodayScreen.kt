@@ -161,7 +161,7 @@ fun TodayScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                localizeDigits(DateTimeFormatter.ofPattern("EEEE d MMMM", locale).format(state.day)),
+                io.github.mehrdad_abdi.qintar.ui.common.calendarDate(state.day, weekday = true, year = false),
                 style = QintarType.Title,
                 color = colors.onSurface,
                 modifier = Modifier.weight(1f),
