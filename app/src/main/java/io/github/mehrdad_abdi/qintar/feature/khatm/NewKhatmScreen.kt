@@ -86,6 +86,7 @@ fun NewKhatmScreen(onBack: () -> Unit, onNavigate: (route: Any) -> Unit, viewMod
                     label = stringResource(R.string.khatm_start_from_label),
                     placeholder = stringResource(R.string.khatm_start_from_hint),
                     actionLabel = null,
+                    suggestions = state.startSuggestions,
                 )
                 state.startRef?.let { ref ->
                     // The reference is resolved by the parser; the surah's name comes from the index in the screen.

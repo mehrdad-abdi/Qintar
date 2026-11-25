@@ -139,7 +139,19 @@ class ReaderRulesTest {
 
     // ---- go to ----
 
-    private fun parse(input: String, surah: Int? = null) = GoToParser.parse(input, surah, index)
+    private fun parse(input: String) = GoToParser.parse(input, index)
+
+    /** The fixture's index with real names for the surahs the name tests use. */
+    private val named = index.surahs.map { s ->
+        when (s.number) {
+            36 -> s.copy(nameAr = "يس", nameLatin = "Yaseen", nameEn = "Yaseen")
+            67 -> s.copy(nameAr = "الملك", nameLatin = "Al-Mulk", nameEn = "The Sovereignty")
+            73 -> s.copy(nameAr = "المزمل", nameLatin = "Al-Muzzammil", nameEn = "The Enshrouded One")
+            else -> s.copy(nameAr = "سورة", nameLatin = "Surah", nameEn = "Surah")
+        }
+    }
+
+    private fun parseNamed(input: String) = GoToParser.parse(input, index, named)
 
     @Test
     fun `surah colon ayah goes to that ayah`() {
@@ -150,10 +162,34 @@ class ReaderRulesTest {
     }
 
     @Test
-    fun `a bare number is an ayah of the chosen surah`() {
-        assertEquals(GoToResult.Ayah(AyahRef(2, 255), app.ayah(2, 255)), parse("255", surah = 2))
-        assertEquals(GoToResult.Invalid(Reason.NEEDS_SURAH), parse("255"))
-        assertEquals(GoToResult.Invalid(Reason.AYAH_OUT_OF_RANGE), parse("255", surah = 1))
+    fun `a bare number is a surah`() {
+        // Owner, 2026-11-25: with names, the "bare ayah numbers refer to" chooser is gone; 36 is Yaseen.
+        assertEquals(GoToResult.Surah(36, app.ayah(36, 1)), parse("36"))
+        assertEquals(GoToResult.Surah(36, app.ayah(36, 1)), parse("۳۶"))
+        assertEquals(GoToResult.Invalid(Reason.SURAH_OUT_OF_RANGE), parse("115"))
+        assertEquals(GoToResult.Invalid(Reason.SURAH_OUT_OF_RANGE), parse("0"))
+    }
+
+    @Test
+    fun `a surah by name, in any script and without vowels, alone or with an ayah number`() {
+        assertEquals(GoToResult.Surah(36, app.ayah(36, 1)), parseNamed("yasin"))
+        assertEquals(GoToResult.Ayah(AyahRef(36, 12), app.ayah(36, 12)), parseNamed("yasin 12"))
+        assertEquals(GoToResult.Ayah(AyahRef(36, 12), app.ayah(36, 12)), parseNamed("Yaseen:12"))
+        assertEquals(GoToResult.Ayah(AyahRef(36, 12), app.ayah(36, 12)), parseNamed("یس ۱۲"))
+        assertEquals(GoToResult.Ayah(AyahRef(67, 3), app.ayah(67, 3)), parseNamed("ملک3"))
+        assertEquals(GoToResult.Surah(73, app.ayah(73, 1)), parseNamed("المُزَّمِّل"))
+        assertEquals("the word surah before the name or number is forgiven", app.ayah(67, 1), parseNamed("surah mulk").target)
+        assertEquals(app.ayah(36, 1), parseNamed("sura 36").target)
+        assertEquals(GoToResult.Invalid(Reason.AYAH_OUT_OF_RANGE), parseNamed("mulk 31"))
+        assertEquals(GoToResult.Invalid(Reason.UNRECOGNIZED), parseNamed("qqq 3"))
+    }
+
+    @Test
+    fun `suggestions are the surahs a typed name may be, only while no number is typed`() {
+        assertEquals(listOf(67, 73), GoToParser.suggestions("mu", index, named).map { it.number }.take(2))
+        assertEquals(emptyList<Int>(), GoToParser.suggestions("mulk 3", index, named).map { it.number })
+        assertEquals(emptyList<Int>(), GoToParser.suggestions("p30", index, named).map { it.number })
+        assertEquals(emptyList<Int>(), GoToParser.suggestions("2:255", index, named).map { it.number })
     }
 
     @Test
@@ -184,7 +220,7 @@ class ReaderRulesTest {
     @Test
     fun `a surah by its number, with any keyboard in any app language`() {
         // Owner, 2026-11-22: s36 (or س36) opens Ya-Sin at its first ayah; Latin forms work in a Persian app too.
-        assertEquals(GoToResult.Ayah(AyahRef(36, 1), app.ayah(36, 1)), parse("s36"))
+        assertEquals(GoToResult.Surah(36, app.ayah(36, 1)), parse("s36"))
         assertEquals(app.ayah(36, 1), parse("S36").target)
         assertEquals(app.ayah(36, 1), parse("س۳۶").target)
         assertEquals(app.ayah(36, 1), parse("سوره ۳۶").target)
@@ -211,7 +247,7 @@ class ReaderRulesTest {
         assertEquals(GoToResult.Invalid(Reason.EMPTY), parse(""))
         assertEquals(GoToResult.Invalid(Reason.EMPTY), parse("   "))
         for (input in listOf("abc", "2:", ":5", "2:5:1", "p", "j", "x12", "2-255", "-5", "p-3", "2.5")) {
-            assertEquals(input, GoToResult.Invalid(Reason.UNRECOGNIZED), parse(input, surah = 2))
+            assertEquals(input, GoToResult.Invalid(Reason.UNRECOGNIZED), parse(input))
         }
         assertNull(parse("abc").target)
     }

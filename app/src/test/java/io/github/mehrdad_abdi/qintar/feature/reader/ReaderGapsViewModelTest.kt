@@ -101,12 +101,13 @@ class ReaderGapsViewModelTest {
     }
 
     @Test
-    fun `a bare ayah number in the jump sheet means the surah being read`() = runTest {
+    fun `a bare number in the jump sheet is a surah, as everywhere in Go to`() = runTest {
+        // Owner, 2026-11-25: a bare number is a surah; "kahf 10" or 18:10 is an ayah.
         val reader = reader(ReaderRoute.browse(app.ayah(18, 1).value))
-        reader.onJumpText("10")
+        reader.onJumpText("20")
         reader.onJumpSubmit()
         val row = reader.state.value.scrollRequest!!.row
-        assertEquals(app.ayah(18, 10), reader.state.value.model!!.ayahAtOrAfter(row)!!.id)
+        assertEquals(app.ayah(20, 1), reader.state.value.model!!.ayahAtOrAfter(row)!!.id)
     }
 
     @Test

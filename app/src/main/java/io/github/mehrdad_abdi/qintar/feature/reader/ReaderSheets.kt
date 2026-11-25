@@ -83,6 +83,7 @@ private fun JumpSheetContent(state: ReaderUiState, viewModel: ReaderViewModel) {
             onValueChange = viewModel::onJumpText,
             onSubmit = viewModel::onJumpSubmit,
             problem = state.jumpProblem,
+            suggestions = state.jumpSuggestions,
         )
         if (state.entry == ReaderEntry.KHATM) {
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {

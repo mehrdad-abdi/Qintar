@@ -53,8 +53,8 @@ data class ReadUiState(
     val surahs: List<SurahRowState> = emptyList(),
     val juz: List<JuzRowState> = emptyList(),
     val goToInput: String = "",
-    /** The surah a bare ayah number refers to; null = none chosen. */
-    val goToSurah: SurahInfo? = null,
+    /** The surahs a name typed into Go to may be (owner, 2026-11-25). */
+    val goToSuggestions: List<SurahInfo> = emptyList(),
     val goToProblem: GoToProblem? = null,
     /** Khatms in progress, most recent activity first. */
     val khatms: List<KhatmListItem> = emptyList(),
@@ -151,19 +151,15 @@ class ReadViewModel(
 
     fun onFilter(text: String) = _state.update { it.copy(filter = text) }
 
-    fun onGoToInput(text: String) = _state.update { it.copy(goToInput = text, goToProblem = null) }
-
-    /** The surah a bare ayah number refers to ("255" → 2:255 when surah 2 is chosen); null clears it. */
-    fun onGoToSurah(number: Int?) {
-        val surah = number?.let { n -> quran?.takeIf { n in 1..Quran.SURAH_COUNT }?.surah(n) }
-        _state.update { it.copy(goToSurah = surah, goToProblem = null) }
+    fun onGoToInput(text: String) = _state.update {
+        it.copy(goToInput = text, goToProblem = null, goToSuggestions = quran?.let { idx -> GoToParser.suggestions(text, idx) }.orEmpty())
     }
 
     /** Parses the field. Returns the reader to open, or null with [ReadUiState.goToProblem] set. */
     fun submitGoTo(): ReaderRoute? {
         val idx = quran ?: return null
         val current = _state.value
-        return when (val result = GoToParser.parse(current.goToInput, current.goToSurah?.number, idx)) {
+        return when (val result = GoToParser.parse(current.goToInput, idx)) {
             is GoToResult.Invalid -> {
                 _state.update { it.copy(goToProblem = GoToProblem.of(result.reason)) }
                 null
@@ -172,11 +168,10 @@ class ReadViewModel(
         }
     }
 
-    /** A random ayah, uniform over all 6,236 (or over the chosen surah's ayahs). */
+    /** A random ayah, uniform over all 6,236. */
     fun randomAyah(): ReaderRoute? {
-        val idx = quran ?: return null
-        val range = _state.value.goToSurah?.let { idx.surahRange(it.number) } ?: AyahRange.ALL
-        return ReaderRoute.random(random.nextInt(range.start.value, range.end.value + 1))
+        if (quran == null) return null
+        return ReaderRoute.random(random.nextInt(AyahRange.ALL.start.value, AyahRange.ALL.end.value + 1))
     }
 
     /** A random page, uniform over the 604; the reader's scope is that page. */

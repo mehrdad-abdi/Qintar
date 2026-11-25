@@ -8,13 +8,10 @@
     <string name="read_tab_juz">Juz</string>
     <string name="read_tab_page">Page</string>
     <string name="read_goto_label">Go to…</string>
-    <string name="read_goto_hint">2:255, s36, p300, j12</string>
+    <string name="read_goto_hint">2:255, 36, Yaseen 12, p300, j12</string>
     <string name="read_goto_action">Go</string>
-    <string name="read_goto_surah_label">Bare ayah numbers refer to</string>
-    <string name="read_goto_surah_none">No surah chosen</string>
     <string name="goto_error_empty">Type a place to go to.</string>
     <string name="goto_error_unrecognized">Try 2:255, s36, p300 or j12.</string>
-    <string name="goto_error_needs_surah">Choose a surah first, or type surah:ayah.</string>
     <string name="goto_error_surah">There are 114 surahs.</string>
     <string name="goto_error_ayah">That surah has no such ayah.</string>
     <string name="goto_error_page">Pages go from 1 to 604.</string>
@@ -45,7 +42,7 @@
     <string name="khatm_name_label">Name</string>
     <string name="khatm_name_required">Give the khatm a name.</string>
     <string name="khatm_start_from_label">Start from (optional)</string>
-    <string name="khatm_start_from_hint">The beginning, or 2:255, p300, j12</string>
+    <string name="khatm_start_from_hint">The beginning, or 2:255, Yaseen 12, p300</string>
     <!-- 1: ayah name -->
     <string name="khatm_start_from_resolved">Starts at %1$s</string>
     <string name="khatm_daily_label">Pages per day (optional)</string>
@@ -101,5 +98,5 @@
     <string name="reader_log_group_reading">Log a full reading of the group</string>
     <!-- 1: full readings today, 2: repeat target -->
     <string name="reader_header_readings">%1$s / %2$s today</string>
-    <string name="goto_help">Ayah 2:255 · surah s36 · page p300 · juz j12</string>
+    <string name="goto_help">Ayah 2:255 · surah 36 or its name · page p300 · juz j12</string>
 </resources>

@@ -26,8 +26,7 @@ class ReadViewModelTest {
     private val app = DomainFixture()
     private fun read(random: Random = Random(7)) = app.readViewModel(main.dispatcher, random)
 
-    private fun ReadViewModel.goTo(input: String, surah: Int? = null): ReaderRoute? {
-        onGoToSurah(surah)
+    private fun ReadViewModel.goTo(input: String): ReaderRoute? {
         onGoToInput(input)
         return submitGoTo()
     }
@@ -45,14 +44,19 @@ class ReadViewModelTest {
     }
 
     @Test
-    fun `a bare ayah number means the chosen surah`() = runTest {
+    fun `a bare number is a surah, and a typed name suggests surahs`() = runTest {
+        // Owner, 2026-11-25: no "bare ayah numbers refer to" chooser any more.
         val read = read()
         assertNull(read.goTo("255"))
-        assertEquals(GoToProblem.NEEDS_SURAH, read.state.value.goToProblem)
-
-        assertEquals(ReaderRoute.browse(app.ayah(2, 255).value), read.goTo("255", surah = 2))
+        assertEquals(GoToProblem.SURAH_OUT_OF_RANGE, read.state.value.goToProblem)
+        assertEquals(ReaderRoute.browse(app.ayah(36, 1).value), read.goTo("36"))
         assertNull("the error clears when the input is accepted", read.state.value.goToProblem)
-        assertEquals(2, read.state.value.goToSurah?.number)
+
+        // The fixture's surahs are called "Surah 1" … "Surah 114".
+        read.onGoToInput("sur")
+        assertTrue(read.state.value.goToSuggestions.isNotEmpty())
+        read.onGoToInput("2:25")
+        assertTrue(read.state.value.goToSuggestions.isEmpty())
     }
 
     @Test
@@ -63,7 +67,7 @@ class ReadViewModelTest {
         assertEquals(kursi, read.goTo("٢:٢٥٥"))
         assertEquals(ReaderRoute.browse(app.index.pageRange(123).start.value), read.goTo("p۱۲۳"))
         assertEquals(ReaderRoute.browse(app.index.juzRange(12).start.value), read.goTo("j١٢"))
-        assertEquals(kursi, read.goTo("۲۵۵", surah = 2))
+        assertEquals(ReaderRoute.browse(app.ayah(36, 1).value), read.goTo("۳۶"))
         // Owner, 2026-11-22: the Persian and Arabic letters, too.
         assertEquals(ReaderRoute.browse(app.index.juzRange(12).start.value), read.goTo("ج12"))
         assertEquals(ReaderRoute.browse(app.index.pageRange(300).start.value), read.goTo("ص۳۰۰"))
@@ -92,7 +96,7 @@ class ReadViewModelTest {
             assertNull("'$input' must not open", read.goTo(input))
             assertEquals("'$input'", problem, read.state.value.goToProblem)
         }
-        assertNull("114 has 6 ayahs", read.goTo("7", surah = 114))
+        assertNull("114 has 6 ayahs", read.goTo("114:7"))
         assertEquals(GoToProblem.AYAH_OUT_OF_RANGE, read.state.value.goToProblem)
 
         read.onGoToInput("2:255")
@@ -113,17 +117,6 @@ class ReadViewModelTest {
         }
         assertTrue(ids.all { it in 1..6236 })
         assertTrue("not stuck on the short surahs: ${ids.max()}", ids.max() > 6000 && ids.min() < 200)
-    }
-
-    @Test
-    fun `with a surah chosen the random ayah stays in that surah`() = runTest {
-        val read = read(Random(2))
-        read.onGoToSurah(18)
-        val range = app.index.surahRange(18)
-        repeat(300) {
-            val id = checkNotNull(read.randomAyah()).startAyahId
-            assertTrue(id in range.start.value..range.end.value)
-        }
     }
 
     @Test

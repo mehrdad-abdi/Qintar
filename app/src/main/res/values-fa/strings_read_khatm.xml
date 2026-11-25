@@ -6,13 +6,10 @@
     <string name="read_tab_juz">جزء</string>
     <string name="read_tab_page">صفحه</string>
     <string name="read_goto_label">برو به…</string>
-    <string name="read_goto_hint">۲:۲۵۵، س۳۶، ص۳۰۰، ج۱۲</string>
+    <string name="read_goto_hint">۲:۲۵۵، ۳۶، یس ۱۲، ص۳۰۰، ج۱۲</string>
     <string name="read_goto_action">برو</string>
-    <string name="read_goto_surah_label">شمارهٔ آیهٔ تنها مربوط به</string>
-    <string name="read_goto_surah_none">سوره‌ای انتخاب نشده</string>
     <string name="goto_error_empty">جایی برای رفتن بنویسید.</string>
     <string name="goto_error_unrecognized">مثلاً ۲:۲۵۵، س۳۶، ص۳۰۰ یا ج۱۲ (یا s36، p300، j12) را امتحان کنید.</string>
-    <string name="goto_error_needs_surah">نخست سوره‌ای انتخاب کنید یا سوره:آیه بنویسید.</string>
     <string name="goto_error_surah">قرآن ۱۱۴ سوره دارد.</string>
     <string name="goto_error_ayah">این سوره چنین آیه‌ای ندارد.</string>
     <string name="goto_error_page">صفحه‌ها از ۱ تا ۶۰۴ هستند.</string>
@@ -40,7 +37,7 @@
     <string name="khatm_name_label">نام</string>
     <string name="khatm_name_required">برای ختم نامی بگذارید.</string>
     <string name="khatm_start_from_label">آغاز از (اختیاری)</string>
-    <string name="khatm_start_from_hint">از ابتدا، یا ۲:۲۵۵، p300، j12</string>
+    <string name="khatm_start_from_hint">از ابتدا، یا ۲:۲۵۵، یس ۱۲، p300</string>
     <string name="khatm_start_from_resolved">آغاز از %1$s</string>
     <string name="khatm_daily_label">صفحه در روز (اختیاری)</string>
     <string name="khatm_daily_invalid">عددی بزرگ‌تر از صفر بنویسید یا خالی بگذارید.</string>
@@ -85,5 +82,5 @@
     <string name="reader_log_full_reading">ثبت یک خواندن کامل</string>
     <string name="reader_log_group_reading">ثبت یک خواندن کامل گروه</string>
     <string name="reader_header_readings">%1$s / %2$s امروز</string>
-    <string name="goto_help">آیه ۲:۲۵۵ · سوره س۳۶ · صفحه ص۳۰۰ · جزء ج۱۲ · یا s36، p300، j12</string>
+    <string name="goto_help">آیه ۲:۲۵۵ · سوره ۳۶ یا نامش · صفحه ص۳۰۰ · جزء ج۱۲ · یا p300، j12</string>
 </resources>

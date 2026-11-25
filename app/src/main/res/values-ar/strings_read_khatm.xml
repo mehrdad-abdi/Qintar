@@ -6,13 +6,10 @@
     <string name="read_tab_juz">الجزء</string>
     <string name="read_tab_page">الصفحة</string>
     <string name="read_goto_label">الانتقال إلى…</string>
-    <string name="read_goto_hint">٢:٢٥٥، س٣٦، ص٣٠٠، ج١٢</string>
+    <string name="read_goto_hint">٢:٢٥٥، ٣٦، يس ١٢، ص٣٠٠، ج١٢</string>
     <string name="read_goto_action">انتقال</string>
-    <string name="read_goto_surah_label">رقم الآية وحده يخص</string>
-    <string name="read_goto_surah_none">لم تُختر سورة</string>
     <string name="goto_error_empty">اكتب موضعًا للانتقال إليه.</string>
     <string name="goto_error_unrecognized">جرّب ٢:٢٥٥ أو س٣٦ أو ص٣٠٠ أو ج١٢ (أو s36، p300، j12).</string>
-    <string name="goto_error_needs_surah">اختر سورة أولًا، أو اكتب سورة:آية.</string>
     <string name="goto_error_surah">عدد السور ١١٤ سورة.</string>
     <string name="goto_error_ayah">ليس في هذه السورة آية بهذا الرقم.</string>
     <string name="goto_error_page">الصفحات من ١ إلى ٦٠٤.</string>
@@ -40,7 +37,7 @@
     <string name="khatm_name_label">الاسم</string>
     <string name="khatm_name_required">أعطِ الختمة اسمًا.</string>
     <string name="khatm_start_from_label">البدء من (اختياري)</string>
-    <string name="khatm_start_from_hint">من البداية، أو ٢:٢٥٥، p300، j12</string>
+    <string name="khatm_start_from_hint">من البداية، أو ٢:٢٥٥، يس ١٢، p300</string>
     <string name="khatm_start_from_resolved">تبدأ من %1$s</string>
     <string name="khatm_daily_label">صفحات في اليوم (اختياري)</string>
     <string name="khatm_daily_invalid">اكتب رقمًا أكبر من صفر أو اتركه فارغًا.</string>
@@ -85,5 +82,5 @@
     <string name="reader_log_full_reading">تسجيل قراءة كاملة</string>
     <string name="reader_log_group_reading">تسجيل قراءة كاملة للمجموعة</string>
     <string name="reader_header_readings">%1$s / %2$s اليوم</string>
-    <string name="goto_help">آية ٢:٢٥٥ · سورة س٣٦ · صفحة ص٣٠٠ · جزء ج١٢ · أو s36، p300، j12</string>
+    <string name="goto_help">آية ٢:٢٥٥ · سورة ٣٦ أو اسمها · صفحة ص٣٠٠ · جزء ج١٢ · أو p300، j12</string>
 </resources>

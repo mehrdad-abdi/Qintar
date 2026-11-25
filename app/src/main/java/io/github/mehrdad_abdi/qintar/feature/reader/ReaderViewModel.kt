@@ -155,6 +155,8 @@ data class ReaderUiState(
     val sheet: ReaderSheet? = null,
     val jumpText: String = "",
     val jumpProblem: GoToProblem? = null,
+    /** The surahs a name typed into the go-to field may be. */
+    val jumpSuggestions: List<io.github.mehrdad_abdi.qintar.domain.model.SurahInfo> = emptyList(),
     /** Surahs and juz the scope touches: what the position sheet offers. */
     val scopeSurahs: List<SurahInfo> = emptyList(),
     val scopeJuz: List<Int> = emptyList(),
@@ -731,20 +733,20 @@ class ReaderViewModel @AssistedInject constructor(
     }
 
     fun onJumpText(text: String) {
-        _state.update { it.copy(jumpText = text, jumpProblem = null) }
+        _state.update { it.copy(jumpText = text, jumpProblem = null, jumpSuggestions = quran?.let { idx -> GoToParser.suggestions(text, idx) }.orEmpty()) }
     }
 
-    /** The sheet's go-to field: `2:255`, `255` in the surah being read, `p300`, `j12`; must lie in the scope. */
+    /** The sheet's go-to field: `2:255`, `36` or a surah's name, `yasin 12`, `p300`, `j12`; must lie in the scope. */
     fun onJumpSubmit() {
         val index = quran ?: return
         val model = model ?: return
         val text = _state.value.jumpText
-        val currentSurah = firstVisible.value?.let { index.ref(it).surah }
-        when (val result = GoToParser.parse(text, currentSurah, index)) {
+        when (val result = GoToParser.parse(text, index)) {
             is GoToResult.Invalid -> _state.update { it.copy(jumpProblem = GoToProblem.of(result.reason)) }
             else -> {
                 // A page or juz may begin before the scope does: land on the first ayah of it that is in scope.
                 val wanted = when (result) {
+                    is GoToResult.Surah -> index.surahRange(result.surah)
                     is GoToResult.Page -> index.pageRange(result.page)
                     is GoToResult.Juz -> index.juzRange(result.juz)
                     else -> null

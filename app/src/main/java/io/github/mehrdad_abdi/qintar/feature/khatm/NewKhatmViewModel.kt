@@ -35,6 +35,8 @@ data class NewKhatmUiState(
     /** What the user typed for the start position; empty = from the beginning. */
     val startText: String = "",
     val startProblem: GoToProblem? = null,
+    /** The surahs a name typed into "Start from" may be. */
+    val startSuggestions: List<io.github.mehrdad_abdi.qintar.domain.model.SurahInfo> = emptyList(),
     /** Where the khatm will start; null = the beginning. */
     val startFrom: AyahId? = null,
     val startRef: AyahRef? = null,
@@ -80,14 +82,15 @@ class NewKhatmViewModel @Inject constructor(
         _state.update { it.copy(name = name, nameMissing = false) }
     }
 
-    /** Accepts `2:255`, `p300`, `j12`; a bare number is refused because no surah is chosen. */
+    /** Accepts `2:255`, `36` or a surah's name (with an ayah number or not), `p300`, `j12`. */
     fun onStartText(text: String) {
         val idx = quran
         if (text.isBlank() || idx == null) {
-            _state.update { it.copy(startText = text, startProblem = null, startFrom = null, startRef = null).withProjection() }
+            _state.update { it.copy(startText = text, startProblem = null, startFrom = null, startRef = null, startSuggestions = emptyList()).withProjection() }
             return
         }
-        when (val result = GoToParser.parse(text, null, idx)) {
+        _state.update { it.copy(startSuggestions = GoToParser.suggestions(text, idx)) }
+        when (val result = GoToParser.parse(text, idx)) {
             is GoToResult.Invalid -> _state.update {
                 it.copy(startText = text, startProblem = GoToProblem.of(result.reason), startFrom = null, startRef = null).withProjection()
             }

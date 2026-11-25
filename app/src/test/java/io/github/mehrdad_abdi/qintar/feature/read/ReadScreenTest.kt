@@ -54,24 +54,24 @@ class ReadScreenTest {
     }
 
     @Test
-    fun `a bare ayah number without a surah shows the reason and goes nowhere`() {
+    fun `a number out of range shows the reason and goes nowhere`() {
         open()
         compose.onNodeWithText("Go to…").performTextInput("255")
         compose.onNodeWithText("Go").performClick()
 
-        compose.onNodeWithText("Choose a surah first, or type surah:ayah.").assertIsDisplayed()
+        compose.onNodeWithText("Bare ayah numbers refer to").assertDoesNotExist()
         assertTrue(navigated.isEmpty())
     }
 
     @Test
-    fun `a bare ayah number goes into the surah chosen beside the field`() {
+    fun `a typed name suggests surahs and a tap puts the name in the field`() {
+        // The fixture's surahs are called "Surah 1" … "Surah 114" (real names are tested in :domain).
         open()
-        compose.onNodeWithText("No surah chosen").performClick()
+        compose.onNodeWithText("Go to…").performTextInput("sur")
+        compose.onNodeWithTag(io.github.mehrdad_abdi.qintar.ui.common.GOTO_SUGGESTIONS_TAG).assertIsDisplayed()
         compose.onNodeWithText("2. Surah 2").performClick()
-        compose.onNodeWithText("Go to…").performTextInput("255")
-        compose.onNodeWithText("Go").performClick()
-
-        assertEquals(listOf<Any>(ReaderRoute.browse(app.ayah(2, 255).value)), navigated)
+        compose.onNodeWithText("Surah 2 ").assertExists()
+        assertTrue("nothing opens until Go", navigated.isEmpty())
     }
 
     @Test

@@ -84,7 +84,7 @@ class KhatmViewModelsTest {
         assertEquals(app.index.juzRange(12).start, form.state.value.startFrom)
 
         form.onStartText("255")
-        assertEquals(GoToProblem.NEEDS_SURAH, form.state.value.startProblem)
+        assertEquals(GoToProblem.SURAH_OUT_OF_RANGE, form.state.value.startProblem)
         assertNull(form.state.value.startFrom)
         form.onStartText("p999")
         assertEquals(GoToProblem.PAGE_OUT_OF_RANGE, form.state.value.startProblem)

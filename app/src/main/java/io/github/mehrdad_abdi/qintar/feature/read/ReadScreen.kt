@@ -25,20 +25,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Casino
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,7 +55,6 @@ import io.github.mehrdad_abdi.qintar.ui.common.GoToField
 import io.github.mehrdad_abdi.qintar.ui.common.ayahName
 import io.github.mehrdad_abdi.qintar.ui.common.displayName
 import io.github.mehrdad_abdi.qintar.ui.common.surahFacts
-import io.github.mehrdad_abdi.qintar.ui.common.surahName
 import io.github.mehrdad_abdi.qintar.ui.designsystem.EmptyState
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Hairline
 import io.github.mehrdad_abdi.qintar.ui.designsystem.QCard
@@ -72,7 +65,6 @@ import io.github.mehrdad_abdi.qintar.ui.designsystem.SectionHeader
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Sizes
 import io.github.mehrdad_abdi.qintar.ui.designsystem.Spacing
 import io.github.mehrdad_abdi.qintar.ui.designsystem.formatNumber
-import io.github.mehrdad_abdi.qintar.ui.designsystem.localizeDigits
 import io.github.mehrdad_abdi.qintar.ui.navigation.KhatmDetailRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.KhatmListRoute
 import io.github.mehrdad_abdi.qintar.ui.navigation.NewKhatmRoute
@@ -199,9 +191,8 @@ private fun GoToCard(state: ReadUiState, viewModel: ReadViewModel, open: (Reader
             onValueChange = viewModel::onGoToInput,
             onSubmit = { open(viewModel.submitGoTo()) },
             problem = state.goToProblem,
+            suggestions = state.goToSuggestions,
         )
-        Spacer(Modifier.height(Spacing.sm))
-        SurahChooser(state, viewModel)
         Spacer(Modifier.height(Spacing.md))
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             OutlinedButton(
@@ -219,37 +210,6 @@ private fun GoToCard(state: ReadUiState, viewModel: ReadViewModel, open: (Reader
                 Icon(Icons.Outlined.Casino, null, modifier = Modifier.size(Sizes.iconSmall))
                 Spacer(Modifier.size(Spacing.sm))
                 Text(stringResource(R.string.read_random_page), style = QintarType.Label, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        }
-    }
-}
-
-/** "Bare ayah numbers refer to: [Surah ▾]": the surah that `255` is read in. */
-@Composable
-private fun SurahChooser(state: ReadUiState, viewModel: ReadViewModel) {
-    var open by remember { mutableStateOf(false) }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            stringResource(R.string.read_goto_surah_label),
-            style = QintarType.Label,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f),
-        )
-        Box {
-            TextButton(onClick = { open = true }, modifier = Modifier.heightIn(min = Sizes.touchTarget)) {
-                Text(state.goToSurah?.let { surahName(it) } ?: stringResource(R.string.read_goto_surah_none), style = QintarType.Label)
-            }
-            DropdownMenu(expanded = open, onDismissRequest = { open = false }, modifier = Modifier.heightIn(max = 360.dp)) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.read_goto_surah_none)) },
-                    onClick = { open = false; viewModel.onGoToSurah(null) },
-                )
-                for (row in state.surahs) {
-                    DropdownMenuItem(
-                        text = { Text(localizeDigits("${row.surah.number}. ") + surahName(row.surah)) },
-                        onClick = { open = false; viewModel.onGoToSurah(row.surah.number) },
-                    )
-                }
             }
         }
     }
