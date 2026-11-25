@@ -72,6 +72,10 @@ class ReadScreenTest {
         compose.onNodeWithText("2. Surah 2").performClick()
         compose.onNodeWithText("Surah 2 ").assertExists()
         assertTrue("nothing opens until Go", navigated.isEmpty())
+        // The cursor is put after the name, so the ayah number typed next follows it (seen on the emulator:
+        // "20" landed inside the name).
+        compose.onNodeWithText("Surah 2 ").performTextInput("7")
+        compose.onNodeWithText("Surah 2 7").assertExists()
     }
 
     @Test

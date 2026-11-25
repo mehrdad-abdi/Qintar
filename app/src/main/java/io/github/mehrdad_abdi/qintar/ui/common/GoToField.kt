@@ -20,6 +20,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -75,11 +81,15 @@ fun GoToField(
     actionLabel: String? = stringResource(R.string.read_goto_action),
     suggestions: List<SurahInfo> = emptyList(),
 ) {
+    // The field keeps its cursor; text set from outside (a picked suggestion) puts it at the end, so the
+    // ayah number typed next follows the name.
+    var field by remember { mutableStateOf(TextFieldValue(value, TextRange(value.length))) }
+    if (field.text != value) field = TextFieldValue(value, TextRange(value.length))
     Column(modifier.fillMaxWidth()) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             OutlinedTextField(
-                value = value,
-                onValueChange = onValueChange,
+                value = field,
+                onValueChange = { field = it; if (it.text != value) onValueChange(it.text) },
                 label = { Text(label) },
                 placeholder = { Text(placeholder) },
                 singleLine = true,
