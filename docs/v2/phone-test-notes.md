@@ -79,3 +79,23 @@ To do when the owner says "start": reproduce each bug in a failing test first, t
 | 36 | change | Bookmarks list, order | The built-in "Ungrouped" section looks bad. Show ungrouped bookmarks directly in the list, side by side with the groups (not under an "Ungrouped" heading). Let the user arrange the list, and choose the order: Quran order (default, by where the ayahs are) or "My order" (as arranged). | To confirm with the owner (understanding + example sent 2026-11-25). Model already has it: `UserPrefs.bookmarkSort` (MUSHAF default, CUSTOM, RECENT; no UI yet) and `sortIndex` on both bookmarks and groups, so a mixed top-level order needs no schema change (groups and loose bookmarks numbered in one sequence). Decided: a sort choice in the list's menu: Quran order (default) / My order / Newest first (owner, 2026-11-25; RECENT, by date added; a group by its newest bookmark); a separate "Arrange" screen (owner, 2026-11-25: not dragging inside the list) that shows only titles, one line each, with groups' bookmarks indented under them; drag by a handle to reorder the top-level items, and the bookmarks within their group (moving between groups stays "Move to group"); saving switches the list to My order. In Quran order a group sits at its first ayah. Supersedes the "Ungrouped" part of items 11/12; continuous play follows the shown order. |
 | 37 | bug | Bookmarks list, group and bookmark headers | Tapping a header opens/closes the group or bookmark, but when it has a long, shortened description, a tap on the description area expands/shortens the description instead, so opening the items is hard. | The description is its own clickable (`ExpandableDescription`, item 16) inside the header. Proposal: drop its own tap; the whole header opens/closes, and the description shows in full while the group/bookmark is open and two lines while it is closed. Test first: a screen test tapping the description of a closed bookmark → its ayahs show (fails today). |
 | 38 | change | Read tab, surah list | The bar under each surah shows coverage in the current khatm (item 4), which is confusing: the khatm has its own view. The surah list is generic, so show the share of the surah read today instead. | Changes item 4's decision. `ReadViewModel` takes it from `log.observeDistinctAyahs` over the khatm; use the distinct ayahs read in the reading day (from `DayClock.todayFlow`, so it resets at the day start), any context. Empty bar (none) for surahs not read today. Test first: VM test, ayahs read today and yesterday → only today's count (fails today, as it shows the khatm's). Update DESIGN §12 / §5.3. |
+
+### Status of 24–38 (branch `bookmarks-list`, 2026-11-25)
+
+| # | Status |
+|---|---|
+| 24 | Done: Settings shows the hadith in the app language only, no Bismillah. |
+| 25 | Done: a mid-page juz / hizb / quarter gets a marker before its first ayah ("Juz 4", "Hizb 7", "¼ / ½ / ¾ Hizb 7"); at a page start the divider names it. Test: every quarter start marked once. |
+| 26 | Done: undo messages close after ~10 s and on a swipe (all screens). Reproduced first: stayed after 15 s. |
+| 27 | Done: the Bookmarks list keeps the screen on, like the reader. |
+| 28 | Done: while the Bismillah plays its row is highlighted and followed (reader and list). Reproduced first: ayah 1 was highlighted; the list scrolled past the Bismillah. |
+| 29 | Done: the Bismillah is titled "Surah 1" in the player and notification. |
+| 30 | Done: names in any script, vowels optional, suggestions under the field; a bare number is a surah everywhere (also in the reader's sheet); the surah chooser and "random in the chosen surah" are gone. |
+| 31 | Done: the font draws pause marks high above the line (reproduced in a render); marks and their space are drawn 0.3 em lower. |
+| 32, 35 | Done. |
+| 33 | Done: Today lists 5, then "Show all" (opens Bookmarks). |
+| 34 | Done: reproduced (came back at the end of the list); now back in its place. |
+| 36 | Done: no Ungrouped section (a group's bookmarks are indented); order menu Quran order / My order / Newest first; Arrange screen (drag; a group opens its own). |
+| 37 | Done: a tap on a description opens/closes; full text while open. Reproduced first. |
+| 38 | Done: surah bars show today's reading. |
+

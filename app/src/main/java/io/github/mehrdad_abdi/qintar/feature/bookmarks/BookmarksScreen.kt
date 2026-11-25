@@ -192,20 +192,32 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
                         modifier = Modifier.padding(Spacing.screen),
                     )
                 } else {
+                    val grouped = remember(state.groups) { state.groups.flatMapTo(HashSet()) { g -> g.items.map { it.id } } }
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize().testTag(BOOKMARKS_LIST_TAG),
                         contentPadding = PaddingValues(start = Spacing.screen, end = Spacing.screen, top = Spacing.xs, bottom = Spacing.xxl),
                     ) {
                         itemsIndexed(state.rows, key = { _, row -> row.key }) { index, row ->
-                            when (row) {
-                                is BookmarksRow.Section -> SectionRow(row, viewModel, onNavigate, first = index == 0)
-                                is BookmarksRow.Entry -> EntryRow(row, viewModel, onNavigate)
-                                is BookmarksRow.Basmala -> InCard(CardSegment.MIDDLE) {
-                                    BasmalaRow(Modifier.padding(top = Spacing.lg), fontSizeSp = state.fontSp, highlighted = state.isAudioAt(row))
+                            // A group's bookmarks are indented under it, so the bookmarks without a group
+                            // that follow are not taken for its own; one of those after a group gets air.
+                            val owner = row.bookmarkId()
+                            val inGroup = owner != null && owner in grouped
+                            val afterGroup = row is BookmarksRow.Entry && !inGroup && state.rows.getOrNull(index - 1)?.bookmarkId()?.let { it in grouped } == true
+                            Box(
+                                Modifier
+                                    .then(if (inGroup) Modifier.padding(start = Spacing.lg) else Modifier)
+                                    .then(if (afterGroup) Modifier.padding(top = Spacing.md) else Modifier),
+                            ) {
+                                when (row) {
+                                    is BookmarksRow.Section -> SectionRow(row, viewModel, onNavigate, first = index == 0)
+                                    is BookmarksRow.Entry -> EntryRow(row, viewModel, onNavigate)
+                                    is BookmarksRow.Basmala -> InCard(CardSegment.MIDDLE) {
+                                        BasmalaRow(Modifier.padding(top = Spacing.lg), fontSizeSp = state.fontSp, highlighted = state.isAudioAt(row))
+                                    }
+                                    is BookmarksRow.Ayah -> InCard(CardSegment.MIDDLE, divider = true) { InlineAyah(row, state, viewModel) }
+                                    is BookmarksRow.End -> InCard(CardSegment.BOTTOM, divider = true) { EndRow(row, viewModel) }
                                 }
-                                is BookmarksRow.Ayah -> InCard(CardSegment.MIDDLE, divider = true) { InlineAyah(row, state, viewModel) }
-                                is BookmarksRow.End -> InCard(CardSegment.BOTTOM, divider = true) { EndRow(row, viewModel) }
                             }
                         }
                     }
@@ -581,4 +593,13 @@ private fun BookmarksDialogs(dialog: BookmarksDialog?, viewModel: BookmarksViewM
             dismissButton = { TextButton(onClick = viewModel::onDialogDismissed) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
+}
+
+/** The bookmark a row belongs to; null for a group's header. */
+private fun BookmarksRow.bookmarkId(): Long? = when (this) {
+    is BookmarksRow.Section -> null
+    is BookmarksRow.Entry -> item.id
+    is BookmarksRow.Basmala -> bookmarkId
+    is BookmarksRow.Ayah -> bookmarkId
+    is BookmarksRow.End -> bookmarkId
 }
