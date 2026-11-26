@@ -284,6 +284,9 @@ class ReaderViewModel @AssistedInject constructor(
     private val firstVisible = MutableStateFlow<AyahId?>(null)
     private val pages = LinkedHashMap<Int, Map<AyahId, String>>(16, 0.75f, true)
     private val pagesLoading = HashSet<Int>()
+
+    /** The pages the rows on screen and around them need; never dropped from [pages]. */
+    private var neededPages: Set<Int> = emptySet()
     private val rankReached = RankReachedDetector()
     private var reachedJob: Job? = null
 
@@ -546,17 +549,38 @@ class ReaderViewModel @AssistedInject constructor(
     fun onVisibleRows(firstRow: Int, lastRow: Int) {
         val model = model ?: return
         val first = model.ayahAtOrAfter(firstRow) ?: return
-        val last = model.ayahAtOrAfter(lastRow.coerceAtLeast(firstRow)) ?: first
         firstVisible.value = first.id
         visibleRows = firstRow..lastRow.coerceAtLeast(firstRow)
-        loadPagesAround(first, last)
+        loadPagesNear(firstRow, lastRow.coerceAtLeast(firstRow))
     }
 
     private fun loadPagesAround(first: ReaderRow.Ayah, last: ReaderRow.Ayah) {
-        val lo = minOf(first.page, last.page)
-        val hi = maxOf(first.page, last.page)
-        val wanted = (lo - PREFETCH_PAGES).coerceAtLeast(1)..(hi + PREFETCH_PAGES).coerceAtMost(PAGE_COUNT)
+        val model = model ?: return
+        val firstRow = model.indexOf(first.segment, first.id) ?: return
+        loadPagesNear(firstRow, model.indexOf(last.segment, last.id) ?: firstRow)
+    }
+
+    /**
+     * Loads the pages of the ayahs on screen and of the rows just around them, and keeps those while
+     * dropping others beyond [CACHED_PAGES]. The pages come from the rows, not from the mushaf
+     * between the first and the last: bookmarks far apart in the Quran stand next to each other in a
+     * group or in Read all, and the pages between them (hundreds) were loaded into a cache of 30,
+     * so the text on screen was dropped and loaded again, over and over (owner's phone, 2026-11-27).
+     */
+    private fun loadPagesNear(firstRow: Int, lastRow: Int) {
+        val model = model ?: return
+        val rows = model.rows
+        val from = (firstRow - PREFETCH_ROWS).coerceAtLeast(0)
+        val to = (lastRow + PREFETCH_ROWS).coerceAtMost(rows.lastIndex)
+        val wanted = LinkedHashSet<Int>()
+        for (i in from..to) (rows[i] as? ReaderRow.Ayah)?.let { wanted += it.page }
+        // In the mushaf's own order (a khatm, browsing) the neighbouring pages are read next.
+        for (edge in listOfNotNull(model.ayahAtOrAfter(firstRow), model.ayahAtOrAfter(lastRow))) {
+            for (page in edge.page - PREFETCH_PAGES..edge.page + PREFETCH_PAGES) if (page in 1..PAGE_COUNT) wanted += page
+        }
+        neededPages = wanted
         for (page in wanted) {
+            // The get also marks the page as recently used (access order), so it is dropped last.
             if (pages[page] != null || !pagesLoading.add(page)) continue
             viewModelScope.launch {
                 val loaded = runCatching { withContext(io) { text.page(page) } }
@@ -564,9 +588,8 @@ class ReaderViewModel @AssistedInject constructor(
                 val ayahs = loaded.getOrNull() ?: return@launch
                 pages[page] = ayahs.associate { it.id to it.text }
                 val eldest = pages.keys.iterator()
-                while (pages.size > CACHED_PAGES) {
-                    eldest.next()
-                    eldest.remove()
+                while (pages.size > CACHED_PAGES && eldest.hasNext()) {
+                    if (eldest.next() !in neededPages) eldest.remove()
                 }
                 publishTexts()
             }
@@ -863,6 +886,9 @@ class ReaderViewModel @AssistedInject constructor(
         /** Pages of text kept in memory (§7.7). */
         const val CACHED_PAGES = 30
         const val PREFETCH_PAGES = 1
+
+        /** Rows around the screen whose pages are loaded ahead, in either direction. */
+        const val PREFETCH_ROWS = 10
         const val BROWSE_POSITION_DEBOUNCE_MILLIS = 500L
         private const val PAGE_COUNT = 604
     }

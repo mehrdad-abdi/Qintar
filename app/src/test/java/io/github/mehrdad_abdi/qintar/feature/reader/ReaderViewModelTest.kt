@@ -484,6 +484,36 @@ class ReaderViewModelTest {
         assertEquals("ayah 50:1", reader.state.value.texts[app.ayah(50, 1)])
     }
 
+    /**
+     * The owner's phone (2026-11-27): Read all under Unread flickered. Talaq 65:2–3 and al-An'am 6:59
+     * were on screen together, and every page between them (about 430) was loaded into a cache of 30,
+     * so the text on screen was dropped and loaded again, over and over.
+     */
+    @Test
+    fun `two distant bookmarks on screen together load only their own pages, and keep them`() = runTest {
+        val talaq = app.library.create(io.github.mehrdad_abdi.qintar.domain.model.BookmarkDraft(AyahRange(app.ayah(65, 2), app.ayah(65, 3)), BookmarkKind.RANGE))
+        val anam = app.library.create(BookmarkDrafts.ayah(app.ayah(6, 59)).copy(label = "An'am"))
+        val text = CountingPages(app.text)
+        val reader = app.readerViewModel(ReaderRoute.bookmarks(), main.dispatcher, text = text)
+        val rows = reader.state.value.rows
+        assertEquals("al-An'am, then Talaq", listOf(anam.id, talaq.id), reader.state.value.model!!.segments.map { (it.context as ReadContext.Bookmark).id })
+
+        reader.onVisibleRows(0, rows.lastIndex)
+        reader.onVisibleRows(0, rows.lastIndex)
+
+        val texts = reader.state.value.texts
+        assertTrue(app.ayah(65, 2) in texts && app.ayah(65, 3) in texts && app.ayah(6, 59) in texts)
+        assertTrue("pages read: ${text.pages}", text.pages.size <= 8)
+        assertEquals("nothing is read twice", text.pages.size, text.pages.toSet().size)
+    }
+
+    /** Records each mushaf page read. */
+    private class CountingPages(private val inner: io.github.mehrdad_abdi.qintar.domain.port.QuranTextSource) :
+        io.github.mehrdad_abdi.qintar.domain.port.QuranTextSource by inner {
+        val pages = ArrayList<Int>()
+        override suspend fun page(page: Int) = inner.page(page).also { pages += page }
+    }
+
     @Test
     fun `scrolling the whole Quran keeps a bounded number of pages in memory`() = runTest {
         val reader = browse(1, 1)
