@@ -44,10 +44,14 @@ enum class ReaderEntry {
     RANDOM,
 
     /**
-     * Every bookmark, in the order of the Bookmarks list (groups, then Ungrouped), each counted under
-     * its own bookmark. The Bookmarks tab plays under this origin; a tap on the player returns there.
+     * Every bookmark the Bookmarks list shows, in its order ("Read all"), each counted under its own
+     * bookmark; [ReaderRoute.unreadOnly] keeps only those not read today.
      */
     BOOKMARKS,
+    ;
+
+    /** A reader of bookmarks, where a bookmark's place says more than a page's (owner, 2026-11-27). */
+    val readsBookmarks: Boolean get() = this == BOOKMARK || this == GROUP || this == BOOKMARKS
 }
 
 /**

@@ -2,6 +2,7 @@ package io.github.mehrdad_abdi.qintar.feature.reader
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,7 +55,7 @@ internal fun ReaderSheets(state: ReaderUiState, viewModel: ReaderViewModel) {
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         when (sheet) {
-            ReaderSheet.JUMP -> JumpSheetContent(state, viewModel)
+            ReaderSheet.JUMP -> if (state.entry.readsBookmarks) BookmarkJumpContent(state, viewModel) else JumpSheetContent(state, viewModel)
             ReaderSheet.TEXT -> TextSheetContent(state, viewModel)
         }
     }
@@ -119,6 +120,45 @@ private fun JumpSheetContent(state: ReaderUiState, viewModel: ReaderViewModel) {
                         label = { Text(stringResource(R.string.juz_n, formatNumber(juz)), style = QintarType.Label) },
                     )
                 }
+            }
+        }
+    }
+}
+
+/** Among bookmarks the jump sheet lists them, each with its read state (owner, 2026-11-27). */
+@Composable
+private fun BookmarkJumpContent(state: ReaderUiState, viewModel: ReaderViewModel) {
+    val colors = MaterialTheme.colorScheme
+    androidx.compose.foundation.lazy.LazyColumn(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.screen)
+            .navigationBarsPadding()
+            .testTag(JUMP_SHEET_TAG),
+        contentPadding = PaddingValues(bottom = Spacing.xl),
+    ) {
+        item { Text(stringResource(R.string.reader_jump_bookmark), style = QintarType.Title, color = colors.onSurface, modifier = Modifier.padding(bottom = Spacing.sm)) }
+        items(state.segmentTitles.size) { segment ->
+            val done = state.headers.getOrNull(segment)?.done == true
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = Sizes.touchTarget)
+                    .clickable { viewModel.onJumpToSegment(segment) },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                io.github.mehrdad_abdi.qintar.ui.designsystem.ReadStateIndicator(
+                    if (done) io.github.mehrdad_abdi.qintar.ui.designsystem.ReadState.Done else io.github.mehrdad_abdi.qintar.ui.designsystem.ReadState.NotRead,
+                    size = Sizes.iconSmall,
+                )
+                Text(
+                    "${formatNumber(segment + 1)}. ${io.github.mehrdad_abdi.qintar.ui.common.bookmarkTitleText(state.segmentTitles[segment])}",
+                    style = QintarType.Body,
+                    color = colors.onSurface,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
             }
         }
     }

@@ -99,4 +99,6 @@
     <!-- 1: full readings today, 2: repeat target -->
     <string name="reader_header_readings">%1$s / %2$s today</string>
     <string name="goto_help">Ayah 2:255 · surah 36 or its name · page p300 · juz j12</string>
+    <string name="reader_bookmark_position">Bookmark %1$s of %2$s</string>
+    <string name="reader_jump_bookmark">Go to a bookmark</string>
 </resources>

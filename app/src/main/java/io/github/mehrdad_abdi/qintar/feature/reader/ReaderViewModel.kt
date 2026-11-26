@@ -798,6 +798,13 @@ class ReaderViewModel @AssistedInject constructor(
         scrollToAyah(ayah)
     }
 
+    /** The jump sheet of a bookmark reader: to the header of that bookmark. */
+    fun onJumpToSegment(segment: Int) {
+        val model = model ?: return
+        val row = model.rows.indexOfFirst { it.segment == segment }.takeIf { it >= 0 } ?: return
+        _state.update { it.copy(scrollRequest = ScrollRequest(row, ++scrollToken), sheet = null) }
+    }
+
     fun onJumpToSurah(number: Int) {
         val index = quran ?: return
         val wanted = index.surahRange(number)

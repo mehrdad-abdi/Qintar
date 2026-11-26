@@ -208,17 +208,31 @@ fun ReaderScreen(
                         audioMenu = { AudioMenu(state.canDownloadPassage, viewModel) },
                     )
                     current?.let { at ->
-                        PositionBar(
-                            primary = stringResource(
-                                R.string.reader_position,
-                                formatNumber(at.page),
-                                formatNumber(PAGE_COUNT),
-                                formatNumber(at.page * 100 / PAGE_COUNT),
-                            ),
-                            secondary = stringResource(R.string.juz_n, formatNumber(at.juz)),
-                            onClick = { viewModel.onSheet(ReaderSheet.JUMP) },
-                            modifier = Modifier.padding(horizontal = Spacing.screen),
-                        )
+                        if (state.entry.readsBookmarks) {
+                            // Page and juz say little among bookmarks (owner, 2026-11-27): which bookmark
+                            // of how many, and how many are done; one bookmark's header says it all.
+                            val count = model.segments.size
+                            if (count > 1) {
+                                PositionBar(
+                                    primary = stringResource(R.string.reader_bookmark_position, formatNumber(at.segment + 1), formatNumber(count)),
+                                    secondary = stringResource(R.string.bm_group_progress, formatNumber(state.headers.count { it?.done == true }), formatNumber(count)),
+                                    onClick = { viewModel.onSheet(ReaderSheet.JUMP) },
+                                    modifier = Modifier.padding(horizontal = Spacing.screen),
+                                )
+                            }
+                        } else {
+                            PositionBar(
+                                primary = stringResource(
+                                    R.string.reader_position,
+                                    formatNumber(at.page),
+                                    formatNumber(PAGE_COUNT),
+                                    formatNumber(at.page * 100 / PAGE_COUNT),
+                                ),
+                                secondary = stringResource(R.string.juz_n, formatNumber(at.juz)),
+                                onClick = { viewModel.onSheet(ReaderSheet.JUMP) },
+                                modifier = Modifier.padding(horizontal = Spacing.screen),
+                            )
+                        }
                     }
                     ReaderList(state, model, listState, viewModel, onNavigate, Modifier.weight(1f), bottomRoom = if (playerVisible) 224.dp else 112.dp)
                 }

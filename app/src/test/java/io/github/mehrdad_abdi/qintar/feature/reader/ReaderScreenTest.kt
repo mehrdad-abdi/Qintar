@@ -13,6 +13,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeRight
 import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
+import io.github.mehrdad_abdi.qintar.domain.model.RangeMode
+import io.github.mehrdad_abdi.qintar.domain.service.BookmarkDrafts
+import androidx.compose.ui.test.onNodeWithTag
 import io.github.mehrdad_abdi.qintar.domain.model.ReadMethod
 import io.github.mehrdad_abdi.qintar.domain.testing.DomainFixture
 import io.github.mehrdad_abdi.qintar.testing.readerViewModel
@@ -197,5 +200,38 @@ class ReaderScreenTest {
 
         assertEquals(io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute.forAyah(app.ayah(2, 1).value), navigated.last())
         assertTrue("nothing saved until the editor saves", runBlocking { app.bookmarkStore.bookmarks() }.isEmpty())
+    }
+
+    // ---- Bookmark readers: the position bar (owner, 2026-11-27) ------------------------------------
+
+    @Test
+    fun `reading several bookmarks, the bar says which bookmark and how many are done, and jumps to one`() {
+        val (kursi, ikhlas) = runBlocking {
+            val group = app.library.createGroup("Morning")
+            app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)).copy(groupId = group.id)) to
+                app.library.create(BookmarkDrafts.surah(112, app.index).copy(groupId = group.id))
+        }
+        runBlocking { app.tracker.markRange(kursi.range, ReadContext.Bookmark(kursi.id), ReadMethod.BULK, RangeMode.FILL) }
+        val group = runBlocking { app.bookmarkStore.groups().single() }
+        open(ReaderRoute.group(group.id))
+
+        compose.onNodeWithText("Page", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Juz", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("1 of 2 done").assertIsDisplayed()
+        compose.onNodeWithText("Bookmark 2 of 2").assertIsDisplayed().performClick()
+
+        compose.onNodeWithTag(JUMP_SHEET_TAG).assertIsDisplayed()
+        compose.onNodeWithText("Surah 2 255", substring = true, useUnmergedTree = true).assertIsDisplayed().performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Bookmark 1 of 2").assertIsDisplayed()
+        check(ikhlas.id > 0)
+    }
+
+    @Test
+    fun `one bookmark has no position bar, its header says all`() {
+        val kursi = runBlocking { app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255))) }
+        open(ReaderRoute.bookmark(kursi.id))
+        compose.onNodeWithText("Page", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Bookmark 1 of 1").assertDoesNotExist()
     }
 }
