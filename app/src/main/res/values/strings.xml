@@ -70,7 +70,7 @@
     <!-- 1: number of readings -->
     <string name="ayah_state_read_times">read %1$s times today</string>
     <string name="ayah_state_covered_earlier">read on an earlier day</string>
-    <string name="ayah_action_mark_read">Mark read</string>
+    <string name="ayah_action_mark_read">I read this ayah</string>
     <string name="ayah_action_bookmark">Bookmark</string>
     <string name="ayah_bookmarked">Bookmarked</string>
     <string name="ayah_action_play">Play</string>
@@ -110,10 +110,10 @@
     <string name="part_three_quarters">¾ Hizb %1$s</string>
     <string name="reader_position">Page %1$s of %2$s · %3$s%%</string>
     <string name="sajda_label">Sajdah</string>
-    <string name="ayah_menu_mark_up_to_here">Mark up to here</string>
+    <string name="ayah_menu_mark_up_to_here">I read up to here</string>
     <string name="bulk_marked">%1$s ayahs marked</string>
-    <string name="khatm_skip_message">Mark all %1$s ayahs from %2$s to here as read?</string>
-    <string name="khatm_skip_mark_n">Mark %1$s ayahs</string>
+    <string name="khatm_skip_message">Did you read all %1$s ayahs from %2$s to here?</string>
+    <string name="khatm_skip_mark_n">I read %1$s ayahs</string>
     <string name="khatm_skip_only_this">Only this ayah</string>
     <string name="reader_not_found_title">Nothing to read here</string>
     <string name="reader_not_found_message">This khatm, bookmark or group no longer exists.</string>
@@ -145,8 +145,8 @@
         <item quantity="other">%1$s ayahs</item>
     </plurals>
     <string name="progress_of">%1$s / %2$s</string>
-    <string name="reader_mark_bookmark">Mark read</string>
-    <string name="reader_mark_surah">Mark %1$s read</string>
+    <string name="reader_mark_bookmark">I read it</string>
+    <string name="reader_mark_surah">I finished %1$s</string>
     <string name="hadith_intro">The seven ranks of Qintar come from this narration about reciting the Quran at night.</string>
     <string name="hadith_label_ar">Arabic</string>
     <string name="hadith_label_en">English</string>
@@ -156,5 +156,6 @@
     <!-- The hadith in the app language only (Settings → About). -->
     <string name="hadith_text_local" translatable="false">@string/hadith_text_en</string>
     <string name="todays_readings">Today\'s readings</string>
+    <string name="today_refresh">Refresh</string>
     <string name="day_show_ayahs">Show the ayahs</string>
 </resources>

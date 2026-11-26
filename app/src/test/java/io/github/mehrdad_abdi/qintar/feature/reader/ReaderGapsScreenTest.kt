@@ -68,7 +68,7 @@ class ReaderGapsScreenTest {
         // Scrolled to the top of the list, clear of the floating pill.
         val model = ReaderRowModel.build(listOf(Segment(ReadContext.Browse, AyahRange.ALL)), app.index)
         compose.onNodeWithTag(READER_LIST_TAG).performScrollToIndex(model.rows.indexOfFirst { it is ReaderRow.PageDivider } - 1)
-        compose.onNodeWithText("Mark page $page read").performClick()
+        compose.onNodeWithText("I finished page $page").performClick()
         compose.onNodeWithText("${app.index.pageRange(page).size} ayahs marked").assertIsDisplayed()
         assertEquals(app.index.pageRange(page).size, app.log.events.size)
 

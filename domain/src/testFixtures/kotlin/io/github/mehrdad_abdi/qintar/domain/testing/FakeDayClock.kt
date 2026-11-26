@@ -35,6 +35,12 @@ class FakeDayClock(
 
     private val today = MutableStateFlow(readingDay(instant, zone, dayStartMinutes))
 
+    /**
+     * A phone asleep: time moves but [todayFlow] does not, as when the production clock's boundary
+     * wait did not run, until [refresh] is called.
+     */
+    var asleep: Boolean = false
+
     override val todayFlow: StateFlow<LocalDate> = today.asStateFlow()
 
     override fun now(): Instant = instant
@@ -74,7 +80,11 @@ class FakeDayClock(
         publish()
     }
 
-    private fun publish() {
+    override fun refresh() {
         today.value = today()
+    }
+
+    private fun publish() {
+        if (!asleep) today.value = today()
     }
 }

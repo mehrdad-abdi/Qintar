@@ -56,7 +56,7 @@
     <string name="ayah_state_read_today">قُرئت اليوم</string>
     <string name="ayah_state_read_times">قُرئت %1$s مرات اليوم</string>
     <string name="ayah_state_covered_earlier">قُرئت في يوم سابق</string>
-    <string name="ayah_action_mark_read">تعليم كمقروءة</string>
+    <string name="ayah_action_mark_read">قرأتُ هذه الآية</string>
     <string name="ayah_action_bookmark">إضافة علامة</string>
     <string name="ayah_bookmarked">عليها علامة</string>
     <string name="ayah_action_play">تشغيل</string>
@@ -94,10 +94,10 @@
     <string name="part_three_quarters">ثلاثة أرباع الحزب %1$s</string>
     <string name="reader_position">الصفحة %1$s من %2$s · %3$s٪</string>
     <string name="sajda_label">سجدة</string>
-    <string name="ayah_menu_mark_up_to_here">تعليم إلى هنا</string>
+    <string name="ayah_menu_mark_up_to_here">قرأتُ إلى هنا</string>
     <string name="bulk_marked">تم تعليم %1$s آية</string>
-    <string name="khatm_skip_message">هل تريد تعليم %1$s آية من %2$s إلى هنا مقروءة؟</string>
-    <string name="khatm_skip_mark_n">تعليم %1$s آية</string>
+    <string name="khatm_skip_message">هل قرأتَ الآيات الـ%1$s من %2$s إلى هنا؟</string>
+    <string name="khatm_skip_mark_n">قرأتُ %1$s آية</string>
     <string name="khatm_skip_only_this">هذه الآية فقط</string>
     <string name="reader_not_found_title">لا شيء للقراءة هنا</string>
     <string name="reader_not_found_message">هذه الختمة أو العلامة أو المجموعة لم تعد موجودة.</string>
@@ -133,8 +133,8 @@
         <item quantity="other">%1$s آية</item>
     </plurals>
     <string name="progress_of">%1$s / %2$s</string>
-    <string name="reader_mark_bookmark">تعليم كمقروءة</string>
-    <string name="reader_mark_surah">تعليم سورة %1$s كمقروءة</string>
+    <string name="reader_mark_bookmark">قرأتُها</string>
+    <string name="reader_mark_surah">قرأتُ سورة %1$s</string>
     <string name="hadith_intro">مراتب قنطار السبع مأخوذة من هذه الرواية في تلاوة القرآن ليلًا.</string>
     <string name="hadith_label_ar">العربية</string>
     <string name="hadith_label_en">الإنجليزية</string>
@@ -143,5 +143,6 @@
     <string name="settings_hadith_summary">من أين جاءت المراتب السبع</string>
     <string name="hadith_text_local" translatable="false">@string/hadith_text_ar</string>
     <string name="todays_readings">قراءات اليوم</string>
+    <string name="today_refresh">تحديث</string>
     <string name="day_show_ayahs">عرض الآيات</string>
 </resources>

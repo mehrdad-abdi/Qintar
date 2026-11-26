@@ -32,6 +32,13 @@ interface DayClock {
 
     /** Wall-clock time of day in the device zone, for schedule windows (§4.7). */
     fun localTime(): LocalTime = LocalDateTime.ofInstant(now(), zone()).toLocalTime()
+
+    /**
+     * Re-evaluates the reading day now and publishes it on [todayFlow]. Called when the app comes
+     * to the foreground and when the user taps the date on Today: a phone that slept may not have
+     * woken the boundary wait (notes item 41).
+     */
+    fun refresh()
 }
 
 /** The reading day of [instant]: the local date after stepping back by the "Day starts at" offset. */
@@ -102,7 +109,7 @@ class SystemDayClock(
      * Re-evaluates the reading day and restarts the boundary wait. The app calls this on
      * ACTION_TIME_CHANGED, ACTION_TIMEZONE_CHANGED and ACTION_DATE_CHANGED.
      */
-    fun refresh() {
+    override fun refresh() {
         today()
         refreshes.value += 1
     }

@@ -380,7 +380,7 @@ interface DayClock {
 ```
 
 - `today() = (now() in system zone − dayStartOffset).toLocalDate()`. `dayStartOffset` is the "Day starts at" setting, default 00:00, allowed 00:00–12:00. *Owner to confirm* (Q3): the hadith says "in a night", so a user who reads after midnight may want that counted with the evening before; a 03:00 or 04:00 day start does that.
-- `todayFlow` re-emits at each boundary and on `ACTION_TIME_CHANGED`, `ACTION_TIMEZONE_CHANGED`, `ACTION_DATE_CHANGED`, and when the setting changes.
+- `todayFlow` re-emits at each boundary and on `ACTION_TIME_CHANGED`, `ACTION_TIMEZONE_CHANGED`, `ACTION_DATE_CHANGED`, and when the setting changes. The boundary wait does not run while the phone sleeps and the broadcasts do not reach a frozen app, so the day is also re-checked (`DayClock.refresh()`) whenever the app comes to the foreground, and when the user taps the date or the count on Today (owner, 2026-11-26).
 - **Never cache a date.** Writers call `today()` at the moment of writing. Readers build their queries with `todayFlow.flatMapLatest { day -> … }`. A lint rule or detekt rule forbids `LocalDate.now()` and `System.currentTimeMillis()` outside the `DayClock` implementation.
 - An event's `day` is never recomputed. Changing time zone or the day-start setting affects only future events.
 - All production code receives time through `DayClock`. Tests and instrumented tests replace it (this is the "mock today" asked for in #18).
@@ -642,7 +642,7 @@ The reader is opened with `ReaderArgs(segments: List<Segment>, startAt)`, where 
 │   8:2               ⋯    ★    ▷  ● ×2  │  read twice today in this context
 │                                        │
 │  ───── Page 201 · Juz 10 · Hizb 19 ──  │  page divider
-│              [ Mark page 200 read ]    │  appears if the page has unread ayahs
+│              [ I finished page 200 ]   │  appears if the page has unread ayahs
 │                                        │
 │ ┌────────────────────────────────────┐ │
 │ │ ◆ 47 today · 3 to Dhakir     ▓▓▓▓░ │ │  today pill: rank mark, count, next
@@ -1342,14 +1342,14 @@ two disagree, this section wins. The full list of findings is in `phone-test-not
 
 | Topic | Decision | Replaces |
 |---|---|---|
-| Hadith | First onboarding page (also for users carried over from v1): Bismillah, then the hadith in Arabic, English and Persian, whatever the app language. Settings → About shows it again. Source (book) to be added. | §4.4 decision, Q2 |
+| Hadith | First onboarding page (also for users carried over from v1): Bismillah, then the hadith in Arabic, English and Persian, whatever the app language. Settings → About shows it again. The whole hadith, to the explanation of the qintar; the salawat is "peace be upon him and his family"; no book is named under it, so readers of any school read on (owner, 2026-11-26). | §4.4 decision, Q2 |
 | Groups | A group is a set of bookmarks, not a time slot. A bookmark is in at most one group; bookmarks without one stand in the list among the groups (no "Ungrouped" section since 2026-11-25). The group editor offers only ungrouped bookmarks to add, and has a bulk box: one new bookmark per line in the forms of Go to (`2:255`, `2:255-257`, `s36`, `p300`, Persian/Arabic letters and digits), created on Save; a wrong line is reported by its number and blocks Save. | §4.7 groups, §5.6 Groups view |
 | Schedules, readings per day | Hidden in the UI, kept in the model and code (`SHOW_SCHEDULES`, `SHOW_REPEAT_TARGET`). `Bookmark.repeatTarget` is deprecated; new bookmarks get 1. Today and the Bookmarks list ignore schedules. | R-BMK-7/10, §4.7 schedules, §5.6 |
 | Bookmarks tab | One list, no views: filter **All / Unread**; groups and bookmarks without a group side by side in one order, chosen in the list's menu: **Quran order** (default; a group stands at its first ayah), **My order**, **Newest first** (a group by its newest bookmark). **Arrange…** opens a screen of titles only, moved by dragging (a group opens its own Arrange for its bookmarks); a finished drag is saved and switches to My order, keeping the rest as it was shown. Two levels fold: a group hides its bookmarks, a bookmark hides its ayahs, which are read in place (tick, play) and end with **Mark read**. On open, groups are open and bookmarks closed. Under Unread a bookmark read on the screen stays until the screen is left. A long description shows two lines while closed and all of it while open; a tap anywhere on the header opens or closes. The list keeps the screen on, as the reader does. "Read today" counts only readings made from the bookmark. Today lists the first five unread bookmarks in the same order, then **Show all**. | §5.6 Now / Groups / All |
 | Bookmark playback | Play on a bookmark or group goes on through every following bookmark of the list (across groups; under Unread skipping read ones). The list follows the recited ayah and opens its bookmark; the mini player returns to the list (`ReaderEntry.BOOKMARKS`). | §7.8 scope of a play |
 | Bookmark editor | Kinds: Ayah, Range, Surah, Page (no Juz). A range is one surah and two ayahs. The preview shows the first ayahs, the number left out, then the last ayah. | §5.6 Add / Edit |
 | Star | The ayah star opens the bookmark editor filled with the ayah (or the bookmark the ayah is in). A filled star marks any ayah inside a bookmark. | R-BMK-2 |
-| Reader marking | Inside a bookmark there is no Mark page: the bookmark ends with one **Mark read**. In a khatm and in free reading each surah ends with **Mark surah read**, besides Mark page. | §5.4 page divider |
+| Reader marking | Inside a bookmark there is no Mark page: the bookmark ends with one **Mark read**. In a khatm and in free reading each surah ends with **Mark surah read**, besides Mark page. Labels speak as the reader (owner, 2026-11-26): "I finished page 200", "I finished Al-Baqarah", "I read it" (end of a bookmark), "I read up to here", "I read 12 ayahs". | §5.4 page divider |
 | Surah list | The bar under a surah shows the share of it read today, from anywhere (none if nothing was read today), in place of the divider; the khatm shows its own progress (changed 2026-11-25). | §5.3 surah row |
 | Revisit | Per bookmark: never read from the bookmark first, then the ones read longest ago; a tap opens it. | §4.8 |
 | Audio | Setting **Stop before sajda ayahs** (off by default): playback stops before a sajda ayah and plays it when the listener taps play. Setting **Sajda dhikr after sajda ayahs** (on by default): after a sajda ayah the bundled dhikr (`res/raw/sajda_dhikr.mp3`: سُبْحَانَ رَبِّيَ الْأَعْلَى وَبِحَمْدِهِ and the sajda dua, voice by Google Cloud Text-to-Speech, credited in About) plays, never counted, then playback waits until the listener plays on. | §7.8 |

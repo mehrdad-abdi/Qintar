@@ -48,7 +48,7 @@ class ReaderScreenTest {
     }
 
     /** The check of the n-th ayah on screen. */
-    private fun check(n: Int) = compose.onAllNodesWithContentDescription("Mark read")[n]
+    private fun check(n: Int) = compose.onAllNodesWithContentDescription("I read this ayah")[n]
     private fun menu(n: Int) = compose.onAllNodesWithContentDescription("More actions")[n]
 
     @Test
@@ -69,11 +69,11 @@ class ReaderScreenTest {
         open(ReaderRoute.browse(app.ayah(2, 1).value))
 
         check(0).performClick()
-        compose.onNode(hasContentDescription("Mark read") and hasStateDescription("read today")).assertIsDisplayed()
+        compose.onNode(hasContentDescription("I read this ayah") and hasStateDescription("read today")).assertIsDisplayed()
 
         check(0).performClick()
 
-        compose.onNode(hasContentDescription("Mark read") and hasStateDescription("read 2 times today")).assertIsDisplayed()
+        compose.onNode(hasContentDescription("I read this ayah") and hasStateDescription("read 2 times today")).assertIsDisplayed()
         compose.onNodeWithContentDescription("2 today, 8 ayahs to the first rank").assertIsDisplayed()
         assertEquals(listOf(app.ayah(2, 1), app.ayah(2, 1)), app.log.events.map { it.ayahId })
     }
@@ -94,7 +94,7 @@ class ReaderScreenTest {
         open(ReaderRoute.browse(app.ayah(2, 1).value))
 
         menu(1).performClick()
-        compose.onNodeWithText("Mark up to here").performClick()
+        compose.onNodeWithText("I read up to here").performClick()
 
         compose.onNodeWithText("2 ayahs marked").assertIsDisplayed()
         assertEquals(2, app.log.events.size)
@@ -124,7 +124,7 @@ class ReaderScreenTest {
     fun `the undo message goes away by itself after a few seconds, and the marks stay`() {
         open(ReaderRoute.browse(app.ayah(2, 1).value))
         menu(1).performClick()
-        compose.onNodeWithText("Mark up to here").performClick()
+        compose.onNodeWithText("I read up to here").performClick()
         compose.onNodeWithText("2 ayahs marked").assertIsDisplayed()
 
         compose.mainClock.advanceTimeBy(15_000)
@@ -138,7 +138,7 @@ class ReaderScreenTest {
     fun `the undo message closes on a swipe, and the marks stay`() {
         open(ReaderRoute.browse(app.ayah(2, 1).value))
         menu(1).performClick()
-        compose.onNodeWithText("Mark up to here").performClick()
+        compose.onNodeWithText("I read up to here").performClick()
 
         compose.onNodeWithText("2 ayahs marked").performTouchInput { swipeRight() }
         compose.waitForIdle()
@@ -155,10 +155,10 @@ class ReaderScreenTest {
 
         check(1).performClick()
 
-        compose.onNodeWithText("Mark all 2 ayahs from Surah 1 1 to here as read?").assertIsDisplayed()
+        compose.onNodeWithText("Did you read all 2 ayahs from Surah 1 1 to here?").assertIsDisplayed()
         assertTrue("nothing written yet", app.log.events.isEmpty())
 
-        compose.onNodeWithText("Mark 2 ayahs").performClick()
+        compose.onNodeWithText("I read 2 ayahs").performClick()
 
         assertEquals(listOf(1, 2), app.log.events.map { it.ayahId.value })
         assertTrue(app.log.events.all { it.context == ReadContext.Khatm(khatm.id) })

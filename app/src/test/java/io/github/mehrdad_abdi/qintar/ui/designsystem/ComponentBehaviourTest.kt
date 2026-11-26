@@ -46,14 +46,14 @@ class ComponentBehaviourTest {
         compose.setContent {
             QintarTheme { AyahRow("نص", "8:1", AyahCheckState.ReadToday, onCheck = { checks++ }) }
         }
-        compose.onNodeWithContentDescription("Mark read").performClick().performClick()
+        compose.onNodeWithContentDescription("I read this ayah").performClick().performClick()
         assertEquals(2, checks)
     }
 
     @Test
     fun `the check is at least 48dp in both directions`() {
         compose.setContent { QintarTheme { AyahRow("نص", "8:1", AyahCheckState.Unread, onCheck = {}) } }
-        compose.onNodeWithContentDescription("Mark read").assertWidthIsAtLeast(48.dp).assertHeightIsAtLeast(48.dp)
+        compose.onNodeWithContentDescription("I read this ayah").assertWidthIsAtLeast(48.dp).assertHeightIsAtLeast(48.dp)
     }
 
     @Test

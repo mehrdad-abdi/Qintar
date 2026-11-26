@@ -56,7 +56,7 @@
     <string name="ayah_state_read_today">امروز خوانده شده</string>
     <string name="ayah_state_read_times">امروز %1$s بار خوانده شده</string>
     <string name="ayah_state_covered_earlier">در روزهای پیش خوانده شده</string>
-    <string name="ayah_action_mark_read">علامت خوانده‌شده</string>
+    <string name="ayah_action_mark_read">این آیه را خواندم</string>
     <string name="ayah_action_bookmark">نشان کردن</string>
     <string name="ayah_bookmarked">نشان شده</string>
     <string name="ayah_action_play">پخش</string>
@@ -94,10 +94,10 @@
     <string name="part_three_quarters">سه‌ربع حزب %1$s</string>
     <string name="reader_position">صفحهٔ %1$s از %2$s · %3$s٪</string>
     <string name="sajda_label">سجده</string>
-    <string name="ayah_menu_mark_up_to_here">علامت‌زدن تا اینجا</string>
+    <string name="ayah_menu_mark_up_to_here">تا این‌جا خواندم</string>
     <string name="bulk_marked">%1$s آیه علامت خورد</string>
-    <string name="khatm_skip_message">همهٔ %1$s آیه از %2$s تا اینجا خوانده‌شده علامت بخورد؟</string>
-    <string name="khatm_skip_mark_n">علامت‌زدن %1$s آیه</string>
+    <string name="khatm_skip_message">همهٔ %1$s آیه از %2$s تا این‌جا را خوانده‌اید؟</string>
+    <string name="khatm_skip_mark_n">%1$s آیه را خواندم</string>
     <string name="khatm_skip_only_this">فقط همین آیه</string>
     <string name="reader_not_found_title">چیزی برای خواندن اینجا نیست</string>
     <string name="reader_not_found_message">این ختم، نشانک یا گروه دیگر وجود ندارد.</string>
@@ -129,8 +129,8 @@
         <item quantity="other">%1$s آیه</item>
     </plurals>
     <string name="progress_of">%1$s / %2$s</string>
-    <string name="reader_mark_bookmark">علامت خوانده‌شده</string>
-    <string name="reader_mark_surah">علامت خواندن سوره %1$s</string>
+    <string name="reader_mark_bookmark">خواندم</string>
+    <string name="reader_mark_surah">سورهٔ %1$s را خواندم</string>
     <string name="hadith_intro">هفت رتبهٔ قنطار از این روایت دربارهٔ تلاوت قرآن در شب گرفته شده است.</string>
     <string name="hadith_label_ar">عربی</string>
     <string name="hadith_label_en">انگلیسی</string>
@@ -139,5 +139,6 @@
     <string name="settings_hadith_summary">هفت رتبه از کجا آمده‌اند</string>
     <string name="hadith_text_local" translatable="false">@string/hadith_text_fa</string>
     <string name="todays_readings">خوانده‌های امروز</string>
+    <string name="today_refresh">به‌روزرسانی</string>
     <string name="day_show_ayahs">نمایش آیه‌ها</string>
 </resources>

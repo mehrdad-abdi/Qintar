@@ -80,6 +80,16 @@ class StringResourcesTest {
         assertTrue(problems.joinToString("\n"), problems.isEmpty())
     }
 
+    /** Someone who tried another language must find the way back (owner, 2026-11-26, notes item 44). */
+    @Test
+    fun `the Language setting also says Language in English in fa and ar`() {
+        assertTrue(english.getValue("settings_language"), english.getValue("settings_language") == "Language")
+        for ((locale, map) in listOf("fa" to persian, "ar" to arabic)) {
+            val text = map.getValue("settings_language")
+            assertTrue("values-$locale: $text", text.endsWith("(Language)"))
+        }
+    }
+
     private companion object {
         /** Keys of Persian strings that deliberately quote Arabic (§6.6). None yet. */
         val ARABIC_QUOTATIONS_IN_PERSIAN = emptySet<String>()

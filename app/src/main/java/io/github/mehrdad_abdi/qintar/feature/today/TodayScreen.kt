@@ -5,6 +5,7 @@ import io.github.mehrdad_abdi.qintar.ui.common.showUndo
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -111,6 +112,7 @@ const val TODAY_CONTENT_TAG = "today-content"
 /** Test tag of the "Log reading" button. */
 /** Test tag of the "Today's readings" link. */
 const val TODAY_READINGS_TAG = "today-readings"
+const val TODAY_DATE_TAG = "today-date"
 
 const val TODAY_LOG_TAG = "today-log-reading"
 
@@ -156,6 +158,7 @@ fun TodayScreen(
     ) {
         if (state.loading) return@Column
         val locale = LocalConfiguration.current.locales[0]
+        val refreshLabel = stringResource(R.string.today_refresh)
         Row(
             modifier = Modifier.fillMaxWidth().padding(start = Spacing.screen, end = Spacing.sm, top = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
@@ -164,7 +167,8 @@ fun TodayScreen(
                 io.github.mehrdad_abdi.qintar.ui.common.calendarDate(state.day, weekday = true, year = false),
                 style = QintarType.Title,
                 color = colors.onSurface,
-                modifier = Modifier.weight(1f),
+                // A tap re-checks the day: after a night in the background it may be stale (notes item 41).
+                modifier = Modifier.weight(1f).clickable(onClickLabel = refreshLabel, onClick = viewModel::onRefreshDay).testTag(TODAY_DATE_TAG),
             )
             IconButton(onClick = { onNavigate(SettingsRoute) }, modifier = Modifier.size(Sizes.touchTarget)) {
                 Icon(Icons.Outlined.Settings, stringResource(R.string.screen_settings), tint = colors.onSurfaceVariant)
@@ -179,7 +183,10 @@ fun TodayScreen(
                 MigrationNoticeCard(notice)
             }
             Spacer(Modifier.height(Spacing.lg))
-            RankSummary(state)
+            Column(
+                Modifier.fillMaxWidth().clickable(onClickLabel = refreshLabel, onClick = viewModel::onRefreshDay),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) { RankSummary(state) }
             // Every reading of today, where an unwanted one is deleted (owner, 2026-11-22).
             TextButton(
                 onClick = { onNavigate(DayDetailRoute(state.day.toString())) },

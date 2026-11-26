@@ -126,6 +126,28 @@ class TodayViewModelTest {
         assertFalse(vm.state.value.streak.atRisk)
     }
 
+    /**
+     * Notes item 41 (owner, 2026-11-26): left in the background overnight, Today still showed
+     * yesterday in the morning. On a phone the boundary wait does not run while it sleeps, so the
+     * day only moves when something asks the clock again: a tap on the date or the count.
+     */
+    @Test
+    fun `after the phone slept past the day start, a tap on the date shows the new day`() = runTest {
+        val vm = today()
+        read(12)
+        main.advanceTimeBy(3_000)
+        app.clock.asleep = true
+
+        app.clock.advanceDays(1)
+        assertEquals("the phone slept: nothing told Today", LocalDate.of(2026, 11, 15), vm.state.value.day)
+
+        vm.onRefreshDay()
+        main.advanceTimeBy(3_000)
+
+        assertEquals(LocalDate.of(2026, 11, 16), vm.state.value.day)
+        assertEquals(0, vm.state.value.rank.count)
+    }
+
     @Test
     fun `Today left open across midnight starts the new day at zero`() = runTest {
         val vm = today()

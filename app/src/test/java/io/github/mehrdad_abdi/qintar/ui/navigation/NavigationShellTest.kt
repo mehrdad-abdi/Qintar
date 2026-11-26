@@ -112,11 +112,11 @@ class NavigationShellTest {
         launch()
         // Ayat al-Kursi as a random ayah: one row, with its check.
         compose.runOnUiThread { navController.navigate(ReaderRoute.random(firstAyahId = 262)) }
-        compose.waitUntil(WAIT_MILLIS) { compose.onAllNodesWithContentDescription("Mark read").fetchSemanticsNodes().size == 1 }
+        compose.waitUntil(WAIT_MILLIS) { compose.onAllNodesWithContentDescription("I read this ayah").fetchSemanticsNodes().size == 1 }
 
         // The ayah is taller than the test window and its check ends up beneath the floating pill,
         // so it is activated the way an accessibility service would.
-        compose.onNodeWithContentDescription("Mark read").performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithContentDescription("I read this ayah").performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
         compose.waitUntil(WAIT_MILLIS) { compose.onAllNodesWithContentDescription("1 today", substring = true).fetchSemanticsNodes().isNotEmpty() }
 
         compose.onNodeWithContentDescription("Back").performClick()

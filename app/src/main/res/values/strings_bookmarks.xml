@@ -135,7 +135,7 @@
     <string name="bm_play_bookmark">Play %1$s</string>
     <string name="bm_menu_open">Open in reader</string>
     <string name="bm_read_today">Read today</string>
-    <string name="bm_mark_read">Mark read</string>
+    <string name="bm_mark_read">I read it</string>
     <string name="grp_add_members">Add bookmarks</string>
     <string name="grp_add_members_none">Every bookmark is already in this group.</string>
     <string name="bm_filter_count">%1$s · %2$s</string>

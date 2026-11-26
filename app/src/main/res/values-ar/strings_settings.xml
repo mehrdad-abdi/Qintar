@@ -8,7 +8,7 @@
     <string name="settings_section_data">البيانات</string>
     <string name="settings_section_about">حول التطبيق</string>
     <string name="settings_system_default">افتراضي النظام</string>
-    <string name="settings_language">اللغة</string>
+    <string name="settings_language">اللغة (Language)</string>
     <string name="settings_theme">السمة</string>
     <string name="settings_theme_light">فاتحة</string>
     <string name="settings_theme_dark">داكنة</string>

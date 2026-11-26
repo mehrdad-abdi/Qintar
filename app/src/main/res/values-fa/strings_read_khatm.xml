@@ -78,7 +78,7 @@
     <string name="reader_jump_juz">جزء</string>
     <string name="reader_jump_resume">جای ادامه</string>
     <string name="reader_first_unread_chip">نخستین نخوانده</string>
-    <string name="reader_mark_page">علامت صفحهٔ %1$s به‌عنوان خوانده</string>
+    <string name="reader_mark_page">صفحهٔ %1$s را خواندم</string>
     <string name="reader_log_full_reading">ثبت یک خواندن کامل</string>
     <string name="reader_log_group_reading">ثبت یک خواندن کامل گروه</string>
     <string name="reader_header_readings">%1$s / %2$s امروز</string>

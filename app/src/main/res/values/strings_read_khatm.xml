@@ -93,7 +93,7 @@
     <string name="reader_jump_resume">Resume position</string>
     <string name="reader_first_unread_chip">First unread</string>
     <!-- 1: page number -->
-    <string name="reader_mark_page">Mark page %1$s read</string>
+    <string name="reader_mark_page">I finished page %1$s</string>
     <string name="reader_log_full_reading">Log a full reading</string>
     <string name="reader_log_group_reading">Log a full reading of the group</string>
     <!-- 1: full readings today, 2: repeat target -->

@@ -222,6 +222,9 @@ class TodayViewModel(
         todayGoalFraction = todayGoalFraction,
     )
 
+    /** A tap on the date or the count: the day may have changed while the phone slept (notes item 41). */
+    fun onRefreshDay() = clock.refresh()
+
     /** "Start a khatm" on the empty card. [name] is the localized default name. */
     fun onStartKhatm(name: String) {
         viewModelScope.launch {
