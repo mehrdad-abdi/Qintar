@@ -294,6 +294,48 @@ class ReaderViewModelTest {
     }
 
     @Test
+    fun `Read all of the Bookmarks list reads what the list shows, in its order`() = runTest {
+        // Notes item 47 (owner, 2026-11-26): under Unread, only the bookmarks not read today.
+        val group = app.library.createGroup("Morning")
+        val ikhlas = app.library.create(BookmarkDrafts.surah(112, app.index).copy(groupId = group.id))
+        val kursi = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)))
+        val fatiha = app.library.create(BookmarkDrafts.surah(1, app.index))
+        app.tracker.markRange(kursi.range, ReadContext.Bookmark(kursi.id), io.github.mehrdad_abdi.qintar.domain.model.ReadMethod.BULK, io.github.mehrdad_abdi.qintar.domain.model.RangeMode.FILL)
+
+        val all = reader(ReaderRoute.bookmarks()).state.value.model!!.segments.map { it.context }
+        assertEquals("Quran order", listOf(fatiha.id, kursi.id, ikhlas.id).map { ReadContext.Bookmark(it) }, all)
+
+        val unread = reader(ReaderRoute.bookmarks(unreadOnly = true)).state.value.model!!.segments.map { it.context }
+        assertEquals(listOf(fatiha.id, ikhlas.id).map { ReadContext.Bookmark(it) }, unread)
+    }
+
+    @Test
+    fun `Read all over a thousand bookmarks watches today's readings with one query, not one per bookmark`() = runTest {
+        // Notes item 43 (owner, 2026-11-26): al-Baqara bookmarked 1000 times must not slow the phone.
+        // Each watched query runs again on every reading, so one per bookmark meant 1000 per tick.
+        repeat(1000) { app.library.create(BookmarkDrafts.surah(2, app.index)) }
+        val log = CountingLog(app.log)
+        val reader = app.readerViewModel(ReaderRoute.bookmarks(), main.dispatcher, log = log)
+        val state = reader.state.value
+        assertEquals(1000, state.model!!.segments.size)
+        assertTrue("watched queries: ${log.watches}", log.watches <= 2)
+
+        val second = reader.row(app.ayah(2, 1), 1)
+        reader.onCheck(second)
+        assertEquals(1, reader.countOf(app.ayah(2, 1), 1))
+        assertEquals("the same ayah of another bookmark is untouched", 0, reader.countOf(app.ayah(2, 1), 0))
+    }
+
+    /** Counts the queries a screen keeps watching. */
+    private class CountingLog(private val inner: io.github.mehrdad_abdi.qintar.domain.port.ReadLogStore) :
+        io.github.mehrdad_abdi.qintar.domain.port.ReadLogStore by inner {
+        var watches = 0
+        override fun observeAyahCounts(context: ReadContext, day: java.time.LocalDate, range: AyahRange) =
+            inner.observeAyahCounts(context, day, range).also { watches++ }
+        override fun observeBookmarkAyahCounts(day: java.time.LocalDate) = inner.observeBookmarkAyahCounts(day).also { watches++ }
+    }
+
+    @Test
     fun `something that no longer exists shows the not-found state`() = runTest {
         assertEquals(ReaderPhase.NOT_FOUND, reader(ReaderRoute.khatm(99)).state.value.phase)
         assertEquals(ReaderPhase.NOT_FOUND, reader(ReaderRoute.bookmark(99)).state.value.phase)

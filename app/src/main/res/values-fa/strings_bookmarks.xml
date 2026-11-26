@@ -116,11 +116,7 @@
     <string name="bm_filter_all">همه</string>
     <string name="bm_filter_unread">خوانده‌نشده</string>
     <string name="bm_unread_empty">همهٔ نشان‌ها امروز خوانده شده‌اند.</string>
-    <string name="bm_play_group">پخش %1$s</string>
-    <string name="bm_play_bookmark">پخش %1$s</string>
-    <string name="bm_menu_open">باز کردن در قرائت</string>
     <string name="bm_read_today">امروز خوانده شد</string>
-    <string name="bm_mark_read">خواندم</string>
     <string name="grp_add_members">افزودن نشان‌ها</string>
     <string name="grp_add_members_none">همهٔ نشان‌ها در این گروه هستند.</string>
     <string name="bm_filter_count">%1$s · %2$s</string>
@@ -142,4 +138,7 @@
         <item quantity="one">%1$s نشانه</item>
         <item quantity="other">%1$s نشانه</item>
     </plurals>
+    <string name="bm_read_all">خواندن همه</string>
+    <string name="bm_show_bookmarks">نمایش نشان‌هایش</string>
+    <string name="bm_hide_bookmarks">پنهان کردن نشان‌هایش</string>
 </resources>

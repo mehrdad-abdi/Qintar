@@ -116,11 +116,7 @@
     <string name="bm_filter_all">الكل</string>
     <string name="bm_filter_unread">غير المقروءة</string>
     <string name="bm_unread_empty">قُرئت كل العلامات اليوم.</string>
-    <string name="bm_play_group">تشغيل %1$s</string>
-    <string name="bm_play_bookmark">تشغيل %1$s</string>
-    <string name="bm_menu_open">فتح في القارئ</string>
     <string name="bm_read_today">قُرئت اليوم</string>
-    <string name="bm_mark_read">قرأتُها</string>
     <string name="grp_add_members">إضافة علامات</string>
     <string name="grp_add_members_none">كل العلامات في هذه المجموعة بالفعل.</string>
     <string name="bm_filter_count">%1$s · %2$s</string>
@@ -146,4 +142,7 @@
         <item quantity="many">%1$s علامة</item>
         <item quantity="other">%1$s علامة</item>
     </plurals>
+    <string name="bm_read_all">قراءة الكل</string>
+    <string name="bm_show_bookmarks">إظهار علاماتها</string>
+    <string name="bm_hide_bookmarks">إخفاء علاماتها</string>
 </resources>

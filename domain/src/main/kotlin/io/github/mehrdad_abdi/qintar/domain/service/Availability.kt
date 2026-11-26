@@ -280,6 +280,8 @@ class Availability @Inject constructor(
         /** @param counts today's count per ayah id in context `Bookmark(bookmark.id)`. */
         fun progress(bookmark: Bookmark, counts: Map<AyahId, Int>): BookmarkProgress {
             val target = bookmark.repeatTarget
+            // Nothing read today in it: no need to walk every ayah (1000 bookmarks of al-Baqara, notes item 43).
+            if (counts.isEmpty()) return BookmarkProgress(0, bookmark.range.size * target, 0, target, bookmark.range.start)
             var readings = 0
             var fullReadings = Int.MAX_VALUE
             var firstBelow: AyahId? = null

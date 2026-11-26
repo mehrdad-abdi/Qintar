@@ -1,11 +1,13 @@
 package io.github.mehrdad_abdi.qintar.feature.bookmarks
 
+import io.github.mehrdad_abdi.qintar.domain.model.AyahRange
 import io.github.mehrdad_abdi.qintar.domain.model.BookmarkDraft
+import io.github.mehrdad_abdi.qintar.domain.port.QuranTextSource
+import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
 import io.github.mehrdad_abdi.qintar.domain.model.Schedule
 import io.github.mehrdad_abdi.qintar.domain.model.TimeWindow
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkDrafts
 import io.github.mehrdad_abdi.qintar.domain.testing.DomainFixture
-import io.github.mehrdad_abdi.qintar.testing.FakePlayerController
 import io.github.mehrdad_abdi.qintar.testing.MainDispatcherRule
 import io.github.mehrdad_abdi.qintar.testing.bookmarksViewModel
 import java.time.LocalTime
@@ -35,7 +37,13 @@ class BookmarksViewModelTest {
 
     private fun BookmarksUiState.sections() = rows.filterIsInstance<BookmarksRow.Section>()
     private fun BookmarksUiState.entries() = rows.filterIsInstance<BookmarksRow.Entry>().map { it.item.id }
-    private fun BookmarksUiState.ayahsOf(id: Long) = rows.filterIsInstance<BookmarksRow.Ayah>().filter { it.bookmarkId == id }
+
+    /** Counts the ayahs read from the Quran text, to show what a screen loads. */
+    private class CountingText(private val inner: QuranTextSource) : QuranTextSource {
+        var ayahsRead = 0
+        override suspend fun ayahs(range: AyahRange) = inner.ayahs(range).also { ayahsRead += it.size }
+        override suspend fun page(page: Int) = inner.page(page).also { ayahsRead += it.size }
+    }
 
     @Test
     fun `bookmarks without a group stand among the groups, with no Ungrouped section, in the chosen order`() = runTest {
@@ -48,9 +56,9 @@ class BookmarksViewModelTest {
         val state = vm.state.value
         assertEquals(listOf(morning.id), state.sections().map { it.sectionKey })
         assertTrue(state.sections().all { it.expanded })
-        assertEquals(BookmarksRow.Entry::class, state.rows[0]::class)
+        assertEquals(BookmarksRow.Entry(state.all.first { it.id == loose.id }, inGroup = false), state.rows[0])
         assertEquals(listOf(loose.id, inGroup.id), state.entries())
-        assertTrue("no ayahs until a bookmark is opened", state.rows.none { it is BookmarksRow.Ayah })
+        assertTrue("the group's bookmark is indented under it", (state.rows.last() as BookmarksRow.Entry).inGroup)
 
         vm.onSort(io.github.mehrdad_abdi.qintar.domain.model.BookmarkSort.RECENT)
         assertEquals("newest first: the loose bookmark was added last", listOf(loose.id, inGroup.id), vm.state.value.entries())
@@ -60,72 +68,72 @@ class BookmarksViewModelTest {
     }
 
     @Test
-    fun `a group folds its bookmarks and a bookmark folds its ayahs`() = runTest {
+    fun `the list is an index of groups and bookmarks, and a group folds its bookmarks`() = runTest {
+        // Notes item 47 (owner, 2026-11-26): ayahs are read in the reader, not in the list.
         val g = app.library.createGroup("G")
         val b = kahf(groupId = g.id)
         val vm = open()
-
-        vm.onToggleBookmark(b.id)
-        val ayahs = vm.state.value.ayahsOf(b.id)
-        assertEquals(b.range.toList(), ayahs.map { it.id })
-        assertTrue("the text is loaded for them", ayahs.all { it.id in vm.state.value.texts })
-        assertEquals("Mark read ends the bookmark", BookmarksRow.End(b.id, done = false), vm.state.value.rows.last())
+        assertEquals(listOf("section-${g.id}", "bookmark-${b.id}"), vm.state.value.rows.map { it.key })
 
         vm.onToggleSection(g.id)
         assertEquals(listOf(g.id), vm.state.value.sections().map { it.sectionKey })
         assertTrue(vm.state.value.entries().isEmpty())
+        assertEquals("a folded group's bookmarks are still read by Read all", listOf(b.id), vm.state.value.listed.map { it.id })
 
         vm.onToggleSection(g.id)
-        assertEquals("the bookmark is still open", b.range.size, vm.state.value.ayahsOf(b.id).size)
-        vm.onToggleBookmark(b.id)
-        assertTrue(vm.state.value.ayahsOf(b.id).isEmpty())
+        assertEquals(listOf(b.id), vm.state.value.entries())
+    }
+
+    // ---- the glimpse of the text (owner, 2026-11-26) --------------------------------------------
+
+    @Test
+    fun `a short passage's glimpse is all of it`() = runTest {
+        val kursi = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)))
+        val vm = open()
+        vm.onGlimpseNeeded(kursi.id)
+        val glimpse = vm.state.value.glimpses.getValue(kursi.range)
+        assertNull("nothing left out", glimpse.tail)
+        assertTrue(glimpse.head.startsWith(app.text.ayahs(kursi.range).single().text.take(10)))
     }
 
     @Test
-    fun `a bookmark that starts a surah shows the Bismillah before ayah 1, but not at-Tawba or al-Fatiha`() = runTest {
-        // Owner, 2026-11-22: a whole-surah bookmark had no Bismillah.
+    fun `a short surah is read whole, so its card can show all of it`() = runTest {
         val ikhlas = kahf()
-        val tawba = app.library.create(BookmarkDrafts.surah(9, app.index))
-        val fatiha = app.library.create(BookmarkDrafts.surah(1, app.index))
-        val inside = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)))
         val vm = open()
-        listOf(ikhlas, tawba, fatiha, inside).forEach { vm.onToggleBookmark(it.id) }
-        val rows = vm.state.value.rows
-
-        val first = rows.indexOfFirst { it is BookmarksRow.Ayah && it.bookmarkId == ikhlas.id }
-        assertEquals(BookmarksRow.Basmala(ikhlas.id, 112), rows[first - 1])
-        assertTrue(rows.none { it is BookmarksRow.Basmala && it.bookmarkId == tawba.id })
-        assertTrue("its ayah 1 is the Bismillah", rows.none { it is BookmarksRow.Basmala && it.bookmarkId == fatiha.id })
-        assertTrue("a passage inside a surah has none", rows.none { it is BookmarksRow.Basmala && it.bookmarkId == inside.id })
+        vm.onGlimpseNeeded(ikhlas.id)
+        val glimpse = vm.state.value.glimpses.getValue(ikhlas.range)
+        assertNull(glimpse.tail)
+        assertTrue("all four ayahs", app.text.ayahs(AyahRange.single(ikhlas.range.end)).single().text.take(5) in glimpse.head)
     }
 
     @Test
-    fun `ticking an ayah in the list counts it under its bookmark`() = runTest {
-        val b = kahf()
-        val vm = open()
-        vm.onToggleBookmark(b.id)
-        val first = vm.state.value.ayahsOf(b.id).first()
-        vm.onCheck(first)
-        assertEquals(1, vm.state.value.count(first))
-        val event = app.log.allEvents().single()
-        assertEquals(io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(b.id), event.context)
+    fun `a long passage's glimpse is its start and its last ayah, and nothing between is read`() = runTest {
+        val baqara = app.library.create(BookmarkDrafts.surah(2, app.index))
+        val text = CountingText(app.text)
+        val vm = app.bookmarksViewModel(main.dispatcher, text)
+        vm.onGlimpseNeeded(baqara.id)
+        val glimpse = vm.state.value.glimpses.getValue(baqara.range)
+        val last = app.text.ayahs(AyahRange.single(baqara.range.end)).single().text
+        assertTrue("ends with 2:286", glimpse.tail!!.startsWith(last.take(10)))
+        assertEquals(BookmarksViewModel.GLIMPSE_AYAHS + 1, text.ayahsRead)
     }
 
     @Test
-    fun `Mark read at the end fills only the unread ayahs and can be undone`() = runTest {
-        val b = kahf()
-        val vm = open()
-        vm.onToggleBookmark(b.id)
-        vm.onCheck(vm.state.value.ayahsOf(b.id).first())
-        vm.onMarkBookmarkRead(b.id)
-        assertEquals("one reading each", b.range.size, app.log.allEvents().size)
-        assertEquals(BookmarksRow.End(b.id, done = true), vm.state.value.rows.last())
-        vm.onUndo()
-        assertEquals(1, app.log.allEvents().size)
+    fun `a thousand bookmarks of al-Baqara load its text once`() = runTest {
+        // Notes item 43 (owner, 2026-11-26): the list must stay light however many bookmarks there are.
+        val ids = (1..1000).map { app.library.create(BookmarkDrafts.surah(2, app.index)).id }
+        val text = CountingText(app.text)
+        val vm = app.bookmarksViewModel(main.dispatcher, text)
+        ids.forEach(vm::onGlimpseNeeded)
+        assertEquals(1000, vm.state.value.entries().size)
+        assertEquals("the start and the end of one passage", BookmarksViewModel.GLIMPSE_AYAHS + 1, text.ayahsRead)
+        assertEquals(1, vm.state.value.glimpses.size)
     }
 
+    // ---- Unread and Read all ------------------------------------------------------------------
+
     @Test
-    fun `Unread hides read bookmarks, but one read here stays until the screen is left`() = runTest {
+    fun `Unread hides read bookmarks, but one read meanwhile stays until the screen is left`() = runTest {
         val read = kahf()
         val unread = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)))
         app.tracker.markRange(read.range, io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(read.id), io.github.mehrdad_abdi.qintar.domain.model.ReadMethod.BULK, io.github.mehrdad_abdi.qintar.domain.model.RangeMode.FILL)
@@ -133,7 +141,7 @@ class BookmarksViewModelTest {
         vm.onFilter(BookmarksFilter.UNREAD)
         assertEquals(listOf(unread.id), vm.state.value.entries())
 
-        vm.onMarkBookmarkRead(unread.id)
+        vm.onLogFullReading(unread.id)
         assertEquals("stays where it is", listOf(unread.id), vm.state.value.entries())
 
         vm.onScreenLeft()
@@ -141,68 +149,12 @@ class BookmarksViewModelTest {
         assertTrue(vm.state.value.rows.isEmpty())
     }
 
-    // ---- audio -------------------------------------------------------------------------------------
-
     @Test
-    fun `play goes on through the following bookmarks of the list`() = runTest {
-        val g = app.library.createGroup("G")
-        val one = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)).copy(groupId = g.id))
-        val two = kahf(groupId = g.id)
-        val three = app.library.create(BookmarkDrafts.ayah(app.ayah(1, 1)))
-        val player = FakePlayerController()
-        val vm = app.bookmarksViewModel(main.dispatcher, player)
-
-        vm.onPlayBookmark(two.id)
-        val request = player.requests.single()
-        assertEquals(BOOKMARKS_ORIGIN, request.origin)
-        // Quran order: 1:1 (no group) comes before the group, which stands at its first ayah, 2:255.
-        assertEquals("every listed bookmark, in list order", listOf(three.range, one.range, two.range), request.segments.map { it.range })
-        assertEquals(2, request.startSegment)
-        assertEquals(two.range.start, request.startAyah)
-    }
-
-    @Test
-    fun `under Unread, play skips bookmarks already read`() = runTest {
-        val read = app.library.create(BookmarkDrafts.ayah(app.ayah(1, 1)))
-        val first = app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)))
-        val second = kahf()
-        app.tracker.mark(read.range.start, io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(read.id), io.github.mehrdad_abdi.qintar.domain.model.ReadMethod.TAP)
-        val player = FakePlayerController()
-        val vm = app.bookmarksViewModel(main.dispatcher, player)
+    fun `Read all opens the reader on what the list shows`() = runTest {
+        val vm = open()
+        assertEquals(ReaderRoute.bookmarks(unreadOnly = false), vm.readAllRoute())
         vm.onFilter(BookmarksFilter.UNREAD)
-        vm.onPlayBookmark(first.id)
-        assertEquals(listOf(first.range, second.range), player.requests.single().segments.map { it.range })
-    }
-
-    @Test
-    fun `while a bookmark's Bismillah plays, its row is followed and highlighted, not ayah 1`() = runTest {
-        val b = kahf()
-        val player = FakePlayerController()
-        val vm = app.bookmarksViewModel(main.dispatcher, player)
-        player.nowAt(BOOKMARKS_ORIGIN, 0, b.range.start, io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(b.id), basmala = true)
-        val state = vm.state.value
-        val basmala = state.rows.indexOfFirst { it is BookmarksRow.Basmala && it.bookmarkId == b.id }
-        assertTrue(basmala >= 0)
-        assertEquals(basmala, state.scrollRequest?.row)
-        assertTrue(state.isAudioAt(state.rows[basmala] as BookmarksRow.Basmala))
-        assertFalse(state.isAudioAt(state.ayahsOf(b.id).first()))
-    }
-
-    @Test
-    fun `the bookmark being played opens and its ayah is highlighted`() = runTest {
-        val b = kahf()
-        val player = FakePlayerController()
-        val vm = app.bookmarksViewModel(main.dispatcher, player)
-        val ayah = b.range.drop(1).first()
-        player.nowAt(BOOKMARKS_ORIGIN, 0, ayah, io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(b.id))
-        val state = vm.state.value
-        assertEquals(ListAudio(b.id, ayah), state.audio)
-        val row = state.ayahsOf(b.id).single { it.id == ayah }
-        assertTrue(state.isAudioAt(row))
-        assertEquals(state.rows.indexOf(row), state.scrollRequest?.row)
-
-        vm.onPlayAyah(row)
-        assertEquals("the playing ayah's button pauses", listOf("toggle"), player.calls)
+        assertEquals(ReaderRoute.bookmarks(unreadOnly = true), vm.readAllRoute())
     }
 
     // ---- actions -----------------------------------------------------------------------------------

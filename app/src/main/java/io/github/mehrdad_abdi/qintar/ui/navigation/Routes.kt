@@ -67,6 +67,8 @@ data class ReaderRoute(
     val startAyahId: Int = UNSET,
     val scopeFirstAyahId: Int = UNSET,
     val scopeLastAyahId: Int = UNSET,
+    /** BOOKMARKS only: just the bookmarks not read today, as the list's Unread filter shows them. */
+    val unreadOnly: Boolean = false,
 ) {
     companion object {
         const val UNSET = 0
@@ -75,7 +77,7 @@ data class ReaderRoute(
         fun khatm(khatmId: Long, startAyahId: Int = UNSET) = ReaderRoute(ReaderEntry.KHATM, khatmId, startAyahId)
         fun bookmark(bookmarkId: Long, startAyahId: Int = UNSET) = ReaderRoute(ReaderEntry.BOOKMARK, bookmarkId, startAyahId)
         fun group(groupId: Long) = ReaderRoute(ReaderEntry.GROUP, groupId)
-        fun bookmarks() = ReaderRoute(ReaderEntry.BOOKMARKS)
+        fun bookmarks(unreadOnly: Boolean = false) = ReaderRoute(ReaderEntry.BOOKMARKS, unreadOnly = unreadOnly)
         fun browse(startAyahId: Int) = ReaderRoute(ReaderEntry.BROWSE, startAyahId = startAyahId)
         fun random(firstAyahId: Int, lastAyahId: Int = firstAyahId) = ReaderRoute(
             ReaderEntry.RANDOM,

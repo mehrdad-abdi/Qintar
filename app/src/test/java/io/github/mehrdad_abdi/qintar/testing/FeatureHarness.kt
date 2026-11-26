@@ -93,6 +93,7 @@ fun DomainFixture.readerViewModel(
     text: QuranTextSource = this.text,
     player: PlayerController = FakePlayerController(),
     downloads: AudioDownloads = FakeAudioDownloads(),
+    log: io.github.mehrdad_abdi.qintar.domain.port.ReadLogStore = this.log,
 ) = ReaderViewModel(
     route = route,
     index = { index },
@@ -244,18 +245,14 @@ fun DomainFixture.khatmDetailViewModel(id: Long, io: CoroutineDispatcher) = Khat
 
 fun DomainFixture.bookmarksViewModel(
     io: CoroutineDispatcher,
-    player: PlayerController = FakePlayerController(),
     text: QuranTextSource = this.text,
 ) = BookmarksViewModel(
     index = { index },
     availability = availability,
     library = library,
     tracker = tracker,
-    log = log,
     text = text,
     prefs = prefs,
-    clock = clock,
-    player = player,
     io = io,
 )
 

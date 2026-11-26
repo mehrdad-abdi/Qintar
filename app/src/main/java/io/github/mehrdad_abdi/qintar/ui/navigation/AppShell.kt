@@ -91,10 +91,7 @@ fun QintarAppShell(
         LaunchedEffect(openPlayerRequest) {
             val playing = withTimeoutOrNull(OPEN_PLAYER_WAIT_MILLIS) { playerViewModel.state.first { it.visible } } ?: return@LaunchedEffect
             val target = playing.returnRoute ?: return@LaunchedEffect
-            when {
-                target.entry == ReaderEntry.BOOKMARKS -> navController.navigateToTab(BookmarksRoute)
-                !showsReaderOf(navController.currentBackStackEntry, target) -> navController.navigate(target) { launchSingleTop = true }
-            }
+            if (!showsReaderOf(navController.currentBackStackEntry, target)) navController.navigate(target) { launchSingleTop = true }
         }
     }
 
@@ -108,10 +105,7 @@ fun QintarAppShell(
                     player?.let {
                         PlayerBar(
                             it(),
-                            // Audio started from the Bookmarks list goes back to that list, not to a reader.
-                            onOpen = { route ->
-                                if (route.entry == ReaderEntry.BOOKMARKS) navController.navigateToTab(BookmarksRoute) else navController.navigate(route)
-                            },
+                            onOpen = { route -> navController.navigate(route) },
                             modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm),
                         )
                     }

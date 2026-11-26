@@ -97,7 +97,7 @@ class BookmarksScreenshotTest(private val language: String, private val dark: Bo
     }
 
     @Test
-    fun bookmarksListOpen() {
+    fun bookmarksListFolded() {
         seed()
         val text = FakeQuranTextSource(app.index, mapOf(app.ayah(8, 1) to SampleAyahs.ANFAL_1, app.ayah(8, 2) to SampleAyahs.ANFAL_2))
         val anfal = runBlocking {
@@ -109,9 +109,10 @@ class BookmarksScreenshotTest(private val language: String, private val dark: Bo
             )
         }
         val vm = app.bookmarksViewModel(Dispatchers.Unconfined, text = text)
+        // A folded group, and a passage whose card shows its real text.
         vm.onToggleSection(vm.state.value.groups.first().id)
-        vm.onToggleBookmark(anfal.id)
-        shot("feature_bookmarks_list_open") { BookmarksScreen(onNavigate = {}, viewModel = vm) }
+        check(anfal.id > 0)
+        shot("feature_bookmarks_list_folded") { BookmarksScreen(onNavigate = {}, viewModel = vm) }
     }
 
     @Test

@@ -5,18 +5,20 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.mehrdad_abdi.qintar.di.IoDispatcher
 import io.github.mehrdad_abdi.qintar.domain.model.AyahId
+import io.github.mehrdad_abdi.qintar.domain.model.AyahRange
+import io.github.mehrdad_abdi.qintar.domain.model.RangeMode
+import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
 import io.github.mehrdad_abdi.qintar.domain.model.Batch
 import io.github.mehrdad_abdi.qintar.domain.model.Bookmark
 import io.github.mehrdad_abdi.qintar.domain.model.DomainFailure
-import io.github.mehrdad_abdi.qintar.domain.model.RangeMode
-import io.github.mehrdad_abdi.qintar.domain.model.ReadContext
 import io.github.mehrdad_abdi.qintar.domain.model.ReadMethod
-import io.github.mehrdad_abdi.qintar.domain.model.SajdaType
 import io.github.mehrdad_abdi.qintar.domain.port.PrefsStore
+import io.github.mehrdad_abdi.qintar.domain.port.AyahText
 import io.github.mehrdad_abdi.qintar.domain.port.QuranTextSource
-import io.github.mehrdad_abdi.qintar.domain.port.ReadLogStore
+import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderRoute
 import io.github.mehrdad_abdi.qintar.domain.quran.QuranIndex
 import io.github.mehrdad_abdi.qintar.domain.service.Availability
+import io.github.mehrdad_abdi.qintar.domain.service.AyahTextFormatter
 import io.github.mehrdad_abdi.qintar.domain.service.BoardItem
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkBoard
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkLibrary
@@ -25,21 +27,13 @@ import io.github.mehrdad_abdi.qintar.domain.service.BookmarkTitle
 import io.github.mehrdad_abdi.qintar.domain.service.BookmarkTitles
 import io.github.mehrdad_abdi.qintar.domain.service.GroupState
 import io.github.mehrdad_abdi.qintar.domain.service.ReadingTracker
-import io.github.mehrdad_abdi.qintar.domain.time.DayClock
-import io.github.mehrdad_abdi.qintar.playback.PlaybackOrigin
-import io.github.mehrdad_abdi.qintar.playback.PlayRequest
-import io.github.mehrdad_abdi.qintar.playback.PlayerController
-import io.github.mehrdad_abdi.qintar.playback.PlayerState
-import io.github.mehrdad_abdi.qintar.ui.navigation.ReaderEntry
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -67,14 +61,11 @@ sealed interface TopItem {
     data class Loose(val item: BookmarkItem) : TopItem
 }
 
-/** The playback origin of the list: audio started here plays every listed bookmark, in order. */
-val BOOKMARKS_ORIGIN = PlaybackOrigin(ReaderEntry.BOOKMARKS)
-
-/** One row of the Bookmarks list. */
+/** One row of the Bookmarks list: a group's card or a bookmark's card. No ayahs: they are read in the reader (notes item 47). */
 sealed interface BookmarksRow {
     val key: String
 
-    /** A group's header. */
+    /** A group's card. */
     data class Section(
         val group: GroupItem,
         val bookmarkCount: Int,
@@ -85,37 +76,19 @@ sealed interface BookmarksRow {
         override val key: String get() = "section-$sectionKey"
     }
 
-    data class Entry(val item: BookmarkItem, val expanded: Boolean) : BookmarksRow {
+    /** A bookmark's card; [inGroup] when it is listed under its group, indented. */
+    data class Entry(val item: BookmarkItem, val inGroup: Boolean) : BookmarksRow {
         override val key: String get() = "bookmark-${item.id}"
-    }
-
-    /** An ayah of an expanded bookmark. */
-    data class Ayah(
-        val bookmarkId: Long,
-        val id: AyahId,
-        val surah: Int,
-        val number: Int,
-        val sajda: SajdaType,
-    ) : BookmarksRow {
-        override val key: String get() = "ayah-$bookmarkId-${id.value}"
-    }
-
-    /** Before ayah 1 of a surah inside an expanded bookmark: every surah but al-Fatiha and at-Tawba. */
-    data class Basmala(val bookmarkId: Long, val surah: Int) : BookmarksRow {
-        override val key: String get() = "basmala-$bookmarkId-$surah"
-    }
-
-    /** Under the last ayah of an expanded bookmark: "Mark read" for all its ayahs, until it is done. */
-    data class End(val bookmarkId: Long, val done: Boolean) : BookmarksRow {
-        override val key: String get() = "end-$bookmarkId"
     }
 }
 
-/** Where the player is in the list: an ayah of a bookmark. */
-/** What the player is on in the list: an ayah, or the Bismillah before [ayah] when [basmala]. */
-data class ListAudio(val bookmarkId: Long, val ayah: AyahId, val basmala: Boolean = false)
-
-data class ListScrollRequest(val row: Int, val token: Int)
+/**
+ * The Quran text a bookmark's card shows (owner, 2026-11-26): [head] is the start of the passage and
+ * [tail] its last ayah; [tail] is null when [head] is the whole passage. Each is formatted as the
+ * reader formats it, flowing (no breaks at pause marks). The card shows all of a passage that fits in
+ * three lines, otherwise a line of the start, "…", and a line of the end.
+ */
+data class Glimpse(val head: String, val tail: String?)
 
 enum class UndoKind { LOGGED, GROUP_LOGGED, DELETED }
 
@@ -142,55 +115,38 @@ data class BookmarksUiState(
     val all: List<BookmarkItem> = emptyList(),
     /** What the list shows, in order. */
     val rows: List<BookmarksRow> = emptyList(),
-    /** Quran text of the ayahs of expanded bookmarks. */
-    val texts: Map<AyahId, String> = emptyMap(),
-    /** Today's readings per bookmark and ayah, counted under that bookmark. */
-    val counts: Map<Long, Map<AyahId, Int>> = emptyMap(),
-    val audio: ListAudio? = null,
-    val audioPlaying: Boolean = false,
-    val fontSp: Int = io.github.mehrdad_abdi.qintar.domain.model.UserPrefs().quranFontSp,
-    val breakAtPauseMarks: Boolean = true,
-    /** The reader's "Keep screen on" setting, so one can listen through every bookmark here (owner, 2026-11-24). */
-    val keepScreenOn: Boolean = true,
-    val scrollRequest: ListScrollRequest? = null,
+    /** The text of each passage's card, by passage, loaded for the cards on screen. */
+    val glimpses: Map<AyahRange, Glimpse> = emptyMap(),
     val notice: UndoNotice? = null,
     val dialog: BookmarksDialog? = null,
 ) {
     val hasBookmarks: Boolean get() = all.isNotEmpty()
 
-    fun count(row: BookmarksRow.Ayah): Int = counts[row.bookmarkId]?.get(row.id) ?: 0
-
-    fun isAudioAt(row: BookmarksRow.Ayah): Boolean = audio?.let { !it.basmala && it.bookmarkId == row.bookmarkId && it.ayah == row.id } == true
-
-    /** The Bismillah is its own playing row (owner, 2026-11-24). */
-    fun isAudioAt(row: BookmarksRow.Basmala): Boolean =
-        audio?.let { it.basmala && it.bookmarkId == row.bookmarkId && rowIndexOf(it) == rows.indexOf(row) } == true
-
-    /** The list row of [at]: its ayah, or the Bismillah row just before it; -1 when not shown. */
-    fun rowIndexOf(at: ListAudio): Int {
-        val ayah = rows.indexOfFirst { it is BookmarksRow.Ayah && it.bookmarkId == at.bookmarkId && it.id == at.ayah }
-        return if (at.basmala && ayah > 0 && rows[ayah - 1] is BookmarksRow.Basmala) ayah - 1 else ayah
+    /** The bookmarks the list shows, in its order: what "Read all" opens. */
+    val listed: List<BookmarkItem> get() = rows.flatMap { row ->
+        when (row) {
+            is BookmarksRow.Entry -> listOf(row.item)
+            // A folded group still counts: its bookmarks are part of the list.
+            is BookmarksRow.Section -> if (row.expanded) emptyList() else row.group.items.filter { filter == BookmarksFilter.ALL || !it.state.progress.done }
+        }
     }
 }
 
 /**
- * The Bookmarks tab (§5.6): one list of groups and bookmarks without a group, in the chosen order,
- * each bookmark with its ayahs inline.
- * Two levels fold: a group hides its bookmarks, a bookmark hides its ayahs. Ticks count under the
- * bookmark; play goes on through every following bookmark of the list.
+ * The Bookmarks tab (§5.6): one list of groups and bookmarks without a group, in the chosen order.
+ * It is an index (owner, 2026-11-26, notes item 47): reading, counting and playing happen in the
+ * reader, which a bookmark, a group or "Read all" opens. A group folds its bookmarks; each bookmark
+ * shows a glimpse of its text, loaded only for the cards on screen and only from the start and the
+ * end of the passage, so a long or much-repeated bookmark costs no more than a short one (item 43).
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class BookmarksViewModel @Inject constructor(
     private val index: Provider<QuranIndex>,
     private val availability: Availability,
     private val library: BookmarkLibrary,
     private val tracker: ReadingTracker,
-    private val log: ReadLogStore,
     private val text: QuranTextSource,
     private val prefs: PrefsStore,
-    private val clock: DayClock,
-    private val player: PlayerController,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) : ViewModel() {
 
@@ -200,38 +156,20 @@ class BookmarksViewModel @Inject constructor(
     private var board: BookmarkBoard? = null
     private var quran: QuranIndex? = null
     private var noticeCounter = 0
-    private var scrollToken = 0
 
     /** Sections folded by the user; on open every group is open (owner's decision). */
     private val collapsedSections = HashSet<Long>()
 
-    /** Bookmarks showing their ayahs; on open none is. */
-    private val expandedBookmarks = HashSet<Long>()
-
     /** Under Unread: bookmarks already shown, kept when read until the screen is left. */
     private val keptUnread = HashSet<Long>()
 
-    private val loadedTexts = HashMap<AyahId, String>()
-    private val loadingTexts = HashSet<Long>()
-
-    /** Rows on screen, as the list last reported them. */
-    private var visibleRows = IntRange.EMPTY
+    private val glimpses = HashMap<AyahRange, Glimpse>()
+    private val loadingGlimpses = HashSet<AyahRange>()
 
     init {
         viewModelScope.launch {
-            prefs.prefs.collect { p -> _state.update { it.copy(fontSp = p.quranFontSp, breakAtPauseMarks = p.breakAtPauseMarks, keepScreenOn = p.keepScreenOn) } }
-        }
-        viewModelScope.launch {
-            clock.todayFlow.flatMapLatest { day -> log.observeBookmarkAyahCounts(day) }.collect { list ->
-                val counts = HashMap<Long, HashMap<AyahId, Int>>()
-                for (c in list) counts.getOrPut(c.bookmarkId) { HashMap() }[c.ayahId] = c.count
-                _state.update { it.copy(counts = counts) }
-            }
-        }
-        viewModelScope.launch {
             val index = withContext(io) { index.get() }
             quran = index
-            launch { player.state.collect(::onPlayerState) }
             availability.observe().collect { board ->
                 this@BookmarksViewModel.board = board
                 _state.update { board.toUi(index, it) }
@@ -265,17 +203,6 @@ class BookmarksViewModel @Inject constructor(
         rebuild()
     }
 
-    fun onToggleBookmark(bookmarkId: Long) {
-        if (!expandedBookmarks.remove(bookmarkId)) expandedBookmarks += bookmarkId
-        rebuild()
-    }
-
-    fun onVisibleRows(first: Int, last: Int) {
-        visibleRows = first..last
-    }
-
-    fun onScrollHandled(request: ListScrollRequest) = _state.update { if (it.scrollRequest == request) it.copy(scrollRequest = null) else it }
-
     /** What the filter lets through, in list order: each group with its bookmarks, or a bookmark alone (null). */
     private fun visibleSections(state: BookmarksUiState): List<Pair<GroupItem?, List<BookmarkItem>>> {
         fun pass(item: BookmarkItem): Boolean = when (state.filter) {
@@ -296,7 +223,6 @@ class BookmarksViewModel @Inject constructor(
     }
 
     private fun rebuild() {
-        val index = quran ?: return
         val state = _state.value
         val rows = ArrayList<BookmarksRow>()
         for ((group, items) in visibleSections(state)) {
@@ -305,112 +231,45 @@ class BookmarksViewModel @Inject constructor(
                 rows += BookmarksRow.Section(group, group.items.size, group.items.count { it.state.progress.done }, open)
                 if (!open) continue
             }
-            for (item in items) {
-                val expanded = item.id in expandedBookmarks
-                rows += BookmarksRow.Entry(item, expanded)
-                if (!expanded) continue
-                loadTexts(item)
-                for (id in item.state.bookmark.range) {
-                    val ref = index.ref(id)
-                    if (ref.ayah == 1 && index.surah(ref.surah).hasBasmala) rows += BookmarksRow.Basmala(item.id, ref.surah)
-                    rows += BookmarksRow.Ayah(item.id, id, ref.surah, ref.ayah, index.sajdaOf(id))
-                }
-                rows += BookmarksRow.End(item.id, item.state.progress.done)
-            }
+            for (item in items) rows += BookmarksRow.Entry(item, inGroup = group != null)
         }
         _state.update { it.copy(rows = rows) }
     }
 
-    private fun loadTexts(item: BookmarkItem) {
-        val range = item.state.bookmark.range
-        if (range.start in loadedTexts && range.end in loadedTexts) return
-        if (!loadingTexts.add(item.id)) return
+    /** "Read all": the reader on every bookmark the list shows, in its order; under Unread only the unread ones. */
+    fun readAllRoute(): ReaderRoute =
+        ReaderRoute.bookmarks(unreadOnly = _state.value.filter == BookmarksFilter.UNREAD)
+
+    // ---- the text on the cards -------------------------------------------------------------------
+
+    /**
+     * A card came on screen: load its glimpse, once per passage. A passage of up to
+     * [GLIMPSE_WHOLE_AYAHS] ayahs is read whole; of a longer one only the first [GLIMPSE_AYAHS] ayahs
+     * and the last, whatever its length.
+     */
+    fun onGlimpseNeeded(bookmarkId: Long) {
+        val range = itemOf(bookmarkId)?.state?.bookmark?.range ?: return
+        if (range in glimpses || !loadingGlimpses.add(range)) return
+        val index = quran ?: return
         viewModelScope.launch {
-            val ayahs = runCatching { withContext(io) { text.ayahs(range) } }.getOrNull()
-            loadingTexts.remove(item.id)
-            if (ayahs != null) {
-                ayahs.forEach { loadedTexts[it.id] = it.text }
-                _state.update { it.copy(texts = HashMap(loadedTexts)) }
+            val glimpse = runCatching {
+                withContext(io) {
+                    // A short passage is read whole and the card decides whether it fits; a long one by its start.
+                    val headSize = if (range.size <= GLIMPSE_WHOLE_AYAHS) range.size else GLIMPSE_AYAHS
+                    val head = AyahRange(range.start, AyahId(range.start.value + headSize - 1))
+                    fun flowing(list: List<AyahText>) =
+                        list.joinToString(" ") { AyahTextFormatter.format(it.text, index.ref(it.id).ayah, breakAtPauseMarks = false) }
+                    Glimpse(
+                        head = flowing(text.ayahs(head)),
+                        tail = if (head.end == range.end) null else flowing(text.ayahs(AyahRange.single(range.end))),
+                    )
+                }
+            }.getOrNull()
+            loadingGlimpses.remove(range)
+            if (glimpse != null) {
+                glimpses[range] = glimpse
+                _state.update { it.copy(glimpses = HashMap(glimpses)) }
             }
-        }
-    }
-
-    // ---- reading -------------------------------------------------------------------------------
-
-    /** The check of an inline ayah: one more reading, under its bookmark. */
-    fun onCheck(row: BookmarksRow.Ayah) = act {
-        tracker.mark(row.id, ReadContext.Bookmark(row.bookmarkId), ReadMethod.TAP)
-    }
-
-    /** "Mark read" at the end of a bookmark: one reading for each of its ayahs not read today, with Undo. */
-    fun onMarkBookmarkRead(bookmarkId: Long) = act {
-        val bookmark = bookmarkOf(bookmarkId) ?: return@act
-        val batch = tracker.markRange(bookmark.range, ReadContext.Bookmark(bookmark.id), ReadMethod.BULK, RangeMode.FILL)
-        notify(UndoKind.LOGGED, batch = batch)
-    }
-
-    // ---- audio ---------------------------------------------------------------------------------
-
-    /**
-     * What a play started here plays: the listed bookmarks in list order — under Unread only those
-     * not read yet — and always [from], the one asked for.
-     */
-    private fun playlist(from: Long): List<BookmarkItem> {
-        val state = _state.value
-        val listed = visibleSections(state).flatMap { it.second }
-        return listed.filter { it.id == from || state.filter == BookmarksFilter.ALL || !it.state.progress.done }
-    }
-
-    private fun play(bookmarkId: Long, ayah: AyahId?) {
-        val list = playlist(bookmarkId)
-        val at = list.indexOfFirst { it.id == bookmarkId }
-        if (at < 0) return
-        val progress = list[at].state
-        val start = ayah ?: progress.progress.firstBelowTarget ?: progress.bookmark.range.start
-        player.play(PlayRequest(BOOKMARKS_ORIGIN, list.map { it.state.segment }, at, start))
-    }
-
-    /** The play button of a bookmark: from its first unread ayah, then on through the list. */
-    fun onPlayBookmark(bookmarkId: Long) = play(bookmarkId, null)
-
-    /** The play button of a section: from its first bookmark not read today. */
-    fun onPlaySection(sectionKey: Long) {
-        val state = _state.value
-        val items = state.groups.firstOrNull { it.id == sectionKey }?.items.orEmpty()
-        val first = items.firstOrNull { !it.state.progress.done } ?: items.firstOrNull() ?: return
-        play(first.id, null)
-    }
-
-    /** The play button of an ayah row: pause or resume when it is the ayah in the player, otherwise play from it. */
-    fun onPlayAyah(row: BookmarksRow.Ayah) {
-        if (_state.value.isAudioAt(row)) player.togglePlayPause() else play(row.bookmarkId, row.id)
-    }
-
-    /**
-     * The playing ayah is highlighted; its bookmark (and section) opens so it can be seen, and the
-     * list follows it while the listener stays with it.
-     */
-    private fun onPlayerState(p: PlayerState) {
-        val item = p.item
-        val now = if (p.origin == BOOKMARKS_ORIGIN && item != null) {
-            (item.context as? ReadContext.Bookmark)?.let { ListAudio(it.id, item.ayah, item.basmala) }
-        } else {
-            null
-        }
-        val before = _state.value.audio
-        _state.update { it.copy(audio = now, audioPlaying = now != null && (p.playing || p.loading)) }
-        if (now == null || now == before) return
-        if (before?.bookmarkId != now.bookmarkId) {
-            val section = _state.value.all.firstOrNull { it.id == now.bookmarkId }?.state?.bookmark?.groupId
-            val changed = expandedBookmarks.add(now.bookmarkId) or (section != null && collapsedSections.remove(section))
-            if (changed) rebuild()
-        }
-        val row = _state.value.rowIndexOf(now)
-        if (row < 0) return
-        val previous = before?.let { _state.value.rowIndexOf(it) } ?: -1
-        val shown = visibleRows
-        if (before == null || (previous in shown && (row >= shown.last || row < shown.first))) {
-            _state.update { it.copy(scrollRequest = ListScrollRequest(row, ++scrollToken)) }
         }
     }
 
@@ -501,6 +360,14 @@ class BookmarksViewModel @Inject constructor(
         } catch (_: DomainFailure) {
             // The bookmark or group was removed meanwhile; the board shows the truth.
         }
+    }
+
+    companion object {
+        /** A passage of at most this many ayahs is read whole for its card (al-Ikhlas, an-Nas…). */
+        const val GLIMPSE_WHOLE_AYAHS = 8
+
+        /** Of a longer passage, how many ayahs from its start are read; with the last, this + 1. */
+        const val GLIMPSE_AYAHS = 3
     }
 }
 

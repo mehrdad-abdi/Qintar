@@ -1,8 +1,12 @@
 package io.github.mehrdad_abdi.qintar.feature.bookmarks
 
 import io.github.mehrdad_abdi.qintar.testing.arrangeViewModel
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -56,23 +60,6 @@ class BookmarksScreensTest {
     }
 
     @Test
-    fun `the list keeps the screen on, as the reader does, when the setting is on`() {
-        seedMorning()
-        var view: android.view.View? = null
-        val vm = app.bookmarksViewModel(Dispatchers.Unconfined)
-        compose.setContent {
-            view = androidx.compose.ui.platform.LocalView.current
-            QintarTheme { BookmarksScreen(onNavigate = {}, viewModel = vm) }
-        }
-        compose.waitForIdle()
-        org.junit.Assert.assertTrue(view!!.keepScreenOn)
-
-        runBlocking { app.prefs.update { it.copy(keepScreenOn = false) } }
-        compose.waitForIdle()
-        org.junit.Assert.assertFalse(view!!.keepScreenOn)
-    }
-
-    @Test
     fun `the order menu picks Quran order, My order or Newest first, and opens Arrange`() {
         seedMorning()
         openTab()
@@ -120,50 +107,59 @@ class BookmarksScreensTest {
     }
 
     @Test
-    fun `the list shows the group, its bookmark and description, a tap opens its ayahs with Mark read`() {
+    fun `the list shows the group and its bookmark as cards, and a tap opens the reader`() {
+        // Notes items 42 and 47 (owner, 2026-11-26): an index; reading happens in the reader.
         seedMorning()
+        val group = runBlocking { app.bookmarkStore.groups().single() }
+        val bookmark = runBlocking { app.bookmarkStore.bookmarks().single() }
         openTab()
         compose.onNodeWithText("Morning").assertIsDisplayed()
         compose.onNodeWithText("0 of 1 done").assertIsDisplayed()
         compose.onNodeWithText("All · 1").assertIsDisplayed()
         compose.onNodeWithText("Read after every prayer").assertIsDisplayed()
         compose.onNodeWithText("I read it").assertDoesNotExist()
+        compose.onAllNodesWithContentDescription("Play", substring = true).assertCountEquals(0)
+
         compose.onNodeWithText("1 ayah").performClick()
-        compose.onNodeWithText("I read it").performClick()
-        compose.waitForIdle()
-        assertEquals(1, runBlocking { app.log.allEvents().size })
-        assertTrue("nothing navigates: the bookmark is read in place", navigated.isEmpty())
+        compose.onNodeWithText("Morning").performClick()
+        compose.onNodeWithTag(BOOKMARKS_READ_ALL_TAG).performClick()
+        assertEquals(listOf(ReaderRoute.bookmark(bookmark.id), ReaderRoute.group(group.id), ReaderRoute.bookmarks()), navigated)
+        assertTrue("nothing is read in the list", runBlocking { app.log.allEvents().isEmpty() })
     }
 
     @Test
-    fun `a tap on a long description opens the bookmark or folds the group, it does not just expand the text`() {
-        val long = "A long note about why this is read. ".repeat(12).trim()
+    fun `a group's arrow shows or hides its bookmarks`() {
         val groupNote = "What the group is for. ".repeat(12).trim()
         runBlocking {
             val group = app.library.createGroup("Night", description = groupNote)
-            app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)).copy(groupId = group.id, description = long))
+            app.library.create(BookmarkDrafts.ayah(app.ayah(2, 255)).copy(groupId = group.id))
         }
         openTab()
-
-        // The bookmark: a tap on its description opens its ayahs (and shows the whole description).
-        val card = compose.onNodeWithText("1 ayah", substring = true)
-        card.performScrollTo().assert(androidx.compose.ui.test.hasStateDescription("Collapsed"))
-        compose.onNodeWithText(long, substring = true).performScrollTo().performClick()
-        card.assert(androidx.compose.ui.test.hasStateDescription("Expanded"))
-
-        // The group: a tap on its description folds it.
-        compose.onNodeWithText(groupNote).performScrollTo().performClick()
-        compose.onNodeWithText("1 ayah", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("1 ayah").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Hide its bookmarks").assert(androidx.compose.ui.test.hasStateDescription("Expanded")).performClick()
+        compose.onNodeWithText("1 ayah").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Show its bookmarks").performClick()
+        compose.onNodeWithText("1 ayah").assertIsDisplayed()
     }
 
     @Test
-    fun `Open in reader is in the bookmark's menu`() {
-        seedMorning()
-        val bookmark = runBlocking { app.bookmarkStore.bookmarks().single() }
+    fun `a bookmark's card shows its text, a long one by its start and end`() {
+        val (short, long) = runBlocking {
+            app.library.create(BookmarkDrafts.ayah(app.ayah(112, 1))) to app.library.create(BookmarkDrafts.surah(2, app.index))
+        }
         openTab()
-        compose.onAllNodesWithContentDescription("Bookmark actions")[0].performClick()
-        compose.onNodeWithText("Open in reader").performClick()
-        assertEquals(ReaderRoute.bookmark(bookmark.id), navigated.single())
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag(GLIMPSE_TAG, useUnmergedTree = true).fetchSemanticsNodes().size == 2 }
+        val texts: List<List<String>> = compose.onAllNodesWithTag(GLIMPSE_TAG, useUnmergedTree = true).fetchSemanticsNodes().map { node ->
+            node.children.flatMap { child ->
+                child.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text).orEmpty().map { line -> line.text }
+            }
+        }
+        // Quran order: al-Baqara, then al-Ikhlas.
+        val (baqara, ikhlas) = texts
+        assertEquals("a short passage is shown whole, in one piece", 1, ikhlas.size)
+        assertEquals("start …, then end", 2, baqara.size)
+        assertTrue(baqara[0], baqara[0].endsWith("…"))
+        assertTrue("short ${short.id}, long ${long.id}", baqara[1].isNotBlank())
     }
 
     @Test
@@ -185,12 +181,15 @@ class BookmarksScreensTest {
     @Test
     fun `Unread hides what is read today`() {
         seedMorning()
+        val bookmark = runBlocking { app.bookmarkStore.bookmarks().single() }
+        runBlocking {
+            app.tracker.markRange(bookmark.range, io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(bookmark.id), io.github.mehrdad_abdi.qintar.domain.model.ReadMethod.BULK, io.github.mehrdad_abdi.qintar.domain.model.RangeMode.FILL)
+        }
         openTab()
-        compose.onNodeWithText("1 ayah").performClick()
-        compose.onNodeWithText("I read it").performClick()
         compose.onNodeWithText("Unread · 0").assertIsDisplayed()
         compose.onNodeWithText("Unread ·", substring = true).performClick()
         compose.onNodeWithText("Every bookmark is read today.").assertIsDisplayed()
+        compose.onNodeWithTag(BOOKMARKS_READ_ALL_TAG).assertIsNotEnabled()
     }
 
     @Test

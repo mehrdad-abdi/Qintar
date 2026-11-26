@@ -440,7 +440,8 @@ class ReaderViewModel @AssistedInject constructor(
                 )
             }
             ReaderEntry.BOOKMARKS -> {
-                val listed = availability.board().listed
+                // "Read all" of the Bookmarks list: what the list shows, in its order (owner, 2026-11-26).
+                val listed = availability.board().listed.filter { !route.unreadOnly || !it.progress.done }
                 if (listed.isEmpty()) return null
                 val model = ReaderRowModel.build(listed.map { it.segment }, index, segmentHeaders = true)
                 val first = listed.firstOrNull { !it.progress.done } ?: listed.first()
@@ -470,9 +471,20 @@ class ReaderViewModel @AssistedInject constructor(
     private fun observeReadState(segments: List<Segment>) {
         viewModelScope.launch {
             // Re-keyed by the reading day: a reader left open across the boundary shows the new day.
+            // Several bookmarks (a group, Read all) are watched with one query for every bookmark: a
+            // query per segment ran again for each of them on every reading (notes item 43).
+            val bookmarkIds = segments.map { (it.context as? ReadContext.Bookmark)?.id }
+            val oneQuery = segments.size > 1 && bookmarkIds.all { it != null }
             clock.todayFlow
                 .flatMapLatest { day ->
-                    combine(segments.map { log.observeAyahCounts(it.context, day, it.range) }) { it.toList() }
+                    if (oneQuery) {
+                        log.observeBookmarkAyahCounts(day).map { rows ->
+                            val byBookmark = rows.groupBy { it.bookmarkId }
+                            bookmarkIds.map { id -> byBookmark[id]?.associate { it.ayahId to it.count }.orEmpty() }
+                        }
+                    } else {
+                        combine(segments.map { log.observeAyahCounts(it.context, day, it.range) }) { it.toList() }
+                    }
                 }
                 .collect { counts -> _state.update { it.copy(counts = counts) } }
         }
