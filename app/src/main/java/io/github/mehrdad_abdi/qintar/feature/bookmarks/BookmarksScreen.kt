@@ -154,10 +154,11 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(stringResource(R.string.tab_bookmarks), style = QintarType.Title, color = colors.onSurface, modifier = Modifier.weight(1f))
+            ReadAllButton(state) { onNavigate(viewModel.readAllRoute()) }
             OrderMenu(state.sort, viewModel::onSort, onNavigate)
             AddMenu(onNavigate)
         }
-        FilterRow(state, viewModel::onFilter, onReadAll = { onNavigate(viewModel.readAllRoute()) })
+        FilterRow(state, viewModel::onFilter)
         Box(Modifier.weight(1f).fillMaxWidth()) {
             if (!state.loading) {
                 if (!state.hasBookmarks && state.groups.isEmpty()) {
@@ -258,7 +259,7 @@ private fun AddMenu(onNavigate: (Any) -> Unit) {
 }
 
 @Composable
-private fun FilterRow(state: BookmarksUiState, onFilter: (BookmarksFilter) -> Unit, onReadAll: () -> Unit) {
+private fun FilterRow(state: BookmarksUiState, onFilter: (BookmarksFilter) -> Unit) {
     val unread = state.all.count { !it.state.progress.done }
     val labels = mapOf(
         BookmarksFilter.ALL to stringResource(R.string.bm_filter_count, stringResource(R.string.bm_filter_all), formatNumber(state.all.size)),
@@ -276,17 +277,25 @@ private fun FilterRow(state: BookmarksUiState, onFilter: (BookmarksFilter) -> Un
                 label = { Text(labels.getValue(entry), style = QintarType.Label) },
             )
         }
-        Spacer(Modifier.weight(1f))
-        // Every bookmark the list shows, in its order, as one reading (owner, 2026-11-26).
-        if (state.hasBookmarks) FilledTonalButton(
-            onClick = onReadAll,
-            enabled = state.listed.isNotEmpty(),
-            modifier = Modifier.heightIn(min = Sizes.touchTarget).testTag(BOOKMARKS_READ_ALL_TAG),
-        ) {
-            Icon(Icons.AutoMirrored.Outlined.MenuBook, contentDescription = null, modifier = Modifier.size(Sizes.iconSmall))
-            Spacer(Modifier.size(Spacing.sm))
-            Text(stringResource(R.string.bm_read_all), style = QintarType.Label)
-        }
+    }
+}
+
+/**
+ * Every bookmark the list shows, in its order, as one reading (owner, 2026-11-26). In the top bar,
+ * where it has room: beside the filter chips it broke into three lines on a phone (2026-11-27).
+ */
+@Composable
+private fun ReadAllButton(state: BookmarksUiState, onReadAll: () -> Unit) {
+    if (!state.hasBookmarks) return
+    FilledTonalButton(
+        onClick = onReadAll,
+        enabled = state.listed.isNotEmpty(),
+        contentPadding = PaddingValues(horizontal = Spacing.md),
+        modifier = Modifier.heightIn(min = Sizes.touchTarget).testTag(BOOKMARKS_READ_ALL_TAG),
+    ) {
+        Icon(Icons.AutoMirrored.Outlined.MenuBook, contentDescription = null, modifier = Modifier.size(Sizes.iconSmall))
+        Spacer(Modifier.size(Spacing.sm))
+        Text(stringResource(R.string.bm_read_all), style = QintarType.Label, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

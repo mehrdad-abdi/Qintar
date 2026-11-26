@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performScrollTo
@@ -126,6 +127,27 @@ class BookmarksScreensTest {
         compose.onNodeWithTag(BOOKMARKS_READ_ALL_TAG).performClick()
         assertEquals(listOf(ReaderRoute.bookmark(bookmark.id), ReaderRoute.group(group.id), ReaderRoute.bookmarks()), navigated)
         assertTrue("nothing is read in the list", runBlocking { app.log.allEvents().isEmpty() })
+    }
+
+    /**
+     * The owner's phone (2026-11-27): 384dp wide, font 1.1×, Persian, 107 bookmarks. "Read all" sat
+     * beside the filter chips and broke into three lines.
+     */
+    @Test
+    @org.robolectric.annotation.Config(qualifiers = "fa-w384dp-h832dp")
+    fun `Read all stays on one line on a phone in Persian with the font a little larger`() {
+        runBlocking { repeat(107) { app.library.create(BookmarkDrafts.ayah(app.ayah(2, it + 1))) } }
+        val vm = app.bookmarksViewModel(Dispatchers.Unconfined)
+        compose.setContent {
+            val density = androidx.compose.ui.platform.LocalDensity.current
+            androidx.compose.runtime.CompositionLocalProvider(
+                androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(density.density, fontScale = 1.1f),
+            ) { QintarTheme { BookmarksScreen(onNavigate = { navigated += it }, viewModel = vm) } }
+        }
+        val label = compose.onNodeWithText("خواندن همه", useUnmergedTree = true)
+        val layouts = ArrayList<androidx.compose.ui.text.TextLayoutResult>()
+        label.performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        assertEquals("one line", 1, layouts.single().lineCount)
     }
 
     @Test
