@@ -102,6 +102,7 @@ class BookmarksScreensTest {
     fun `the empty tab offers to add a bookmark`() {
         openTab()
         compose.onNodeWithText("No bookmarks yet").assertIsDisplayed()
+        compose.onNodeWithTag(BOOKMARKS_READ_ALL_TAG).assertDoesNotExist()
         compose.onNodeWithText("Add bookmark").performClick()
         assertEquals(BookmarkEditorRoute(), navigated.single())
     }

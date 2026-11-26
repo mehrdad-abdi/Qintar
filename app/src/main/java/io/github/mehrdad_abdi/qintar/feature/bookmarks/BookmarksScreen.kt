@@ -278,7 +278,7 @@ private fun FilterRow(state: BookmarksUiState, onFilter: (BookmarksFilter) -> Un
         }
         Spacer(Modifier.weight(1f))
         // Every bookmark the list shows, in its order, as one reading (owner, 2026-11-26).
-        FilledTonalButton(
+        if (state.hasBookmarks) FilledTonalButton(
             onClick = onReadAll,
             enabled = state.listed.isNotEmpty(),
             modifier = Modifier.heightIn(min = Sizes.touchTarget).testTag(BOOKMARKS_READ_ALL_TAG),
