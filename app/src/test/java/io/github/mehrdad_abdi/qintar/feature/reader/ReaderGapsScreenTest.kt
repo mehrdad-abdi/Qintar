@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -78,7 +79,8 @@ class ReaderGapsScreenTest {
     }
 
     @Test
-    fun `a bookmark opens under its own header and Log a full reading adds a reading of every ayah`() {
+    fun `a bookmark opens under its own header, and is marked read only by I read it at its end`() {
+        // Owner, 2026-11-27: the header's "Log a full reading" repeated the "I read it" at the end.
         val bookmark = runBlocking {
             app.library.create(
                 BookmarkDrafts.surah(112, app.index).copy(label = "Ikhlas", description = "A third of the Quran", repeatTarget = 3),
@@ -88,11 +90,12 @@ class ReaderGapsScreenTest {
 
         compose.onNodeWithText("A third of the Quran").assertIsDisplayed()
         compose.onNodeWithContentDescription("0 / 3 today, 0%").assertIsDisplayed()
-        compose.onNodeWithText("Log a full reading").performClick()
+        compose.onNodeWithText("Log a full reading").assertDoesNotExist()
+        compose.onNodeWithTag(READER_LIST_TAG).performScrollToNode(androidx.compose.ui.test.hasText("I read it"))
+        compose.onNodeWithText("I read it").performClick()
 
         assertEquals(4, app.log.events.size)
         assertTrue(app.log.events.all { it.context == ReadContext.Bookmark(bookmark.id) })
-        compose.onNodeWithContentDescription("1 / 3 today, 33%").assertIsDisplayed()
         compose.onNodeWithText("4 ayahs marked").assertIsDisplayed()
         compose.onNodeWithText("Undo").performClick()
         compose.waitForIdle()

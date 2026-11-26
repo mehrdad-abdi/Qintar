@@ -676,13 +676,7 @@ class ReaderViewModel @AssistedInject constructor(
         offerUndo(tracker.markRange(target.range, target.context, ReadMethod.BULK, RangeMode.FILL))
     }
 
-    /** "Log a full reading" of one bookmark: one more reading of every ayah of its passage; one Undo. */
-    fun onLogFullReading(segment: Int) = act {
-        val target = model?.segments?.getOrNull(segment) ?: return@act
-        offerUndo(tracker.markRange(target.range, target.context, ReadMethod.BULK, RangeMode.ADD))
-    }
-
-    /** The same for every bookmark of the group at once, as one action with one Undo. */
+    /** "Log a full reading" of the group: one more reading of every ayah of every bookmark, with one Undo. */
     fun onLogGroupReading() = act {
         val segments = model?.segments ?: return@act
         offerUndo(tracker.markSegments(segments, ReadMethod.BULK, RangeMode.ADD))

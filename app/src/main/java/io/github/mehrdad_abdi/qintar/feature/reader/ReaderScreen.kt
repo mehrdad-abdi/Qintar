@@ -395,7 +395,6 @@ private fun ReaderList(
                     info = state.headers.getOrNull(row.segment),
                     first = row.segment == 0,
                     groupAction = state.entry == ReaderEntry.GROUP && row.segment == 0,
-                    onLog = { viewModel.onLogFullReading(row.segment) },
                     onLogGroup = viewModel::onLogGroupReading,
                 )
                 is ReaderRow.SurahHeader -> SurahHeader(surahName(row.surah), subtitle = surahFacts(row.surah))
@@ -459,7 +458,7 @@ private fun ReaderList(
 
 /**
  * The header of a bookmark in the reader (§5.4): its title, its description (prominent: it may hold a
- * narration), today's progress against the repeat target, and "Log a full reading".
+ * narration) and today's progress. "I read it" at its end marks it read.
  */
 @Composable
 private fun SegmentHeaderRow(
@@ -467,7 +466,6 @@ private fun SegmentHeaderRow(
     info: SegmentHeaderInfo?,
     first: Boolean,
     groupAction: Boolean,
-    onLog: () -> Unit,
     onLogGroup: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -504,10 +502,7 @@ private fun SegmentHeaderRow(
             val progress = if (info.required == 0) 0f else info.readings.toFloat() / info.required
             val readings = stringResource(R.string.reader_header_readings, formatNumber(info.fullReadings), formatNumber(info.repeatTarget))
             StackedProgressRow(label = readings, valueText = stringResource(R.string.percent, formatNumber((progress * 100).toInt())), progress = progress)
-            FilledTonalButton(
-                onClick = onLog,
-                modifier = Modifier.heightIn(min = Sizes.touchTarget),
-            ) { Text(stringResource(R.string.reader_log_full_reading), style = QintarType.Label) }
+            // No "Log a full reading" here: "I read it" ends the bookmark (owner, 2026-11-27).
         }
         Spacer(Modifier.height(Spacing.md))
     }

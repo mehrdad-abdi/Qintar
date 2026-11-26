@@ -79,7 +79,6 @@
     <string name="reader_jump_resume">جای ادامه</string>
     <string name="reader_first_unread_chip">نخستین نخوانده</string>
     <string name="reader_mark_page">صفحهٔ %1$s را خواندم</string>
-    <string name="reader_log_full_reading">ثبت یک خواندن کامل</string>
     <string name="reader_log_group_reading">ثبت یک خواندن کامل گروه</string>
     <string name="reader_header_readings">%1$s / %2$s امروز</string>
     <string name="goto_help">آیه ۲:۲۵۵ · سوره ۳۶ یا نامش · صفحه ص۳۰۰ · جزء ج۱۲ · یا p300، j12</string>

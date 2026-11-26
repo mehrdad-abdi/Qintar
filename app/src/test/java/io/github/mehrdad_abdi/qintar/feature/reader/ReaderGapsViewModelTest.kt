@@ -282,39 +282,9 @@ class ReaderGapsViewModelTest {
         assertEquals(3, header.repeatTarget)
         assertEquals(0, header.fullReadings)
 
-        reader.onLogFullReading(0)
+        reader.onMarkSegment(0)
         assertEquals(1, reader.state.value.headers.single()!!.fullReadings)
         assertFalse(reader.state.value.headers.single()!!.done)
-    }
-
-    @Test
-    fun `log a full reading adds one reading of every ayah under the bookmark and Undo removes it`() = runTest {
-        val bookmark = app.library.create(BookmarkDrafts.surah(112, app.index).copy(repeatTarget = 2))
-        val context = ReadContext.Bookmark(bookmark.id)
-        val reader = reader(ReaderRoute.bookmark(bookmark.id))
-        reader.onCheck(reader.row112(1))
-
-        reader.onLogFullReading(0)
-
-        assertEquals("a tick, then one more of each", 1 + 4, app.log.events.size)
-        for (n in 1..4) assertEquals(if (n == 1) 2 else 1, reader.countOf(app.ayah(112, n)))
-        assertTrue(app.log.events.all { it.context == context })
-        assertEquals(4, reader.state.value.bulk?.added)
-
-        reader.onUndoBulk()
-        assertEquals(1, app.log.events.size)
-        assertEquals(1, reader.countOf(app.ayah(112, 1)))
-        assertEquals(0, reader.countOf(app.ayah(112, 4)))
-    }
-
-    @Test
-    fun `log a full reading again adds another, since it is a reading not a fill`() = runTest {
-        val bookmark = app.library.create(BookmarkDrafts.surah(112, app.index))
-        val reader = reader(ReaderRoute.bookmark(bookmark.id))
-        reader.onLogFullReading(0)
-        reader.onLogFullReading(0)
-        assertEquals(2, reader.countOf(app.ayah(112, 3)))
-        assertEquals(8, app.log.events.size)
     }
 
     @Test
@@ -325,7 +295,7 @@ class ReaderGapsViewModelTest {
         val reader = reader(ReaderRoute.group(group.id))
         assertEquals(2, reader.state.value.headers.size)
 
-        reader.onLogFullReading(1)
+        reader.onMarkSegment(1)
         assertEquals(5, app.log.events.size)
         assertTrue(app.log.events.all { it.context == ReadContext.Bookmark(second.id) })
 
