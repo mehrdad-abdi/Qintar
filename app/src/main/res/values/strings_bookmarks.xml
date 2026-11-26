@@ -29,13 +29,11 @@
     <string name="bm_menu_more">Bookmark actions</string>
     <string name="bm_group_menu_more">Group actions</string>
     <string name="bm_menu_edit">Edit</string>
-    <string name="bm_menu_log">Log a full reading</string>
     <string name="bm_menu_move">Move to group</string>
     <string name="bm_menu_duplicate">Duplicate to another group</string>
     <string name="bm_menu_delete">Delete</string>
     <string name="bm_group_menu_log">Log a full reading of the group</string>
     <string name="bm_group_menu_delete">Delete group</string>
-    <string name="bm_snack_logged">Logged a full reading</string>
     <string name="bm_snack_group_logged">Logged a full reading of the group</string>
     <string name="bm_snack_deleted">Bookmark deleted</string>
     <string name="bm_move_title">Move to group</string>

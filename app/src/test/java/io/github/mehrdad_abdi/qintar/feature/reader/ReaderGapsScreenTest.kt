@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import io.github.mehrdad_abdi.qintar.domain.model.AyahId
 import io.github.mehrdad_abdi.qintar.domain.model.AyahRange
@@ -79,7 +80,7 @@ class ReaderGapsScreenTest {
     }
 
     @Test
-    fun `a bookmark opens under its own header, and is marked read only by I read it at its end`() {
+    fun `a bookmark opens under a header with its title only, and is marked read by I read it at its end`() {
         // Owner, 2026-11-27: the header's "Log a full reading" repeated the "I read it" at the end.
         val bookmark = runBlocking {
             app.library.create(
@@ -88,11 +89,15 @@ class ReaderGapsScreenTest {
         }
         open(ReaderRoute.bookmark(bookmark.id))
 
-        compose.onNodeWithText("A third of the Quran").assertIsDisplayed()
-        compose.onNodeWithContentDescription("0 / 3 today, 0%").assertIsDisplayed()
+        // Owner, 2026-11-27: the header is the title only; the description is on the Bookmarks list,
+        // and "0 / 1 today" took room for little.
+        compose.onAllNodesWithText("Ikhlas").assertCountEquals(2) // the top bar, and the header
+        compose.onNodeWithText("A third of the Quran").assertDoesNotExist()
+        compose.onNodeWithContentDescription("0 / 3 today, 0%").assertDoesNotExist()
         compose.onNodeWithText("Log a full reading").assertDoesNotExist()
         compose.onNodeWithTag(READER_LIST_TAG).performScrollToNode(androidx.compose.ui.test.hasText("I read it"))
-        compose.onNodeWithText("I read it").performClick()
+        // Its own click: scrolled to the bottom edge, it sits under the floating pill.
+        compose.onNodeWithText("I read it").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
 
         assertEquals(4, app.log.events.size)
         assertTrue(app.log.events.all { it.context == ReadContext.Bookmark(bookmark.id) })

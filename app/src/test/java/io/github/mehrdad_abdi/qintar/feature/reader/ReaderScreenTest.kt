@@ -82,13 +82,17 @@ class ReaderScreenTest {
     }
 
     @Test
-    fun `the row menu offers today's readings, and no set count any more`() {
+    fun `today's readings open from the pill, not from an ayah's menu`() {
+        // Owner, 2026-11-27: an ayah's menu was the wrong place; the pill shows today's count.
         open(ReaderRoute.browse(app.ayah(2, 1).value))
 
         menu(0).performClick()
         compose.onNodeWithText("Set count…").assertDoesNotExist()
         compose.onNodeWithText("Add bookmark").assertDoesNotExist() // the star does that (owner, 2026-11-22)
-        compose.onNodeWithText("Today's readings").performClick()
+        compose.onNodeWithText("Today's readings").assertDoesNotExist()
+        androidx.test.espresso.Espresso.pressBack()
+
+        compose.onNodeWithContentDescription("0 today, 10 ayahs to the first rank").performClick()
         assertEquals(io.github.mehrdad_abdi.qintar.ui.navigation.DayDetailRoute("2026-11-15"), navigated.last())
     }
 
@@ -217,6 +221,7 @@ class ReaderScreenTest {
 
         compose.onNodeWithText("Page", substring = true).assertDoesNotExist()
         compose.onNodeWithText("Juz", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Log a full reading of the group").assertDoesNotExist() // owner, 2026-11-27
         compose.onNodeWithText("1 of 2 done").assertIsDisplayed()
         compose.onNodeWithText("Bookmark 2 of 2").assertIsDisplayed().performClick()
 

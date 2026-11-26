@@ -90,7 +90,7 @@ sealed interface BookmarksRow {
  */
 data class Glimpse(val head: String, val tail: String?)
 
-enum class UndoKind { LOGGED, GROUP_LOGGED, DELETED }
+enum class UndoKind { GROUP_LOGGED, DELETED }
 
 /** The snackbar with Undo. [id] tells a new notice from the one already shown. */
 data class UndoNotice(val id: Int, val kind: UndoKind, val batch: Batch? = null, val bookmark: Bookmark? = null)
@@ -274,13 +274,6 @@ class BookmarksViewModel @Inject constructor(
     }
 
     // ---- bookmark actions ----------------------------------------------------------------------
-
-    /** "Log a full reading": one more reading of every ayah of the passage, with one Undo. */
-    fun onLogFullReading(bookmarkId: Long) = act {
-        val bookmark = bookmarkOf(bookmarkId) ?: return@act
-        val batch = tracker.markRange(bookmark.range, ReadContext.Bookmark(bookmark.id), ReadMethod.BULK, RangeMode.ADD)
-        notify(UndoKind.LOGGED, batch = batch)
-    }
 
     /** Deletes the bookmark; Undo [BookmarkLibrary.restore]s it. Its readings were never touched. */
     fun onDelete(bookmarkId: Long) = act {

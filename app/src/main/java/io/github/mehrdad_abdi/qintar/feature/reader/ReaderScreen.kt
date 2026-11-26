@@ -275,6 +275,8 @@ fun ReaderScreen(
                 progress = state.today.ringFraction,
                 rankReached = reached != null,
                 reachedText = reached?.let { rankReachedText(it) },
+                // Today's readings, where one can be removed (owner, 2026-11-27).
+                onClick = { onNavigate(viewModel.todayReadingsRoute()) },
             )
         }
     }
@@ -392,10 +394,7 @@ private fun ReaderList(
             when (row) {
                 is ReaderRow.SegmentHeader -> SegmentHeaderRow(
                     title = state.segmentTitles.getOrNull(row.segment)?.let { bookmarkTitleText(it) }.orEmpty(),
-                    info = state.headers.getOrNull(row.segment),
                     first = row.segment == 0,
-                    groupAction = state.entry == ReaderEntry.GROUP && row.segment == 0,
-                    onLogGroup = viewModel::onLogGroupReading,
                 )
                 is ReaderRow.SurahHeader -> SurahHeader(surahName(row.surah), subtitle = surahFacts(row.surah))
                 is ReaderRow.Basmala -> BasmalaRow(fontSizeSp = state.fontSp, highlighted = state.isAudioAt(row))
@@ -437,7 +436,6 @@ private fun ReaderList(
                     },
                     viewModel = viewModel,
                     onStar = { onNavigate(viewModel.starTarget(row)) },
-                    onTodayReadings = { onNavigate(viewModel.todayReadingsRoute()) },
                 )
             }
         }
@@ -457,54 +455,20 @@ private fun ReaderList(
 }
 
 /**
- * The header of a bookmark in the reader (§5.4): its title, its description (prominent: it may hold a
- * narration) and today's progress. "I read it" at its end marks it read.
+ * The header of a bookmark in the reader (§5.4): its title only (owner, 2026-11-27). Its description
+ * is on the Bookmarks list; "N / M today" took room for little, as most bookmarks are short; "I read
+ * it" at its end marks it read.
  */
 @Composable
-private fun SegmentHeaderRow(
-    title: String,
-    info: SegmentHeaderInfo?,
-    first: Boolean,
-    groupAction: Boolean,
-    onLogGroup: () -> Unit,
-) {
-    val colors = MaterialTheme.colorScheme
+private fun SegmentHeaderRow(title: String, first: Boolean) {
     Column(Modifier.fillMaxWidth().testTag(SEGMENT_HEADER_TAG)) {
         if (!first) Hairline(Modifier.padding(top = Spacing.xl))
-        if (groupAction) {
-            FilledTonalButton(
-                onClick = onLogGroup,
-                modifier = Modifier.padding(horizontal = Spacing.screen, vertical = Spacing.sm).heightIn(min = Sizes.touchTarget),
-            ) { Text(stringResource(R.string.reader_log_group_reading), style = QintarType.Label) }
-        }
         Text(
             title,
             style = QintarType.Headline,
-            color = colors.onSurface,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(horizontal = Spacing.screen, vertical = Spacing.lg),
         )
-        if (info == null) return@Column
-        info.description?.let { description ->
-            Text(
-                description,
-                style = QintarType.Body,
-                color = colors.onSurface,
-                modifier = Modifier
-                    .padding(horizontal = Spacing.screen)
-                    .fillMaxWidth()
-                    .clip(QintarShapes.Inner)
-                    .background(colors.surfaceContainer)
-                    .padding(Spacing.lg),
-            )
-            Spacer(Modifier.height(Spacing.md))
-        }
-        Column(Modifier.padding(horizontal = Spacing.screen), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            val progress = if (info.required == 0) 0f else info.readings.toFloat() / info.required
-            val readings = stringResource(R.string.reader_header_readings, formatNumber(info.fullReadings), formatNumber(info.repeatTarget))
-            StackedProgressRow(label = readings, valueText = stringResource(R.string.percent, formatNumber((progress * 100).toInt())), progress = progress)
-            // No "Log a full reading" here: "I read it" ends the bookmark (owner, 2026-11-27).
-        }
-        Spacer(Modifier.height(Spacing.md))
     }
 }
 
@@ -520,7 +484,6 @@ private fun AyahItem(
     onCheck: () -> Unit,
     viewModel: ReaderViewModel,
     onStar: () -> Unit,
-    onTodayReadings: () -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     // A row whose text has not arrived keeps its place and its controls.
@@ -546,10 +509,6 @@ private fun AyahItem(
         )
         Box(Modifier.align(Alignment.End)) {
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.todays_readings)) },
-                    onClick = { menuOpen = false; onTodayReadings() },
-                )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.ayah_menu_mark_up_to_here)) },
                     onClick = { menuOpen = false; viewModel.onMarkUpToHere(row) },

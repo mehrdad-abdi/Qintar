@@ -130,7 +130,6 @@ fun BookmarksScreen(onNavigate: (route: Any) -> Unit, viewModel: BookmarksViewMo
     DisposableEffect(viewModel) { onDispose { viewModel.onScreenLeft() } }
 
     val messages = mapOf(
-        UndoKind.LOGGED to stringResource(R.string.bm_snack_logged),
         UndoKind.GROUP_LOGGED to stringResource(R.string.bm_snack_group_logged),
         UndoKind.DELETED to stringResource(R.string.bm_snack_deleted),
     )

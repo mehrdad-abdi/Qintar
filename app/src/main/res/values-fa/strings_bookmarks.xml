@@ -27,13 +27,11 @@
     <string name="bm_menu_more">کارهای نشانه</string>
     <string name="bm_group_menu_more">کارهای گروه</string>
     <string name="bm_menu_edit">ویرایش</string>
-    <string name="bm_menu_log">ثبت یک خواندن کامل</string>
     <string name="bm_menu_move">انتقال به گروه</string>
     <string name="bm_menu_duplicate">رونوشت در گروهی دیگر</string>
     <string name="bm_menu_delete">حذف</string>
     <string name="bm_group_menu_log">ثبت یک خواندن کامل گروه</string>
     <string name="bm_group_menu_delete">حذف گروه</string>
-    <string name="bm_snack_logged">یک خواندن کامل ثبت شد</string>
     <string name="bm_snack_group_logged">یک خواندن کامل گروه ثبت شد</string>
     <string name="bm_snack_deleted">نشانه حذف شد</string>
     <string name="bm_move_title">انتقال به گروه</string>

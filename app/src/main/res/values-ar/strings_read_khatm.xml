@@ -79,8 +79,6 @@
     <string name="reader_jump_resume">موضع المتابعة</string>
     <string name="reader_first_unread_chip">أول غير مقروء</string>
     <string name="reader_mark_page">قرأتُ الصفحة %1$s</string>
-    <string name="reader_log_group_reading">تسجيل قراءة كاملة للمجموعة</string>
-    <string name="reader_header_readings">%1$s / %2$s اليوم</string>
     <string name="goto_help">آية ٢:٢٥٥ · سورة ٣٦ أو اسمها · صفحة ص٣٠٠ · جزء ج١٢ · أو p300، j12</string>
     <string name="reader_bookmark_position">العلامة %1$s من %2$s</string>
     <string name="reader_jump_bookmark">الانتقال إلى علامة</string>

@@ -27,13 +27,11 @@
     <string name="bm_menu_more">إجراءات العلامة</string>
     <string name="bm_group_menu_more">إجراءات المجموعة</string>
     <string name="bm_menu_edit">تعديل</string>
-    <string name="bm_menu_log">تسجيل قراءة كاملة</string>
     <string name="bm_menu_move">نقل إلى مجموعة</string>
     <string name="bm_menu_duplicate">نسخ إلى مجموعة أخرى</string>
     <string name="bm_menu_delete">حذف</string>
     <string name="bm_group_menu_log">تسجيل قراءة كاملة للمجموعة</string>
     <string name="bm_group_menu_delete">حذف المجموعة</string>
-    <string name="bm_snack_logged">سُجّلت قراءة كاملة</string>
     <string name="bm_snack_group_logged">سُجّلت قراءة كاملة للمجموعة</string>
     <string name="bm_snack_deleted">حُذفت العلامة</string>
     <string name="bm_move_title">نقل إلى مجموعة</string>

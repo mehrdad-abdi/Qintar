@@ -268,27 +268,21 @@ class ReaderGapsViewModelTest {
     // ---- Bookmark and group headers, log a full reading --------------------------------------------
 
     @Test
-    fun `a bookmark reader has a header with its description and its progress against the target`() = runTest {
-        val bookmark = app.library.create(
-            BookmarkDrafts.surah(112, app.index).copy(label = "Ikhlas", description = "Narrated: it equals a third of the Quran", repeatTarget = 3),
-        )
+    fun `a bookmark reader has a header, and knows when the bookmark is read today`() = runTest {
+        val bookmark = app.library.create(BookmarkDrafts.surah(112, app.index).copy(label = "Ikhlas"))
         val reader = reader(ReaderRoute.bookmark(bookmark.id))
         val state = reader.state.value
 
         assertTrue(state.rows.first() is ReaderRow.SegmentHeader)
         assertEquals(0, state.initialRowIndex)
-        val header = checkNotNull(state.headers.single())
-        assertEquals("Narrated: it equals a third of the Quran", header.description)
-        assertEquals(3, header.repeatTarget)
-        assertEquals(0, header.fullReadings)
+        assertFalse(checkNotNull(state.headers.single()).done)
 
         reader.onMarkSegment(0)
-        assertEquals(1, reader.state.value.headers.single()!!.fullReadings)
-        assertFalse(reader.state.value.headers.single()!!.done)
+        assertTrue(reader.state.value.headers.single()!!.done)
     }
 
     @Test
-    fun `in a group each bookmark can be logged on its own, or the whole group at once with one Undo`() = runTest {
+    fun `in a group each bookmark is marked read on its own, under its own bookmark`() = runTest {
         val group = app.library.createGroup("Morning")
         val first = app.library.create(BookmarkDrafts.surah(112, app.index).copy(groupId = group.id))
         val second = app.library.create(BookmarkDrafts.surah(113, app.index).copy(groupId = group.id))
@@ -299,13 +293,7 @@ class ReaderGapsViewModelTest {
         assertEquals(5, app.log.events.size)
         assertTrue(app.log.events.all { it.context == ReadContext.Bookmark(second.id) })
 
-        reader.onLogGroupReading()
-        assertEquals(5 + 4 + 5, app.log.events.size)
-        assertEquals(2, app.log.events.count { it.ayahId == app.ayah(113, 1) })
-        assertEquals(1, app.log.events.count { it.ayahId == app.ayah(112, 1) && it.context == ReadContext.Bookmark(first.id) })
-
-        reader.onUndoBulk()
-        assertEquals("one Undo removes the whole group reading", 5, app.log.events.size)
+        assertTrue("the other bookmark is untouched", app.log.events.none { it.context == ReadContext.Bookmark(first.id) })
     }
 
     // ---- Aa panel --------------------------------------------------------------------------------

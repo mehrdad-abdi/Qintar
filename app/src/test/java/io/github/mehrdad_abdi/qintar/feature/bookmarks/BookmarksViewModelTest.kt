@@ -141,7 +141,8 @@ class BookmarksViewModelTest {
         vm.onFilter(BookmarksFilter.UNREAD)
         assertEquals(listOf(unread.id), vm.state.value.entries())
 
-        vm.onLogFullReading(unread.id)
+        // Read in the reader meanwhile.
+        app.tracker.markRange(unread.range, io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(unread.id), io.github.mehrdad_abdi.qintar.domain.model.ReadMethod.BULK, io.github.mehrdad_abdi.qintar.domain.model.RangeMode.FILL)
         assertEquals("stays where it is", listOf(unread.id), vm.state.value.entries())
 
         vm.onScreenLeft()
@@ -160,24 +161,10 @@ class BookmarksViewModelTest {
     // ---- actions -----------------------------------------------------------------------------------
 
     @Test
-    fun `log a full reading and undo it`() = runTest {
-        val b = kahf(target = 2)
-        val vm = open()
-        vm.onLogFullReading(b.id)
-        assertEquals(b.range.size, app.log.allEvents().size)
-        assertEquals(UndoKind.LOGGED, vm.state.value.notice?.kind)
-
-        vm.onUndo()
-        assertEquals(0, app.log.allEvents().size)
-        assertNull(vm.state.value.notice)
-        assertEquals(0, vm.state.value.all.single().state.progress.readings)
-    }
-
-    @Test
     fun `delete and undo keeps the day's readings`() = runTest {
         val b = kahf()
         val vm = open()
-        vm.onLogFullReading(b.id)
+        app.tracker.markRange(b.range, io.github.mehrdad_abdi.qintar.domain.model.ReadContext.Bookmark(b.id), io.github.mehrdad_abdi.qintar.domain.model.ReadMethod.BULK, io.github.mehrdad_abdi.qintar.domain.model.RangeMode.FILL)
         val before = app.log.allEvents().size
 
         vm.onDelete(b.id)

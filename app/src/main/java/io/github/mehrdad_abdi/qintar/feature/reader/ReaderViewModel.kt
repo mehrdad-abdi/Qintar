@@ -105,13 +105,7 @@ enum class ReaderSheet {
 
 /** A bookmark's header in the reader: its description and today's progress against its repeat target. */
 data class SegmentHeaderInfo(
-    val description: String?,
-    /** Σ of today's counts, each capped at the target. */
-    val readings: Int,
-    val required: Int,
-    /** Complete readings today ("37 / 100"). */
-    val fullReadings: Int,
-    val repeatTarget: Int,
+    /** Read today: its tick in the jump list and the "done" count of the position bar. */
     val done: Boolean,
 )
 
@@ -497,23 +491,13 @@ class ReaderViewModel @AssistedInject constructor(
         }
     }
 
-    /** Bookmark and group readers: each segment's description and today's progress, live. */
+    /** Bookmark and group readers: whether each bookmark is read today, live. */
     private fun observeHeaders(segments: List<Segment>) {
         viewModelScope.launch {
             availability.observe().collect { board ->
                 val infos = segments.map { segment ->
                     val id = (segment.context as? ReadContext.Bookmark)?.id ?: return@map null
-                    board.state(id)?.let { state ->
-                        val p = state.progress
-                        SegmentHeaderInfo(
-                            description = state.bookmark.description?.takeIf { it.isNotBlank() },
-                            readings = p.readings,
-                            required = p.required,
-                            fullReadings = p.fullReadings,
-                            repeatTarget = p.repeatTarget,
-                            done = p.done,
-                        )
-                    }
+                    board.state(id)?.let { state -> SegmentHeaderInfo(done = state.progress.done) }
                 }
                 _state.update { it.copy(headers = infos) }
             }
@@ -674,12 +658,6 @@ class ReaderViewModel @AssistedInject constructor(
     fun onMarkSegment(segment: Int) = act {
         val target = model?.segments?.getOrNull(segment) ?: return@act
         offerUndo(tracker.markRange(target.range, target.context, ReadMethod.BULK, RangeMode.FILL))
-    }
-
-    /** "Log a full reading" of the group: one more reading of every ayah of every bookmark, with one Undo. */
-    fun onLogGroupReading() = act {
-        val segments = model?.segments ?: return@act
-        offerUndo(tracker.markSegments(segments, ReadMethod.BULK, RangeMode.ADD))
     }
 
     // ---- Audio (§7.8) ------------------------------------------------------------------------------
