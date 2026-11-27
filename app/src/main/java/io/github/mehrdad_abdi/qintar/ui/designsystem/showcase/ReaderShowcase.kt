@@ -142,7 +142,6 @@ private fun AnfalRows(t: ShowcaseText) {
     BasmalaRow()
     AyahRow(
         text = displayText(SampleAyahs.ANFAL_1, 1),
-        reference = localizeDigits("8:1"),
         checkState = AyahCheckState.Unread,
         onCheck = {},
         accessibilityLabel = "${t.anfalLabel} ${formatNumber(1)}",
@@ -150,10 +149,8 @@ private fun AnfalRows(t: ShowcaseText) {
     Hairline(Modifier.padding(horizontal = Spacing.screen))
     AyahRow(
         text = displayText(SampleAyahs.ANFAL_2, 2),
-        reference = localizeDigits("8:2"),
         checkState = AyahCheckState.ReadToday,
         readCount = 2,
-        starred = true,
         playing = true,
         onCheck = {},
         accessibilityLabel = "${t.anfalLabel} ${formatNumber(2)}",
@@ -161,7 +158,6 @@ private fun AnfalRows(t: ShowcaseText) {
     PageDivider(t.pageDivider, actionLabel = t.markPage, onAction = {})
     AyahRow(
         text = displayText(SampleAyahs.ANFAL_3, 3),
-        reference = localizeDigits("8:3"),
         checkState = AyahCheckState.CoveredEarlier,
         onCheck = {},
         accessibilityLabel = "${t.anfalLabel} ${formatNumber(3)}",
@@ -173,9 +169,7 @@ private fun KursiRows(t: ShowcaseText) {
     Spacer(Modifier.height(Spacing.sm))
     AyahRow(
         text = displayText(SampleAyahs.AYAT_AL_KURSI, 255),
-        reference = localizeDigits("2:255"),
         checkState = AyahCheckState.ReadToday,
-        starred = true,
         onCheck = {},
         accessibilityLabel = "${t.baqarahLabel} ${formatNumber(255)}",
     )

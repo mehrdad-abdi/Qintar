@@ -57,8 +57,6 @@
     <string name="ayah_state_read_times">قُرئت %1$s مرات اليوم</string>
     <string name="ayah_state_covered_earlier">قُرئت في يوم سابق</string>
     <string name="ayah_action_mark_read">قرأتُ هذه الآية</string>
-    <string name="ayah_action_bookmark">إضافة علامة</string>
-    <string name="ayah_bookmarked">عليها علامة</string>
     <string name="ayah_action_play">تشغيل</string>
     <string name="ayah_action_pause">إيقاف مؤقت</string>
     <string name="ayah_action_more">إجراءات أخرى</string>
@@ -94,6 +92,8 @@
     <string name="part_three_quarters">ثلاثة أرباع الحزب %1$s</string>
     <string name="reader_position">الصفحة %1$s من %2$s · %3$s٪</string>
     <string name="sajda_label">سجدة</string>
+    <string name="ayah_menu_bookmark">إضافة علامة لهذه الآية</string>
+    <string name="ayah_menu_edit_bookmark">تعديل علامتها</string>
     <string name="ayah_menu_mark_up_to_here">قرأتُ إلى هنا</string>
     <string name="bulk_marked">تم تعليم %1$s آية</string>
     <string name="khatm_skip_message">هل قرأتَ الآيات الـ%1$s من %2$s إلى هنا؟</string>

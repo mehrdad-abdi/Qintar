@@ -57,8 +57,6 @@
     <string name="ayah_state_read_times">امروز %1$s بار خوانده شده</string>
     <string name="ayah_state_covered_earlier">در روزهای پیش خوانده شده</string>
     <string name="ayah_action_mark_read">این آیه را خواندم</string>
-    <string name="ayah_action_bookmark">نشان کردن</string>
-    <string name="ayah_bookmarked">نشان شده</string>
     <string name="ayah_action_play">پخش</string>
     <string name="ayah_action_pause">مکث</string>
     <string name="ayah_action_more">کارهای بیشتر</string>
@@ -94,6 +92,8 @@
     <string name="part_three_quarters">سه‌ربع حزب %1$s</string>
     <string name="reader_position">صفحهٔ %1$s از %2$s · %3$s٪</string>
     <string name="sajda_label">سجده</string>
+    <string name="ayah_menu_bookmark">نشان کردن این آیه</string>
+    <string name="ayah_menu_edit_bookmark">ویرایش نشانش</string>
     <string name="ayah_menu_mark_up_to_here">تا این‌جا خواندم</string>
     <string name="bulk_marked">%1$s آیه علامت خورد</string>
     <string name="khatm_skip_message">همهٔ %1$s آیه از %2$s تا این‌جا را خوانده‌اید؟</string>

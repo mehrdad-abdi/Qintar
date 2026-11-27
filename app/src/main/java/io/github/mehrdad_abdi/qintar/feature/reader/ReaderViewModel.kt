@@ -824,10 +824,11 @@ class ReaderViewModel @AssistedInject constructor(
     fun todayReadingsRoute(): DayDetailRoute = DayDetailRoute(clock.today().toString())
 
     /**
-     * Where the star of [row] leads (owner, 2026-11-22): the editor of the bookmark the ayah is in, or
-     * a new bookmark filled with the ayah, where a description and the end of the range can be added.
+     * Where "Bookmark this ayah" in an ayah's menu leads (owner, 2026-11-22; in the menu since
+     * 2026-11-27): the editor of the bookmark the ayah is in, or a new bookmark filled with the ayah,
+     * where a description and the end of the range can be added.
      */
-    fun starTarget(row: ReaderRow.Ayah): BookmarkEditorRoute {
+    fun bookmarkTarget(row: ReaderRow.Ayah): BookmarkEditorRoute {
         val id = _state.value.bookmarkedBy[row.id]
         return if (id != null) BookmarkEditorRoute(bookmarkId = id) else BookmarkEditorRoute.forAyah(row.id.value)
     }

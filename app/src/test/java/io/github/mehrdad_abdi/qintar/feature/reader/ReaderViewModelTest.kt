@@ -424,7 +424,7 @@ class ReaderViewModelTest {
         val reader = browse()
         val ayah = app.ayah(2, 5)
         assertFalse(ayah in reader.state.value.bookmarkedBy)
-        assertEquals(BookmarkEditorRoute.forAyah(ayah.value), reader.starTarget(reader.row(ayah)))
+        assertEquals(BookmarkEditorRoute.forAyah(ayah.value), reader.bookmarkTarget(reader.row(ayah)))
         assertTrue("nothing is saved by the star itself", app.bookmarkStore.bookmarks().isEmpty())
     }
 
@@ -437,7 +437,7 @@ class ReaderViewModelTest {
         val reader = browse(2, 256)
         val inside = app.ayah(2, 256)
         assertEquals(bookmark.id, reader.state.value.bookmarkedBy[inside])
-        assertEquals(BookmarkEditorRoute(bookmarkId = bookmark.id), reader.starTarget(reader.row(inside)))
+        assertEquals(BookmarkEditorRoute(bookmarkId = bookmark.id), reader.bookmarkTarget(reader.row(inside)))
     }
 
     // ---- Opening, text and settings ----------------------------------------------------------------

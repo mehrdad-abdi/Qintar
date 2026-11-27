@@ -94,22 +94,19 @@ enum class AyahCheckState {
 @Composable
 fun AyahRow(
     text: String,
-    reference: String,
     checkState: AyahCheckState,
     onCheck: () -> Unit,
     modifier: Modifier = Modifier,
     readCount: Int = if (checkState == AyahCheckState.ReadToday) 1 else 0,
-    starred: Boolean = false,
     playing: Boolean = false,
     /** The player is at this ayah, playing or paused: the row keeps its tint while paused. */
     highlighted: Boolean = playing,
     sajdaLabel: String? = null,
     fontSizeSp: Int = QuranTextSizeDefaultSp,
-    accessibilityLabel: String = reference,
+    /** What TalkBack says for the ayah, e.g. "Al-Baqarah, ayah 255". */
+    accessibilityLabel: String = "",
     onTextClick: () -> Unit = {},
     onPlay: (() -> Unit)? = {},
-    /** Null hides the star (the Bookmarks list: the ayah is already in a bookmark). */
-    onStar: (() -> Unit)? = {},
     /** Null hides the ⋯ menu. */
     onMenu: (() -> Unit)? = {},
 ) {
@@ -122,7 +119,6 @@ fun AyahRow(
         AyahCheckState.CoveredEarlier -> stringResource(R.string.ayah_state_covered_earlier)
     }
     val markReadLabel = stringResource(R.string.ayah_action_mark_read)
-    val bookmarkLabel = stringResource(R.string.ayah_action_bookmark)
     val playLabel = stringResource(R.string.ayah_action_play)
     val rowTint = if (highlighted) colors.primaryContainer.copy(alpha = 0.35f) else Color.Transparent
 
@@ -141,7 +137,6 @@ fun AyahRow(
                     contentDescription = "$accessibilityLabel, $stateText"
                     customActions = listOfNotNull(
                         CustomAccessibilityAction(markReadLabel) { onCheck(); true },
-                        onStar?.let { star -> CustomAccessibilityAction(bookmarkLabel) { star(); true } },
                         onPlay?.let { play -> CustomAccessibilityAction(playLabel) { play(); true } },
                     )
                 },
@@ -150,14 +145,9 @@ fun AyahRow(
             modifier = Modifier.fillMaxWidth().padding(start = Spacing.screen, end = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = reference,
-                style = QintarType.Numeric,
-                color = colors.onSurfaceVariant,
-                modifier = Modifier.clearAndSetSemantics { },
-            )
+            // No "surah:ayah" here (owner, 2026-11-27): the end marker carries the ayah's number and
+            // the title the surah's name.
             if (sajdaLabel != null) {
-                Spacer(Modifier.width(Spacing.sm))
                 Text(
                     text = sajdaLabel,
                     style = QintarType.Caption,
@@ -171,13 +161,6 @@ fun AyahRow(
             Spacer(Modifier.weight(1f))
             if (onMenu != null) IconButton(onClick = onMenu, modifier = Modifier.size(Sizes.touchTarget)) {
                 Icon(Icons.Rounded.MoreHoriz, stringResource(R.string.ayah_action_more), tint = colors.onSurfaceVariant)
-            }
-            if (onStar != null) IconButton(onClick = onStar, modifier = Modifier.size(Sizes.touchTarget)) {
-                Icon(
-                    if (starred) Icons.Rounded.Star else Icons.Rounded.StarBorder,
-                    stringResource(if (starred) R.string.ayah_bookmarked else R.string.ayah_action_bookmark),
-                    tint = if (starred) colors.primary else colors.onSurfaceVariant,
-                )
             }
             if (onPlay != null) Box(Modifier.size(Sizes.touchTarget), contentAlignment = Alignment.Center) {
                 if (playing) PlayingRing()
@@ -514,9 +497,9 @@ private fun ReaderComponentsPreview() {
                 PositionBar("Page 200 of 604 · 33%", {}, Modifier.padding(Spacing.screen), secondary = "Juz 10")
                 SurahHeader("Al-Anfal", subtitle = "75 ayahs · Medinan")
                 BasmalaRow()
-                AyahRow(BASMALA + " " + Numerals.ayahEndMarker(1), "8:1", AyahCheckState.Unread, {})
+                AyahRow(BASMALA + " " + Numerals.ayahEndMarker(1), AyahCheckState.Unread, {})
                 Hairline(Modifier.padding(horizontal = Spacing.screen))
-                AyahRow(BASMALA + " " + Numerals.ayahEndMarker(2), "8:2", AyahCheckState.ReadToday, {}, readCount = 2, starred = true)
+                AyahRow(BASMALA + " " + Numerals.ayahEndMarker(2), AyahCheckState.ReadToday, {}, readCount = 2)
                 PageDivider("Page 201 · Juz 10 · Hizb 19", actionLabel = "Mark page 200 read", onAction = {})
                 MiniPlayer("Al-Anfal 2 · Alafasy", true, "1×", {}, {}, {}, Modifier.padding(Spacing.screen))
             }
@@ -531,7 +514,7 @@ private fun ReaderComponentsDarkRtlPreview() {
         Surface(color = MaterialTheme.colorScheme.background) {
             Column {
                 SurahHeader("انفال", subtitle = "۷۵ آیه · مدنی")
-                AyahRow(BASMALA + " " + Numerals.ayahEndMarker(3), "۸:۳", AyahCheckState.CoveredEarlier, {}, playing = true)
+                AyahRow(BASMALA + " " + Numerals.ayahEndMarker(3), AyahCheckState.CoveredEarlier, {}, playing = true)
             }
         }
     }

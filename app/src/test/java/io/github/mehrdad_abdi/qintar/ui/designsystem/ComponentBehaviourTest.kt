@@ -44,7 +44,7 @@ class ComponentBehaviourTest {
     fun `tapping the check of an ayah invokes onCheck once per tap, read or not`() {
         var checks = 0
         compose.setContent {
-            QintarTheme { AyahRow("نص", "8:1", AyahCheckState.ReadToday, onCheck = { checks++ }) }
+            QintarTheme { AyahRow("نص", AyahCheckState.ReadToday, onCheck = { checks++ }) }
         }
         compose.onNodeWithContentDescription("I read this ayah").performClick().performClick()
         assertEquals(2, checks)
@@ -52,14 +52,14 @@ class ComponentBehaviourTest {
 
     @Test
     fun `the check is at least 48dp in both directions`() {
-        compose.setContent { QintarTheme { AyahRow("نص", "8:1", AyahCheckState.Unread, onCheck = {}) } }
+        compose.setContent { QintarTheme { AyahRow("نص", AyahCheckState.Unread, onCheck = {}) } }
         compose.onNodeWithContentDescription("I read this ayah").assertWidthIsAtLeast(48.dp).assertHeightIsAtLeast(48.dp)
     }
 
     @Test
     fun `an ayah read twice today shows x2 and one read once shows no multiplier`() {
         var count by mutableIntStateOf(2)
-        compose.setContent { QintarTheme { AyahRow("نص", "8:2", AyahCheckState.ReadToday, onCheck = {}, readCount = count) } }
+        compose.setContent { QintarTheme { AyahRow("نص", AyahCheckState.ReadToday, onCheck = {}, readCount = count) } }
         compose.onNodeWithText("×2", useUnmergedTree = true).assertIsDisplayed()
         compose.onNode(stateDescription("read 2 times today")).assertExists()
 
@@ -72,33 +72,31 @@ class ComponentBehaviourTest {
     fun `ayah states are announced with the ayah's label`() {
         compose.setContent {
             QintarTheme {
-                AyahRow("نص", "2:255", AyahCheckState.CoveredEarlier, onCheck = {}, accessibilityLabel = "Al-Baqarah, ayah 255")
+                AyahRow("نص", AyahCheckState.CoveredEarlier, onCheck = {}, accessibilityLabel = "Al-Baqarah, ayah 255")
             }
         }
         compose.onNodeWithContentDescription("Al-Baqarah, ayah 255, read on an earlier day").assertExists()
     }
 
     @Test
-    fun `star, play, menu and the text each invoke their own callback`() {
+    fun `play, menu and the text each invoke their own callback`() {
         val calls = mutableListOf<String>()
         compose.setContent {
             QintarTheme {
                 AyahRow(
-                    "نص", "8:1", AyahCheckState.Unread,
+                    "نص", AyahCheckState.Unread,
                     onCheck = { calls += "check" },
                     accessibilityLabel = "Al-Anfal, ayah 1",
                     onTextClick = { calls += "text" },
                     onPlay = { calls += "play" },
-                    onStar = { calls += "star" },
                     onMenu = { calls += "menu" },
                 )
             }
         }
-        compose.onNodeWithContentDescription("Bookmark").performClick()
         compose.onNodeWithContentDescription("Play").performClick()
         compose.onNodeWithContentDescription("More actions").performClick()
         compose.onNodeWithContentDescription("Al-Anfal, ayah 1, not read today").performClick()
-        assertEquals(listOf("star", "play", "menu", "text"), calls)
+        assertEquals(listOf("play", "menu", "text"), calls)
     }
 
     // ---- Bookmarks --------------------------------------------------------------------------

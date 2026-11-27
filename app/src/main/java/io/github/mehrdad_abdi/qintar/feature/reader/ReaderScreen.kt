@@ -435,7 +435,7 @@ private fun ReaderList(
                         viewModel.onCheck(row)
                     },
                     viewModel = viewModel,
-                    onStar = { onNavigate(viewModel.starTarget(row)) },
+                    onBookmark = { onNavigate(viewModel.bookmarkTarget(row)) },
                 )
             }
         }
@@ -483,7 +483,7 @@ private fun AyahItem(
     surahLabel: String,
     onCheck: () -> Unit,
     viewModel: ReaderViewModel,
-    onStar: () -> Unit,
+    onBookmark: () -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     // A row whose text has not arrived keeps its place and its controls.
@@ -493,10 +493,8 @@ private fun AyahItem(
     Column {
         AyahRow(
             text = shown,
-            reference = localizeDigits("${row.surah}:${row.number}"),
             checkState = state.checkState(row),
             readCount = state.count(row),
-            starred = row.id in state.bookmarkedBy,
             sajdaLabel = if (row.sajda != SajdaType.NONE) stringResource(R.string.sajda_label) else null,
             fontSizeSp = state.fontSp,
             accessibilityLabel = stringResource(R.string.ayah_label, surahLabel, formatNumber(row.number)),
@@ -504,11 +502,15 @@ private fun AyahItem(
             playing = state.isPlaying(row),
             highlighted = state.isAudioAt(row),
             onPlay = { viewModel.onPlay(row) },
-            onStar = onStar,
             onMenu = { menuOpen = true },
         )
         Box(Modifier.align(Alignment.End)) {
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                // Not used often, so in the menu rather than on every row (owner, 2026-11-27).
+                DropdownMenuItem(
+                    text = { Text(stringResource(if (row.id in state.bookmarkedBy) R.string.ayah_menu_edit_bookmark else R.string.ayah_menu_bookmark)) },
+                    onClick = { menuOpen = false; onBookmark() },
+                )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.ayah_menu_mark_up_to_here)) },
                     onClick = { menuOpen = false; viewModel.onMarkUpToHere(row) },

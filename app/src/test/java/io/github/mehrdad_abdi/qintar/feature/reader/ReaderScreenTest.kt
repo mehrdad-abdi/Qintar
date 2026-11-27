@@ -197,13 +197,24 @@ class ReaderScreenTest {
     }
 
     @Test
-    fun `the star opens the bookmark editor for the ayah`() {
+    fun `an ayah is bookmarked from its menu, and the row has no star and no surah-ayah number`() {
+        // Owner, 2026-11-27: the star is not used often; the number repeats the end marker and the title.
+        val kursi = runBlocking { app.library.create(BookmarkDrafts.ayah(app.ayah(2, 2))) }
         open(ReaderRoute.browse(app.ayah(2, 1).value))
 
-        compose.onAllNodesWithContentDescription("Bookmark")[0].performClick()
+        compose.onAllNodesWithContentDescription("Bookmark").assertCountEquals(0)
+        compose.onAllNodesWithContentDescription("Bookmarked").assertCountEquals(0)
+        compose.onNodeWithText("2:1").assertDoesNotExist()
 
+        menu(0).performClick()
+        compose.onNodeWithText("Bookmark this ayah").performClick()
         assertEquals(io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute.forAyah(app.ayah(2, 1).value), navigated.last())
-        assertTrue("nothing saved until the editor saves", runBlocking { app.bookmarkStore.bookmarks() }.isEmpty())
+
+        // An ayah already in a bookmark opens that bookmark.
+        menu(1).performClick()
+        compose.onNodeWithText("Edit its bookmark").performClick()
+        assertEquals(io.github.mehrdad_abdi.qintar.ui.navigation.BookmarkEditorRoute(bookmarkId = kursi.id), navigated.last())
+        assertEquals("nothing saved until the editor saves", 1, runBlocking { app.bookmarkStore.bookmarks() }.size)
     }
 
     // ---- Bookmark readers: the position bar (owner, 2026-11-27) ------------------------------------

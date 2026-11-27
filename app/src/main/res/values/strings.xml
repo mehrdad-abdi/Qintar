@@ -71,8 +71,6 @@
     <string name="ayah_state_read_times">read %1$s times today</string>
     <string name="ayah_state_covered_earlier">read on an earlier day</string>
     <string name="ayah_action_mark_read">I read this ayah</string>
-    <string name="ayah_action_bookmark">Bookmark</string>
-    <string name="ayah_bookmarked">Bookmarked</string>
     <string name="ayah_action_play">Play</string>
     <string name="ayah_action_pause">Pause</string>
     <string name="ayah_action_more">More actions</string>
@@ -110,6 +108,8 @@
     <string name="part_three_quarters">¾ Hizb %1$s</string>
     <string name="reader_position">Page %1$s of %2$s · %3$s%%</string>
     <string name="sajda_label">Sajdah</string>
+    <string name="ayah_menu_bookmark">Bookmark this ayah</string>
+    <string name="ayah_menu_edit_bookmark">Edit its bookmark</string>
     <string name="ayah_menu_mark_up_to_here">I read up to here</string>
     <string name="bulk_marked">%1$s ayahs marked</string>
     <string name="khatm_skip_message">Did you read all %1$s ayahs from %2$s to here?</string>
