@@ -30,7 +30,6 @@
     <string name="khatm_section_completed">مكتملة</string>
     <string name="khatm_none_message">لا توجد ختمة قيد القراءة. ابدأ واحدة لتحفظ موضعك في القرآن.</string>
     <string name="khatm_goal_pages_per_day">%1$s صفحات في اليوم</string>
-    <string name="khatm_no_goal">بلا هدف يومي</string>
     <string name="khatm_completed_row">اكتملت %1$s · %2$s يومًا</string>
     <string name="khatm_default_name_n">ختمة %1$s</string>
     <string name="khatm_new_title">ختمة جديدة</string>

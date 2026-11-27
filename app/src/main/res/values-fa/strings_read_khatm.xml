@@ -30,7 +30,6 @@
     <string name="khatm_section_completed">تمام‌شده</string>
     <string name="khatm_none_message">ختمی در جریان نیست. یکی را آغاز کنید تا جایتان در قرآن بماند.</string>
     <string name="khatm_goal_pages_per_day">روزی %1$s صفحه</string>
-    <string name="khatm_no_goal">بدون هدف روزانه</string>
     <string name="khatm_completed_row">پایان %1$s · %2$s روز</string>
     <string name="khatm_default_name_n">ختم %1$s</string>
     <string name="khatm_new_title">ختم تازه</string>

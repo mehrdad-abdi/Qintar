@@ -1,34 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="bm_view_now">الآن</string>
-    <string name="bm_view_groups">المجموعات</string>
-    <string name="bm_view_all">الكل</string>
-    <string name="bm_views_label">عروض العلامات</string>
     <string name="bm_add">إضافة</string>
     <string name="bm_add_bookmark">إضافة علامة</string>
     <string name="bm_add_group">إضافة مجموعة</string>
-    <string name="bm_now_empty_title">لا شيء مجدول الآن</string>
-    <string name="bm_now_empty_message">العلامات التي يكون جدولها مفتوحًا في هذه اللحظة تظهر هنا. وبقية العلامات على بُعد لمسة واحدة.</string>
-    <string name="bm_show_groups">عرض المجموعات</string>
-    <string name="bm_show_all">عرض كل العلامات</string>
     <string name="bm_none_title">لا علامات بعد</string>
     <string name="bm_none_message">احفظ مقطعًا تريد العودة إليه، مع ملاحظة عن سبب أهميته لك.</string>
-    <string name="bm_later_today">لاحقًا اليوم</string>
-    <string name="bm_earlier_today">سابقًا اليوم</string>
-    <string name="bm_done_today">تمّت</string>
     <string name="bm_ungrouped">بلا مجموعة</string>
     <string name="bm_group_empty">لا علامات في هذه المجموعة بعد.</string>
-    <string name="bm_groups_empty_title">لا مجموعات بعد</string>
-    <string name="bm_groups_empty_message">المجموعة تجمع العلامات التي تقرؤها معًا، مثل الصباح أو الجمعة.</string>
-    <string name="bm_sort_mushaf">ترتيب المصحف</string>
-    <string name="bm_sort_custom">مخصص</string>
-    <string name="bm_sort_recent">الأحدث</string>
     <string name="bm_group_progress">تمّ %1$s من %2$s</string>
     <string name="bm_menu_more">إجراءات العلامة</string>
     <string name="bm_group_menu_more">إجراءات المجموعة</string>
     <string name="bm_menu_edit">تعديل</string>
     <string name="bm_menu_move">نقل إلى مجموعة</string>
-    <string name="bm_menu_duplicate">نسخ إلى مجموعة أخرى</string>
     <string name="bm_menu_delete">حذف</string>
     <string name="bm_group_menu_log">تسجيل قراءة كاملة للمجموعة</string>
     <string name="bm_group_menu_delete">حذف المجموعة</string>
@@ -36,7 +19,6 @@
     <string name="bm_snack_deleted">حُذفت العلامة</string>
     <string name="bm_move_title">نقل إلى مجموعة</string>
     <string name="bm_duplicate_title">نسخ إلى</string>
-    <string name="bm_no_group">بلا مجموعة</string>
     <string name="bm_delete_group_title">حذف «%1$s»؟</string>
     <string name="bm_delete_group_message">يمكن أن تبقى علاماتها (%1$s) بلا مجموعة أو أن تُحذف معها. تبقى قراءاتك في الحالتين.</string>
     <string name="bm_delete_group_keep">إبقاء العلامات</string>
@@ -53,7 +35,6 @@
     <string name="bm_kind_juz">جزء</string>
     <string name="bm_surah">السورة</string>
     <string name="bm_surah_entry">%1$s · %2$s</string>
-    <string name="ayah_menu_add_bookmark">إضافة علامة…</string>
     <string name="bm_pick_surah">اختر سورة</string>
     <string name="bm_ayah_number">الآية</string>
     <string name="bm_range_from">من</string>
@@ -89,7 +70,6 @@
     <string name="sched_inherit_with">مثل المجموعة · %1$s</string>
     <string name="sched_none">بلا جدول</string>
     <string name="sched_own">اختيار الأيام</string>
-    <string name="sched_days">الأيام</string>
     <string name="sched_once">حتى تُقرأ مرة واحدة</string>
     <string name="sched_window">فقط بين</string>
     <string name="sched_from">من</string>

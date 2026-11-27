@@ -9,8 +9,6 @@
 
     <string name="screen_reader">القراءة</string>
     <string name="screen_khatm_detail">الختمة</string>
-    <string name="screen_bookmark_editor">علامة</string>
-    <string name="screen_group_editor">مجموعة</string>
     <string name="screen_day_detail">اليوم</string>
     <string name="screen_settings">الإعدادات</string>
     <string name="screen_onboarding">مرحبًا</string>
@@ -72,7 +70,6 @@
     <string name="khatm_default_name">ختمتي</string>
     <string name="khatm_migrated_name">ختمة الإصدار السابق</string>
     <string name="action_undo">تراجع</string>
-    <string name="action_remove">إزالة</string>
     <string name="action_continue">متابعة</string>
     <string name="ayah_name">%1$s %2$s</string>
     <string name="ayah_label">%1$s، الآية %2$s</string>

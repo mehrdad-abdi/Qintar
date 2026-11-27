@@ -9,8 +9,6 @@
 
     <string name="screen_reader">قرائت</string>
     <string name="screen_khatm_detail">ختم</string>
-    <string name="screen_bookmark_editor">نشان</string>
-    <string name="screen_group_editor">گروه</string>
     <string name="screen_day_detail">روز</string>
     <string name="screen_settings">تنظیمات</string>
     <string name="screen_onboarding">خوش آمدید</string>
@@ -72,7 +70,6 @@
     <string name="khatm_default_name">ختم من</string>
     <string name="khatm_migrated_name">ختم نسخهٔ پیشین</string>
     <string name="action_undo">واگرد</string>
-    <string name="action_remove">حذف</string>
     <string name="action_continue">ادامه</string>
     <string name="ayah_name">%1$s %2$s</string>
     <string name="ayah_label">%1$s، آیهٔ %2$s</string>

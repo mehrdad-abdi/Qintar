@@ -34,7 +34,6 @@
     <string name="khatm_none_message">No khatm in progress. Start one to keep your place in the Quran.</string>
     <!-- 1: pages per day -->
     <string name="khatm_goal_pages_per_day">%1$s pages a day</string>
-    <string name="khatm_no_goal">No daily goal</string>
     <!-- 1: completion date, 2: number of days -->
     <string name="khatm_completed_row">Completed %1$s · %2$s days</string>
     <string name="khatm_default_name_n">Khatm %1$s</string>

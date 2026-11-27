@@ -1,36 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Bookmarks tab -->
-    <string name="bm_view_now">Now</string>
-    <string name="bm_view_groups">Groups</string>
-    <string name="bm_view_all">All</string>
-    <string name="bm_views_label">Bookmark views</string>
     <string name="bm_add">Add</string>
     <string name="bm_add_bookmark">Add bookmark</string>
     <string name="bm_add_group">Add group</string>
-    <string name="bm_now_empty_title">Nothing is scheduled for now</string>
-    <string name="bm_now_empty_message">Bookmarks whose schedule is open at this moment appear here. Everything else is one tap away.</string>
-    <string name="bm_show_groups">Show groups</string>
-    <string name="bm_show_all">Show all bookmarks</string>
     <string name="bm_none_title">No bookmarks yet</string>
     <string name="bm_none_message">Keep a passage you want to come back to, with a note on why it matters to you.</string>
-    <string name="bm_later_today">Later today</string>
-    <string name="bm_earlier_today">Earlier today</string>
-    <string name="bm_done_today">Done</string>
     <string name="bm_ungrouped">No group</string>
     <string name="bm_group_empty">No bookmarks in this group yet.</string>
-    <string name="bm_groups_empty_title">No groups yet</string>
-    <string name="bm_groups_empty_message">A group gathers bookmarks that you read together, such as Morning or Friday.</string>
-    <string name="bm_sort_mushaf">Mushaf order</string>
-    <string name="bm_sort_custom">Custom</string>
-    <string name="bm_sort_recent">Recent</string>
     <!-- 1: bookmarks read to the target, 2: bookmarks in the group -->
     <string name="bm_group_progress">%1$s of %2$s done</string>
     <string name="bm_menu_more">Bookmark actions</string>
     <string name="bm_group_menu_more">Group actions</string>
     <string name="bm_menu_edit">Edit</string>
     <string name="bm_menu_move">Move to group</string>
-    <string name="bm_menu_duplicate">Duplicate to another group</string>
     <string name="bm_menu_delete">Delete</string>
     <string name="bm_group_menu_log">Log a full reading of the group</string>
     <string name="bm_group_menu_delete">Delete group</string>
@@ -38,7 +21,6 @@
     <string name="bm_snack_deleted">Bookmark deleted</string>
     <string name="bm_move_title">Move to group</string>
     <string name="bm_duplicate_title">Duplicate to</string>
-    <string name="bm_no_group">No group</string>
     <!-- 1: group name -->
     <string name="bm_delete_group_title">Delete %1$s?</string>
     <!-- 1: number of bookmarks -->
@@ -58,7 +40,6 @@
     <string name="bm_kind_juz">Juz</string>
     <string name="bm_surah">Surah</string>
     <string name="bm_surah_entry">%1$s · %2$s</string>
-    <string name="ayah_menu_add_bookmark">Add bookmark…</string>
     <string name="bm_pick_surah">Choose a surah</string>
     <string name="bm_ayah_number">Ayah</string>
     <string name="bm_range_from">From</string>
@@ -101,7 +82,6 @@
     <string name="sched_inherit_with">Same as the group · %1$s</string>
     <string name="sched_none">No schedule</string>
     <string name="sched_own">Choose days</string>
-    <string name="sched_days">Days</string>
     <string name="sched_once">Only until read once</string>
     <string name="sched_window">Only between</string>
     <string name="sched_from">From</string>
